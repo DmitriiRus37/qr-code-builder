@@ -16,18 +16,17 @@ public class QrCreator {
         return new int[1][1];
     }
 
-    private void drawImage(int[][] field) {
+    private void drawImage(Cell[][] field) {
         BufferedImage bufferedImage = new BufferedImage(field.length, field[0].length, BufferedImage.TYPE_BYTE_GRAY);
 
         for (int x = 0; x < field[0].length; x++) {
             for (int y = 0; y < field.length; y++) {
-                bufferedImage.setRGB(x, y, field[y][x] == 0 ? 0xFFFFFF : 0x000000);
+                bufferedImage.setRGB(x, y, field[y][x].getValue() == 0 ? 0xFFFFFF : 0x000000);
             }
         }
 
         // Define the output file
         File outputFile = new File("output.jpg");
-
         try {
             // Write the BufferedImage to the JPEG file
             ImageIO.write(bufferedImage, "jpg", outputFile);
