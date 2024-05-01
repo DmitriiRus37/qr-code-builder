@@ -11,6 +11,7 @@ public class QrCreator {
     public int[][] createQr() {
         qrCodeField = new QrCodeField(Version.ONE);
         qrCodeField.addFinderPatterns();
+        qrCodeField.addSynchronizationLines();
 
         drawImage(qrCodeField.getField());
         return new int[1][1];
