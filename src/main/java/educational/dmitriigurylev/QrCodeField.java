@@ -9,6 +9,10 @@ public class QrCodeField {
 
     Version version;
 
+    public int[][] getField() {
+        return field;
+    }
+
     int[][] field;
 
     public QrCodeField(Version version) {
