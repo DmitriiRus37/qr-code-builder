@@ -21,4 +21,59 @@ public class QrCodeField {
             put(Version.ONE, new int[21][21]);
         }};
     }
+
+    public void addFinderPatterns() {
+        if (version == Version.ONE) {
+            addSquareStartingWithLeftUpperPoint(0,0);
+            addSquareStartingWithLeftUpperPoint(0,14);
+            addSquareStartingWithLeftUpperPoint(14,0);
+        }
+    }
+
+    private void addSquareStartingWithLeftUpperPoint(int row, int column) {
+        field[row][column] = 1;
+        field[row][++column] = 1;
+        field[row][++column] = 1;
+        field[row][++column] = 1;
+        field[row][++column] = 1;
+        field[row][++column] = 1;
+        field[row][++column] = 1;
+
+        field[++row][column] = 1;
+        field[++row][column] = 1;
+        field[++row][column] = 1;
+        field[++row][column] = 1;
+        field[++row][column] = 1;
+        field[++row][column] = 1;
+
+        field[row][--column] = 1;
+        field[row][--column] = 1;
+        field[row][--column] = 1;
+        field[row][--column] = 1;
+        field[row][--column] = 1;
+        field[row][--column] = 1;
+
+        field[--row][column] = 1;
+        field[--row][column] = 1;
+        field[--row][column] = 1;
+        field[--row][column] = 1;
+        field[--row][column] = 1;
+        field[--row][column] = 1;
+
+        row += 2;
+        column += 2;
+        field[row][column] = 1;
+        field[row][++column] = 1;
+        field[row][++column] = 1;
+
+        field[++row][column] = 1;
+        field[++row][column] = 1;
+
+        field[row][--column] = 1;
+        field[row][--column] = 1;
+
+        field[--row][column] = 1;
+
+        field[row][++column] = 1;
+    }
 }
