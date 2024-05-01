@@ -72,4 +72,19 @@ public class QrCodeField {
         }
 
     }
+
+    public void addSynchronizationLines() {
+        for (int y=7; y<14; y++) {
+            if (y == 8 || y == 10 || y == 12) {
+                field[6][y].setValue(1);
+            }
+            field[6][y].setBusy(true);
+        }
+        for (int x=7; x<14; x++) {
+            if (x == 8 || x == 10 || x == 12) {
+                field[x][6].setValue(1);
+            }
+            field[x][6].setBusy(true);
+        }
+    }
 }
