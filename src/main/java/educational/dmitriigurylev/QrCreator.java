@@ -50,8 +50,12 @@ public class QrCreator {
         int[] cValueArr = new int[generatingPolynomial.length];
         int[] dValueArr = new int[generatingPolynomial.length];
 
-        for (int count = 0; count < generatingPolynomial.length; count++) {
+        for (int count = 0; count < decimalArr.length; count++) {
             int aValue = listCorrectBytes.remove(0);
+            listCorrectBytes.add(0);
+            if (aValue == 0) {
+                continue;
+            }
             int bValue = AB_Map.getMapInstance().getVal(aValue);
             if (listCorrectBytes.size() < generatingPolynomial.length) {
                 listCorrectBytes.add(0);
@@ -105,14 +109,14 @@ public class QrCreator {
 
         while (!sb.isEmpty()) {
             while (dir == Direction.up) {
-                if (!f[y][x].isBusy()) {
+                if (!f[y][x].isBusy() && !sb.isEmpty()) {
                     f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
                     sb.deleteCharAt(0);
                     drawImage(f);
                 }
                 x--;
 
-                if (!f[y][x].isBusy()) {
+                if (!f[y][x].isBusy() && !sb.isEmpty()) {
                     f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
                     sb.deleteCharAt(0);
                     drawImage(f);
@@ -130,14 +134,14 @@ public class QrCreator {
             }
 
             while (dir == Direction.down) {
-                if (!f[y][x].isBusy()) {
+                if (!f[y][x].isBusy() && !sb.isEmpty()) {
                     f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
                     sb.deleteCharAt(0);
                     drawImage(f);
                 }
                 x--;
 
-                if (!f[y][x].isBusy()) {
+                if (!f[y][x].isBusy() && !sb.isEmpty()) {
                     f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
                     sb.deleteCharAt(0);
                     drawImage(f);
