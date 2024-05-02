@@ -39,7 +39,9 @@ public class QrCreator {
 
         int[] generatingPolynomial = GeneratingPolynomial.map.get(17);
 
-        List<Integer> listCorrectBytes = new LinkedList<>(Arrays.stream(decimalArr).boxed().collect(Collectors.toList()));
+        List<Integer> listCorrectBytes = Arrays.stream(decimalArr)
+                .boxed()
+                .collect(Collectors.toCollection(LinkedList::new));
         while (listCorrectBytes.size() < generatingPolynomial.length) {
             listCorrectBytes.add(0);
         }
