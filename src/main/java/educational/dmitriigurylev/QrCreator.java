@@ -100,25 +100,34 @@ public class QrCreator {
     }
 
     private void drawImage(Cell[][] field) {
-        BufferedImage qrImage = new BufferedImage(field.length, field[0].length, BufferedImage.TYPE_BYTE_GRAY);
-        BufferedImage qrBusy = new BufferedImage(field.length, field[0].length, BufferedImage.TYPE_BYTE_GRAY);
+        BufferedImage qrImage = new BufferedImage(
+                field[0].length+4,
+                field.length+4,
+                BufferedImage.TYPE_BYTE_GRAY);
 
-        for (int x = 0; x < field[0].length; x++) {
-            for (int y = 0; y < field.length; y++) {
-                qrImage.setRGB(x, y, field[y][x].getValue() == 0 ? 0xFFFFFF : 0x000000);
-                qrBusy.setRGB(x, y, !field[y][x].isBusy() ? 0xFFFFFF : 0x000000);
+        for (int x = 0; x < field[0].length+4; x++) {
+            if (x == 0 || x == 1 || x == field[0].length+2 || x == field[0].length+3) {
+                for (int y = 2; y < field.length+2; y++) {
+                    qrImage.setRGB(x, y, 0xFFFFFF);
+                }
             }
+            qrImage.setRGB(x, 0, 0xFFFFFF);
+            qrImage.setRGB(x, 1, 0xFFFFFF);
+            qrImage.setRGB(x, field.length+2, 0xFFFFFF);
+            qrImage.setRGB(x, field.length+3, 0xFFFFFF);
         }
 
+        for (int x = 2; x < field[0].length+2; x++) {
+            for (int y = 2; y < field.length+2; y++) {
+                qrImage.setRGB(x, y, field[y-2][x-2].getValue() == 0 ? 0xFFFFFF : 0x000000);
+            }
+        }
         File outputQrImageFile = new File("qr_image.jpg");
-        File outputQrBusyFile = new File("qr_busy.jpg");
         try {
             ImageIO.write(qrImage, "jpg", outputQrImageFile);
-            ImageIO.write(qrBusy, "jpg", outputQrBusyFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
     enum Direction {up, down}
 
