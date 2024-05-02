@@ -1,10 +1,10 @@
-package educational.dmitriigurylev;
+package educational.dmitriigurylev.reedSolomonMapping;
 
 import java.util.*;
 import java.util.stream.IntStream;
 
 public class CD_Map {
-    private Map<Integer, Integer> map;
+    private final Map<Integer, Integer> map;
 
     private static CD_Map instance;
 

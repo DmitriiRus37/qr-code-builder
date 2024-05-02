@@ -3,6 +3,8 @@ package educational.dmitriigurylev;
 import educational.dmitriigurylev.customExceptions.UnknownEncodingTypeException;
 import educational.dmitriigurylev.encoders.IntLetterEncoder;
 import educational.dmitriigurylev.encoders.IntegerEncoder;
+import educational.dmitriigurylev.reedSolomonMapping.AB_Map;
+import educational.dmitriigurylev.reedSolomonMapping.CD_Map;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -23,14 +25,14 @@ public class QrCreator {
         qrCodeField.addSynchronizationLines();
         qrCodeField.addTypeInformationBits();
 
-        Object objectToEncode = "";
+        Object objectToEncode = "ALEK OS";
 
         int[] decimalArr;
-        if (objectToEncode.getClass() == String.class) {
-            decimalArr = IntLetterEncoder.encodeSymbols((String) objectToEncode);
-        } else if (objectToEncode.getClass() == Integer.class) {
+        if (objectToEncode.getClass() == Integer.class) {
             decimalArr = IntegerEncoder.encodeInteger((int) objectToEncode);
-        } else if (objectToEncode.getClass() == FileInputStream.class) {
+        } else if (objectToEncode.getClass() == String.class && UtilityClass.isAllLettersUpperCase((String) objectToEncode)) {
+            decimalArr = IntLetterEncoder.encodeSymbols((String) objectToEncode);
+        } else if (objectToEncode.getClass() == String.class || objectToEncode.getClass() == FileInputStream.class) {
 //            decimalArr = ByteEncoder.encodeBytes(objectToEncode);
             throw new RuntimeException("it's not ready yet");
         } else {
