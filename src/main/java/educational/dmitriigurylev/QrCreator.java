@@ -63,12 +63,23 @@ public class QrCreator {
             unitedArr[i] = String.format("%8s", binStr).replace(' ', '0');
             sb.append(unitedArr[i]);
         }
-//        encodeBitsSequence(sb);
-
-
-
+        encodeBitsSequence(sb);
+        applyMaskPattern();
         drawImage(qrCodeField.getField());
         return new int[1][1];
+    }
+
+    private void applyMaskPattern() {
+        for (int x=0; x<qrCodeField.getField()[0].length; x++) {
+            if (x % 3 == 0) {
+                for (int y = 0; y < qrCodeField.getField().length; y++) {
+                    if (qrCodeField.getField()[y][x].isBusy()) {
+                        continue;
+                    }
+                    qrCodeField.getField()[y][x].setValue(qrCodeField.getField()[y][x].getValue() == 1 ? 0 : 1);
+                }
+            }
+        }
     }
 
     private void encodeBitsSequence(StringBuilder sb) {
@@ -84,19 +95,13 @@ public class QrCreator {
                     qrCodeField.getField()[y][x].setValue(1).setBusy(true);
                 }
                 x--;
-
-
             }
         }
-
-
-
     }
 
     private void drawImage(Cell[][] field) {
         BufferedImage qrImage = new BufferedImage(field.length, field[0].length, BufferedImage.TYPE_BYTE_GRAY);
         BufferedImage qrBusy = new BufferedImage(field.length, field[0].length, BufferedImage.TYPE_BYTE_GRAY);
-
 
         for (int x = 0; x < field[0].length; x++) {
             for (int y = 0; y < field.length; y++) {
