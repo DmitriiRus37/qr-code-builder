@@ -9,7 +9,7 @@ public class IntegerEncoder {
     public static int[] encodeInteger(int value) {
         String[] strAr = separateValue(value);
         intArrayToBinaryArray(strAr);
-        String bitString = binaryArrayToBitString(strAr);
+        String bitString = UtilityClass.binaryArrayToBitString(strAr);
         return UtilityClass.binaryStringToDecimalString(bitString);
     }
 
@@ -43,11 +43,6 @@ public class IntegerEncoder {
 
         String binaryString = Integer.toBinaryString(Integer.parseInt(arr[1]));
         arr[1] = String.format("%10s", binaryString).replace(' ', '0');
-    }
-
-    private static String binaryArrayToBitString(String[] strAr) {
-        StringBuilder str = new StringBuilder(String.join("", strAr));
-        return str.append("0".repeat(Math.max(0, 8 - str.length() % 8))).toString();
     }
 
 }

@@ -29,4 +29,9 @@ public class UtilityClass {
         }
         return decimalIntArray;
     }
+
+    public static String binaryArrayToBitString(String[] strAr) {
+        StringBuilder str = new StringBuilder(String.join("", strAr));
+        return str.append("0".repeat(Math.max(0, 8 - str.length() % 8))).toString();
+    }
 }

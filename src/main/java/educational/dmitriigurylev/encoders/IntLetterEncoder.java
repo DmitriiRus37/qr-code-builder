@@ -13,7 +13,7 @@ public class IntLetterEncoder {
         String[] strAr = separateSymbols(value);
         int[][] intAr = mapCharToInt(strAr);
         String[] binaryArr = symbolsArrayToBinaryArray(intAr);
-        String bitString = binaryArrayToBitString(binaryArr);
+        String bitString = UtilityClass.binaryArrayToBitString(binaryArr);
         return UtilityClass.binaryStringToDecimalString(bitString);
     }
 
@@ -66,11 +66,6 @@ public class IntLetterEncoder {
         String binaryString = Integer.toBinaryString(symbolsCounter);
         resArr[1] = String.format("%9s", binaryString).replace(' ', '0');
         return resArr;
-    }
-
-    private static String binaryArrayToBitString(String[] strAr) {
-        StringBuilder str = new StringBuilder(String.join("", strAr));
-        return str.append("0".repeat(Math.max(0, 8 - str.length() % 8))).toString();
     }
 
     private static Map<Character, Integer> createCharMap() {
