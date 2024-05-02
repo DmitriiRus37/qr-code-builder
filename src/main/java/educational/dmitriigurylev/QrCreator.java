@@ -1,8 +1,13 @@
 package educational.dmitriigurylev;
 
+import educational.dmitriigurylev.customExceptions.UnknownEncodingTypeException;
+import educational.dmitriigurylev.encoders.IntLetterEncoder;
+import educational.dmitriigurylev.encoders.IntegerEncoder;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -18,15 +23,21 @@ public class QrCreator {
         qrCodeField.addSynchronizationLines();
         qrCodeField.addTypeInformationBits();
 
+        Object objectToEncode = "";
 
-        String[] strAr = IntegerEncoder.separateValue(1234);
-        IntegerEncoder.intArrayToBinaryArray(strAr);
-        String bitString = IntegerEncoder.binaryArrayToBitString(strAr);
-        int[] decimalArr = IntegerEncoder.binaryStringToDecimalString(bitString);
+        int[] decimalArr;
+        if (objectToEncode.getClass() == String.class) {
+            decimalArr = IntLetterEncoder.encodeSymbols((String) objectToEncode);
+        } else if (objectToEncode.getClass() == Integer.class) {
+            decimalArr = IntegerEncoder.encodeInteger((int) objectToEncode);
+        } else if (objectToEncode.getClass() == FileInputStream.class) {
+//            decimalArr = ByteEncoder.encodeBytes(objectToEncode);
+            throw new RuntimeException("it's not ready yet");
+        } else {
+            throw new UnknownEncodingTypeException("You can encode digits/letters/bytes only");
+        }
+
         int[] generatingPolynomial = GeneratingPolynomial.map.get(17);
-
-//        listCorrectBytes = new LinkedList<>() {{add(32);add(91);add(11);add(120);add(209);add(114);add(220);add(77);add(67);add(64);add(236);add(17);add(236);add(17);add(236);add(17);}};
-//        generatingPolynomial = new int[]{251,67,46,61,118,70,64,94,32,45};
 
         List<Integer> listCorrectBytes = new LinkedList<>(Arrays.stream(decimalArr).boxed().collect(Collectors.toList()));
         while (listCorrectBytes.size() < generatingPolynomial.length) {
@@ -93,12 +104,14 @@ public class QrCreator {
                 if (!f[y][x].isBusy()) {
                     f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
                     sb.deleteCharAt(0);
+                    drawImage(f);
                 }
                 x--;
 
                 if (!f[y][x].isBusy()) {
                     f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
                     sb.deleteCharAt(0);
+                    drawImage(f);
                 }
                 x++;
                 y--;
@@ -116,12 +129,14 @@ public class QrCreator {
                 if (!f[y][x].isBusy()) {
                     f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
                     sb.deleteCharAt(0);
+                    drawImage(f);
                 }
                 x--;
 
                 if (!f[y][x].isBusy()) {
                     f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
                     sb.deleteCharAt(0);
+                    drawImage(f);
                 }
                 x++;
                 y++;
