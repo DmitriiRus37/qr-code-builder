@@ -1,6 +1,7 @@
 package educational.dmitriigurylev;
 
 
+import java.util.stream.IntStream;
 
 public class UtilityClass {
     public static int binaryToDecimal(String binaryString) {
@@ -33,5 +34,10 @@ public class UtilityClass {
     public static String binaryArrayToBitString(String[] strAr) {
         StringBuilder str = new StringBuilder(String.join("", strAr));
         return str.append("0".repeat(Math.max(0, 8 - str.length() % 8))).toString();
+    }
+
+    public static boolean isAllLettersUpperCase(String str) {
+        return IntStream.range(0, str.length())
+                .noneMatch(i -> Character.isLetter(str.charAt(i)) && !Character.isUpperCase(str.charAt(i)));
     }
 }
