@@ -83,18 +83,56 @@ public class QrCreator {
     }
 
     private void encodeBitsSequence(StringBuilder sb) {
+        Cell[][] f = qrCodeField.getField();
         Direction dir = Direction.up;
-        int x = qrCodeField.getField()[0].length - 1;
-        int y = qrCodeField.getField().length - 1;
+        int x = f[0].length - 1;
+        int y = f.length - 1;
 
         while (!sb.isEmpty()) {
             while (dir == Direction.up) {
-                if (sb.charAt(0) == '0') {
-                    qrCodeField.getField()[y][x].setValue(0).setBusy(true);
-                } else {
-                    qrCodeField.getField()[y][x].setValue(1).setBusy(true);
+                if (!f[y][x].isBusy()) {
+                    f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
+                    sb.deleteCharAt(0);
                 }
                 x--;
+
+                if (!f[y][x].isBusy()) {
+                    f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
+                    sb.deleteCharAt(0);
+                }
+                x++;
+                y--;
+                if (y < 0) {
+                    dir = Direction.down;
+                    y++;
+                    x-=2;
+                    if (x == 6) {
+                        x--;
+                    }
+                }
+            }
+
+            while (dir == Direction.down) {
+                if (!f[y][x].isBusy()) {
+                    f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
+                    sb.deleteCharAt(0);
+                }
+                x--;
+
+                if (!f[y][x].isBusy()) {
+                    f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
+                    sb.deleteCharAt(0);
+                }
+                x++;
+                y++;
+                if (y >= f.length) {
+                    dir = Direction.up;
+                    y--;
+                    x-=2;
+                    if (x == 6) {
+                        x--;
+                    }
+                }
             }
         }
     }
