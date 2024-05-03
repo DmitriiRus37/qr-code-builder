@@ -4,16 +4,22 @@ import educational.dmitriigurylev.UtilityClass;
 
 import java.util.Map;
 
-public class IntegerEncoder {
+public class IntegerEncoder implements Encoder {
 
-    public static int[] encodeInteger(int value) {
-        String[] strAr = separateValue(value);
-        intArrayToBinaryArray(strAr);
+    private final int value;
+    public IntegerEncoder(int value) {
+        this.value = value;
+    }
+
+    @Override
+    public int[] encodeSymbols() {
+        String[] strAr = separateSymbols();
+        symbolsArrayToBinaryArray(strAr);
         String bitString = UtilityClass.binaryArrayToBitString(strAr);
         return UtilityClass.binaryStringToDecimalString(bitString);
     }
 
-    private static String[] separateValue(int value) {
+    private String[] separateSymbols() {
         String strInteger = String.valueOf(value);
         int digitsInValue = strInteger.length();
         String[] arr = digitsInValue % 3 == 0 ? new String[digitsInValue / 3 + 2] : new String[digitsInValue / 3 + 3];
@@ -32,7 +38,7 @@ public class IntegerEncoder {
         return arr;
     }
 
-    private static void intArrayToBinaryArray(String[] arr) {
+    private static void symbolsArrayToBinaryArray(String[] arr) {
         for (int i = 2; i < arr.length; i++) {
             int decimalValue = Integer.parseInt(arr[i]);
             String binaryString = Integer.toBinaryString(decimalValue);
@@ -44,6 +50,7 @@ public class IntegerEncoder {
         String binaryString = Integer.toBinaryString(Integer.parseInt(arr[1]));
         arr[1] = String.format("%10s", binaryString).replace(' ', '0');
     }
+
 
 }
 
