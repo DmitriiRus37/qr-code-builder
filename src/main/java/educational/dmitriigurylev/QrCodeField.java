@@ -2,13 +2,14 @@ package educational.dmitriigurylev;
 
 import lombok.Getter;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.IntStream;
 
 public class QrCodeField {
 
-    static Map<Version, Cell[][]> versionFieldMap = createVersionFieldMap();
+    static EnumMap<Version, Cell[][]> versionFieldMap = createVersionFieldMap();
 
     private Version version;
 
@@ -29,14 +30,14 @@ public class QrCodeField {
         }
     }
 
-    private static Map<Version, Cell[][]> createVersionFieldMap() {
-        return new HashMap<>(){{
-            put(Version.ONE, new Cell[21][21]);
-        }};
+    private static EnumMap<Version, Cell[][]> createVersionFieldMap() {
+        EnumMap<Version, Cell[][]> m = new EnumMap<>(Version.class);
+        m.put(Version.V_1, new Cell[21][21]);
+        return m;
     }
 
     public void addFinderPatterns() {
-        if (version == Version.ONE) {
+        if (version == Version.V_1) {
             addSquareStartingWithLeftUpperPoint(0,0, FinderPatterLocation.UpperLeft);
             addSquareStartingWithLeftUpperPoint(0,14, FinderPatterLocation.UpperRight);
             addSquareStartingWithLeftUpperPoint(14,0, FinderPatterLocation.LowerLeft);

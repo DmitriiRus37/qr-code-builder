@@ -1,25 +1,19 @@
-package educational.dmitriigurylev.reedSolomonMapping;
+package educational.dmitriigurylev.reed_solomon_mapping;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class AB_Map {
-    private final Map<Integer, Integer> map;
+public class ABMap {
 
-    private static AB_Map instance;
+    private ABMap() {}
+    private static final Map<Integer, Integer> map = createMap();
 
-    public static AB_Map getMapInstance() {
-        if (instance == null) {
-            instance = new AB_Map();
-        }
-        return instance;
+    public static int getVal(int a) {
+        return map.get(a);
     }
 
-    public int getVal(int a) {
-        return instance.map.get(a);
-    }
-
-    private AB_Map() {
+    private static Map<Integer, Integer> createMap() {
         Queue<Integer> q = new LinkedList<>(List.of(
                 0,1,25,2,50,26,198,3,223,51,238,27,104,199,75,
                 4,100,224,14,52,141,239,129,28,193,105,248,200,8,76,113,
@@ -38,8 +32,9 @@ public class AB_Map {
                 203,89,95,176,156,169,160,81,11,245,22,235,122,117,44,215,
                 79,1174,213,233,230,231,173,232,116,214,244,234,168,80,88,175
         ));
-        map = new HashMap<>();
-        IntStream.range(1, 256).forEach(i -> map.put(i, q.poll()));
+        return IntStream.range(1, 256)
+                .boxed()
+                .collect(Collectors.toMap(i -> i, i -> q.poll(), (a, b) -> b));
     }
 
 }

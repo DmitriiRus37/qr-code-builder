@@ -3,8 +3,8 @@ package educational.dmitriigurylev;
 import educational.dmitriigurylev.customExceptions.UnknownEncodingTypeException;
 import educational.dmitriigurylev.encoders.IntLetterEncoder;
 import educational.dmitriigurylev.encoders.IntegerEncoder;
-import educational.dmitriigurylev.reedSolomonMapping.AB_Map;
-import educational.dmitriigurylev.reedSolomonMapping.CD_Map;
+import educational.dmitriigurylev.reed_solomon_mapping.ABMap;
+import educational.dmitriigurylev.reed_solomon_mapping.CDMap;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -20,12 +20,12 @@ public class QrCreator {
     QrCodeField qrCodeField;
 
     public int[][] createQr() {
-        qrCodeField = new QrCodeField(Version.ONE);
+        qrCodeField = new QrCodeField(Version.V_1);
         qrCodeField.addFinderPatterns();
         qrCodeField.addSynchronizationLines();
         qrCodeField.addTypeInformationBits();
 
-        Object objectToEncode = "ALEK OS";
+        Object objectToEncode = "12345678";
 
         int[] decimalArr;
         if (objectToEncode.getClass() == Integer.class) {
@@ -56,14 +56,14 @@ public class QrCreator {
             if (aValue == 0) {
                 continue;
             }
-            int bValue = AB_Map.getMapInstance().getVal(aValue);
+            int bValue = ABMap.getVal(aValue);
             if (listCorrectBytes.size() < generatingPolynomial.length) {
                 listCorrectBytes.add(0);
             }
 
             for (int i = 0; i < cValueArr.length; i++) {
                 cValueArr[i] = (generatingPolynomial[i] + bValue) % 255;
-                dValueArr[i] = CD_Map.getMapInstance().getVal(cValueArr[i]);
+                dValueArr[i] = CDMap.getVal(cValueArr[i]);
                 listCorrectBytes.set(i, dValueArr[i] ^ listCorrectBytes.get(i));
             }
         }
@@ -103,12 +103,12 @@ public class QrCreator {
 
     private void encodeBitsSequence(StringBuilder sb) {
         Cell[][] f = qrCodeField.getField();
-        Direction dir = Direction.up;
+        Direction dir = Direction.UP;
         int x = f[0].length - 1;
         int y = f.length - 1;
 
         while (!sb.isEmpty()) {
-            while (dir == Direction.up) {
+            while (dir == Direction.UP) {
                 if (!f[y][x].isBusy() && !sb.isEmpty()) {
                     f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
                     sb.deleteCharAt(0);
@@ -124,7 +124,7 @@ public class QrCreator {
                 x++;
                 y--;
                 if (y < 0) {
-                    dir = Direction.down;
+                    dir = Direction.DOWN;
                     y++;
                     x-=2;
                     if (x == 6) {
@@ -133,7 +133,7 @@ public class QrCreator {
                 }
             }
 
-            while (dir == Direction.down) {
+            while (dir == Direction.DOWN) {
                 if (!f[y][x].isBusy() && !sb.isEmpty()) {
                     f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
                     sb.deleteCharAt(0);
@@ -149,7 +149,7 @@ public class QrCreator {
                 x++;
                 y++;
                 if (y >= f.length) {
-                    dir = Direction.up;
+                    dir = Direction.UP;
                     y--;
                     x-=2;
                     if (x == 6) {
@@ -160,27 +160,27 @@ public class QrCreator {
         }
     }
 
-    private void drawImage(Cell[][] field) {
+    private void drawImage(Cell[][] f) {
         BufferedImage qrImage = new BufferedImage(
-                field[0].length+4,
-                field.length+4,
+                f[0].length+4,
+                f.length+4,
                 BufferedImage.TYPE_BYTE_GRAY);
 
-        for (int x = 0; x < field[0].length+4; x++) {
-            if (x == 0 || x == 1 || x == field[0].length+2 || x == field[0].length+3) {
-                for (int y = 2; y < field.length+2; y++) {
+        for (int x = 0; x < f[0].length+4; x++) {
+            if (x == 0 || x == 1 || x == f[0].length+2 || x == f[0].length+3) {
+                for (int y = 2; y < f.length+2; y++) {
                     qrImage.setRGB(x, y, 0xFFFFFF);
                 }
             }
             qrImage.setRGB(x, 0, 0xFFFFFF);
             qrImage.setRGB(x, 1, 0xFFFFFF);
-            qrImage.setRGB(x, field.length+2, 0xFFFFFF);
-            qrImage.setRGB(x, field.length+3, 0xFFFFFF);
+            qrImage.setRGB(x, f.length+2, 0xFFFFFF);
+            qrImage.setRGB(x, f.length+3, 0xFFFFFF);
         }
 
-        for (int x = 2; x < field[0].length+2; x++) {
-            for (int y = 2; y < field.length+2; y++) {
-                qrImage.setRGB(x, y, field[y-2][x-2].getValue() == 0 ? 0xFFFFFF : 0x000000);
+        for (int x = 2; x < f[0].length+2; x++) {
+            for (int y = 2; y < f.length+2; y++) {
+                qrImage.setRGB(x, y, f[y-2][x-2].getValue() == 0 ? 0xFFFFFF : 0x000000);
             }
         }
         File outputQrImageFile = new File("qr_image.jpg");
@@ -190,6 +190,6 @@ public class QrCreator {
             e.printStackTrace();
         }
     }
-    enum Direction {up, down}
+    enum Direction {UP, DOWN}
 
 }
