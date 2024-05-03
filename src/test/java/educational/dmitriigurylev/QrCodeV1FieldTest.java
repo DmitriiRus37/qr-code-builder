@@ -10,10 +10,11 @@ class QrCodeV1FieldTest {
 
     QrCodeField qrCodeField;
     Version version = Version.V_1;
+    CorrectionLevel level = CorrectionLevel.HIGH;
 
     @BeforeEach
     void initField() {
-        qrCodeField = new QrCodeField(version);
+        qrCodeField = new QrCodeField(version, level);
     }
 
     @Test

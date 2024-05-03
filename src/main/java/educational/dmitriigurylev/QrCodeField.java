@@ -11,11 +11,14 @@ public class QrCodeField {
 
     private Version version;
 
+    private CorrectionLevel level;
+
     @Getter
     private Cell[][] field;
 
-    public QrCodeField(Version version) {
+    public QrCodeField(Version version, CorrectionLevel level) {
         this.version = version;
+        this.level = level;
         this.field = versionFieldMap.get(version);
         fillFieldWithZeros();
     }

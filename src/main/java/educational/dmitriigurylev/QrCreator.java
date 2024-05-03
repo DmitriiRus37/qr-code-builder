@@ -20,7 +20,7 @@ public class QrCreator {
     QrCodeField qrCodeField;
 
     public int[][] createQr() {
-        qrCodeField = new QrCodeField(Version.V_1);
+        qrCodeField = new QrCodeField(Version.V_1, CorrectionLevel.HIGH);
         qrCodeField.addFinderPatterns();
         qrCodeField.addSynchronizationLines();
         qrCodeField.addTypeInformationBits();
