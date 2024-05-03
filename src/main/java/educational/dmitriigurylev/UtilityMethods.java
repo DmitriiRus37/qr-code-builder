@@ -2,10 +2,13 @@ package educational.dmitriigurylev;
 
 
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UtilityMethods {
     public static int binaryToDecimal(String binaryString) {
         if (binaryString == null || binaryString.isEmpty() || !containsZerosAndOnesOnly(binaryString)) {
