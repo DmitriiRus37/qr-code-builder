@@ -66,7 +66,6 @@ public class QrCodeField {
             IntStream.range(-1, 7).forEach(x -> field[firstY + 7][firstX + x].setBusy(true));
             IntStream.range(0, 7).forEach(y -> field[firstY + y][firstX - 1].setBusy(true));
         }
-
     }
 
     public void addSynchronizationLines() {
@@ -84,8 +83,8 @@ public class QrCodeField {
         }
     }
 
-    public void addTypeInformationBits() {
-        String code = "001110011100111";
+    public void addInformationTypeBits() {
+        String code = CorrectionLevelAndMaskCodeMap.getMaskAndCorrectionLevelCode(level, (byte) 2);
         StringBuilder typeInformationBits = new StringBuilder(code);
         int i = -1;
         int j = -2;
