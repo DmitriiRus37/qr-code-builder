@@ -21,6 +21,16 @@ public class UtilityMethods {
         return decimal;
     }
 
+    public static String binaryArrayToBitString(String[] strAr) {
+        if (strAr == null) {
+            throw new InvalidInputFormatException();
+        }
+        StringBuilder str = new StringBuilder(String.join("", strAr));
+        byte remainToWholeByte = (byte) (8 - str.length() % 8);
+        str.append("0".repeat(remainToWholeByte == 8 ? 0 : remainToWholeByte));
+        return str.toString();
+    }
+
     public static int[] binaryStringToDecimalArray(String bitString) {
         if (bitString == null || bitString.isEmpty() || bitString.length() % 8 != 0) {
             throw new InvalidInputFormatException();
@@ -38,16 +48,6 @@ public class UtilityMethods {
             decimalIntArray[i++] = 17;
         }
         return decimalIntArray;
-    }
-
-    public static String binaryArrayToBitString(String[] strAr) {
-        if (strAr == null) {
-            throw new InvalidInputFormatException();
-        }
-        StringBuilder str = new StringBuilder(String.join("", strAr));
-        byte remainToWholeByte = (byte) (8 - str.length() % 8);
-        str.append("0".repeat(remainToWholeByte == 8 ? 0 : remainToWholeByte));
-        return str.toString();
     }
 
     public static boolean containsAllLettersUpperCase(String str) {
