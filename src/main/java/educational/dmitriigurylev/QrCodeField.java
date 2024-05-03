@@ -3,8 +3,6 @@ package educational.dmitriigurylev;
 import lombok.Getter;
 
 import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.IntStream;
 
 public class QrCodeField {
@@ -92,53 +90,46 @@ public class QrCodeField {
     public void addTypeInformationBits() {
         String code = "001110011100111";
         StringBuilder typeInformationBits = new StringBuilder(code);
-        int i=-1;
-        int j=-2;
-//        TODO разбить цикл на 2 части, чтобы писать меньше условий
+        int i = -1;
+        int j = -2;
         while (!typeInformationBits.isEmpty()) {
             i++;
             Cell currentCell;
             if (i < 8) {
                 currentCell = field[8][i];
             } else {
-                j+=2;
-                currentCell = field[i-j][8];
+                j += 2;
+                currentCell = field[i - j][8];
             }
-
             if (currentCell.isBusy()) {
                 continue;
             }
-            char curChar = typeInformationBits.charAt(0);
+            setValueAndBusy(currentCell, typeInformationBits.charAt(0));
             typeInformationBits.deleteCharAt(0);
-            if (curChar == '1') {
-                currentCell.setValue(1);
-            }
-            currentCell.setBusy(true);
         }
 
-        i=-1;
-        j=-2;
+        i = -1;
+        j = -2;
         typeInformationBits = new StringBuilder(code);
-//        TODO разбить цикл на 2 части, чтобы писать меньше условий
         while (!typeInformationBits.isEmpty()) {
             i++;
             Cell currentCell;
             if (i < 7) {
-                currentCell = field[field.length-i-1][8];
+                currentCell = field[field.length - i - 1][8];
             } else {
-                j+=2;
-                currentCell = field[8][field[0].length-1-i+j];
+                j += 2;
+                currentCell = field[8][field[0].length - 1 - i + j];
             }
-            char curChar = typeInformationBits.charAt(0);
+            setValueAndBusy(currentCell, typeInformationBits.charAt(0));
             typeInformationBits.deleteCharAt(0);
-            if (curChar == '1') {
-                currentCell.setValue(1);
-            }
-            currentCell.setBusy(true);
             if (i == 7) {
-                field[field.length-i-1][8].setValue(1).setBusy(true);
+                field[field.length - i - 1][8].setValue(1).setBusy(true);
             }
         }
+    }
+
+    private void setValueAndBusy(Cell cell, char ch) {
+        cell.setValue(ch == '1' ? 1 : 0).setBusy(true);
     }
 
 }
