@@ -2,15 +2,20 @@ package educational.dmitriigurylev.encoders;
 
 import educational.dmitriigurylev.UtilityClass;
 
-import java.util.HashMap;
 import java.util.Map;
 
-public class IntLetterEncoder {
+public class IntLetterEncoder implements Encoder {
+
+    private String value;
+    public IntLetterEncoder(String value) {
+        this.value = value;
+    }
 
     private static final Map<Character, Integer> charIntMap = createCharMap();
 
-    public static int[] encodeSymbols(String value) {
-        String[] strAr = separateSymbols(value);
+    @Override
+    public int[] encodeSymbols() {
+        String[] strAr = separateSymbols();
         int[][] intAr = mapCharToInt(strAr);
         String[] binaryArr = symbolsArrayToBinaryArray(intAr);
         String bitString = UtilityClass.binaryArrayToBitString(binaryArr);
@@ -30,7 +35,7 @@ public class IntLetterEncoder {
         return res;
     }
 
-    private static String[] separateSymbols(String value) {
+    private String[] separateSymbols() {
         int symbolsInValue = value.length();
         String[] arr = symbolsInValue % 2 == 0 ? new String[symbolsInValue / 2] : new String[symbolsInValue / 2 + 1];
 
@@ -68,53 +73,52 @@ public class IntLetterEncoder {
     }
 
     private static Map<Character, Integer> createCharMap() {
-        Map<Character, Integer> m = new HashMap<>();
-        m.put('0', 0);
-        m.put('1', 1);
-        m.put('2', 2);
-        m.put('3', 3);
-        m.put('4', 4);
-        m.put('5', 5);
-        m.put('6', 6);
-        m.put('7', 7);
-        m.put('8', 8);
-        m.put('9', 9);
-        m.put('A', 10);
-        m.put('B', 11);
-        m.put('C', 12);
-        m.put('D', 13);
-        m.put('E', 14);
-        m.put('F', 15);
-        m.put('G', 16);
-        m.put('H', 17);
-        m.put('I', 18);
-        m.put('J', 19);
-        m.put('K', 20);
-        m.put('L', 21);
-        m.put('M', 22);
-        m.put('N', 23);
-        m.put('O', 24);
-        m.put('P', 25);
-        m.put('Q', 26);
-        m.put('R', 27);
-        m.put('S', 28);
-        m.put('T', 29);
-        m.put('U', 30);
-        m.put('V', 31);
-        m.put('W', 32);
-        m.put('X', 33);
-        m.put('Y', 34);
-        m.put('Z', 35);
-        m.put(' ', 36);
-        m.put('$', 37);
-        m.put('%', 38);
-        m.put('*', 39);
-        m.put('+', 40);
-        m.put('-', 41);
-        m.put('.', 42);
-        m.put('/', 43);
-        m.put(':', 44);
-        return m;
+        return Map.ofEntries(
+                Map.entry('0', 0),
+                Map.entry('1', 1),
+                Map.entry('2', 2),
+                Map.entry('3', 3),
+                Map.entry('4', 4),
+                Map.entry('5', 5),
+                Map.entry('6', 6),
+                Map.entry('7', 7),
+                Map.entry('8', 8),
+                Map.entry('9', 9),
+                Map.entry('A', 10),
+                Map.entry('B', 11),
+                Map.entry('C', 12),
+                Map.entry('D', 13),
+                Map.entry('E', 14),
+                Map.entry('F', 15),
+                Map.entry('G', 16),
+                Map.entry('H', 17),
+                Map.entry('I', 18),
+                Map.entry('J', 19),
+                Map.entry('K', 20),
+                Map.entry('L', 21),
+                Map.entry('M', 22),
+                Map.entry('N', 23),
+                Map.entry('O', 24),
+                Map.entry('P', 25),
+                Map.entry('Q', 26),
+                Map.entry('R', 27),
+                Map.entry('S', 28),
+                Map.entry('T', 29),
+                Map.entry('U', 30),
+                Map.entry('V', 31),
+                Map.entry('W', 32),
+                Map.entry('X', 33),
+                Map.entry('Y', 34),
+                Map.entry('Z', 35),
+                Map.entry(' ', 36),
+                Map.entry('$', 37),
+                Map.entry('%', 38),
+                Map.entry('*', 39),
+                Map.entry('+', 40),
+                Map.entry('-', 41),
+                Map.entry('.', 42),
+                Map.entry('/', 43),
+                Map.entry(':', 44));
     }
 
 }

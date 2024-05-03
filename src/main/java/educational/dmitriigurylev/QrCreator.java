@@ -29,9 +29,9 @@ public class QrCreator {
 
         int[] decimalArr;
         if (objectToEncode.getClass() == Integer.class) {
-            decimalArr = IntegerEncoder.encodeInteger((int) objectToEncode);
+            decimalArr = new IntegerEncoder((int) objectToEncode).encodeSymbols();
         } else if (objectToEncode.getClass() == String.class && UtilityClass.isAllLettersUpperCase((String) objectToEncode)) {
-            decimalArr = IntLetterEncoder.encodeSymbols((String) objectToEncode);
+            decimalArr = new IntLetterEncoder((String) objectToEncode).encodeSymbols();
         } else if (objectToEncode.getClass() == String.class || objectToEncode.getClass() == FileInputStream.class) {
 //            decimalArr = ByteEncoder.encodeBytes(objectToEncode);
             throw new RuntimeException("it's not ready yet");
