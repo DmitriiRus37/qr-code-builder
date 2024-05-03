@@ -1,38 +1,30 @@
 package educational.dmitriigurylev.encoders;
 
+import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
 import educational.dmitriigurylev.enums.EncodingWay;
 import educational.dmitriigurylev.utility_maps.EncodingHeaderMap;
-import educational.dmitriigurylev.UtilityMethods;
+import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
+@NoArgsConstructor
 public class IntLetterEncoder implements Encoder {
 
     private String value;
-    public IntLetterEncoder(String value) {
-        this.value = value;
-    }
 
     private static final Map<Character, Integer> charIntMap = createCharMap();
+
+    @Override
+    public Encoder setValueToTransform(Object obj) {
+        this.value = (String) obj;
+        return this;
+    }
 
     @Override
     public String[] transformToBinaryArray() {
         String[] strAr = separateSymbols();
         int[][] intAr = mapCharToInt(strAr);
         return symbolsArrayToBinaryArray(intAr);
-    }
-
-    private static int[][] mapCharToInt(String[] strAr) {
-        int[][] res = new int[strAr.length][];
-        for (int j = 0; j < strAr.length; j++) {
-            String str = strAr[j];
-            int[] ar = new int[str.length()];
-            for (int i = 0; i < str.length(); i++) {
-                ar[i] = charIntMap.get(str.charAt(i));
-            }
-            res[j] = ar;
-        }
-        return res;
     }
 
     private String[] separateSymbols() {
@@ -50,6 +42,23 @@ public class IntLetterEncoder implements Encoder {
             }
         }
         return arr;
+    }
+
+    private static int[][] mapCharToInt(String[] strAr) {
+        int[][] res = new int[strAr.length][];
+        for (int j = 0; j < strAr.length; j++) {
+            String str = strAr[j];
+            int[] ar = new int[str.length()];
+            for (int i = 0; i < str.length(); i++) {
+                var mappedValue = charIntMap.get(str.charAt(i));
+                if (mappedValue == null) {
+                    throw new InvalidInputFormatException();
+                }
+                ar[i] = mappedValue;
+            }
+            res[j] = ar;
+        }
+        return res;
     }
 
     private static String[] symbolsArrayToBinaryArray(int[][] arr) {
