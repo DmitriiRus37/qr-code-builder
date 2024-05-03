@@ -25,7 +25,7 @@ public class QrCreator {
         qrCodeField = new QrCodeField(Version.V_1, CorrectionLevel.HIGH);
         qrCodeField.addFinderPatterns();
         qrCodeField.addSynchronizationLines();
-        qrCodeField.addTypeInformationBits();
+        qrCodeField.addInformationTypeBits();
 
         Object objectToEncode = "12345678";
 
