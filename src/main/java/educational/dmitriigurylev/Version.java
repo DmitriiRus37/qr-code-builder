@@ -1,5 +1,5 @@
 package educational.dmitriigurylev;
 
 public enum Version {
-    ONE
+    V_1
 }

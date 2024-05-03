@@ -1,25 +1,19 @@
-package educational.dmitriigurylev.reedSolomonMapping;
+package educational.dmitriigurylev.reed_solomon_mapping;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class CD_Map {
-    private final Map<Integer, Integer> map;
+public class CDMap {
 
-    private static CD_Map instance;
+    private CDMap() {}
+    private static final Map<Integer, Integer> map = createMap();
 
-    public static CD_Map getMapInstance() {
-        if (instance == null) {
-            instance = new CD_Map();
-        }
-        return instance;
+    public static int getVal(int a) {
+        return map.get(a);
     }
 
-    public int getVal(int a) {
-        return instance.map.get(a);
-    }
-
-    private CD_Map() {
+    private static Map<Integer, Integer> createMap() {
         Queue<Integer> q = new LinkedList<>(List.of(
               1,2,4,8,16,32,64,128,29,58,116,232,205,135,19,38,
                 76,152,45,90,180,117,234,201,143,3,6,12,24,48,96,192,
@@ -38,8 +32,9 @@ public class CD_Map {
                 18,36,72,144,61,122,244,245,247,243,251,235,203,139,11,22,
                 44,88,176,125,250,233,207,131,27,54,108,216,173,71,142,1
         ));
-        map = new HashMap<>();
-        IntStream.range(0, 256).forEach(i -> map.put(i, q.isEmpty() ? Integer.valueOf(i) : q.poll()));
+        return IntStream.range(0, 256)
+                .boxed()
+                .collect(Collectors.toMap(i -> i, i -> q.poll(), (a, b) -> b));
     }
 
 }
