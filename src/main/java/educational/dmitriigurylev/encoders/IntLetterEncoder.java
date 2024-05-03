@@ -1,6 +1,6 @@
 package educational.dmitriigurylev.encoders;
 
-import educational.dmitriigurylev.UtilityClass;
+import educational.dmitriigurylev.UtilityMethods;
 
 import java.util.Map;
 
@@ -18,8 +18,8 @@ public class IntLetterEncoder implements Encoder {
         String[] strAr = separateSymbols();
         int[][] intAr = mapCharToInt(strAr);
         String[] binaryArr = symbolsArrayToBinaryArray(intAr);
-        String bitString = UtilityClass.binaryArrayToBitString(binaryArr);
-        return UtilityClass.binaryStringToDecimalString(bitString);
+        String bitString = UtilityMethods.binaryArrayToBitString(binaryArr);
+        return UtilityMethods.binaryStringToDecimalArray(bitString);
     }
 
     private static int[][] mapCharToInt(String[] strAr) {
