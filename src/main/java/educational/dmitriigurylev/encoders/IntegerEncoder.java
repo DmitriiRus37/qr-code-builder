@@ -1,6 +1,6 @@
 package educational.dmitriigurylev.encoders;
 
-import educational.dmitriigurylev.UtilityClass;
+import educational.dmitriigurylev.UtilityMethods;
 
 import java.util.Map;
 
@@ -15,8 +15,8 @@ public class IntegerEncoder implements Encoder {
     public int[] encodeSymbols() {
         String[] strAr = separateSymbols();
         symbolsArrayToBinaryArray(strAr);
-        String bitString = UtilityClass.binaryArrayToBitString(strAr);
-        return UtilityClass.binaryStringToDecimalString(bitString);
+        String bitString = UtilityMethods.binaryArrayToBitString(strAr);
+        return UtilityMethods.binaryStringToDecimalArray(bitString);
     }
 
     private String[] separateSymbols() {

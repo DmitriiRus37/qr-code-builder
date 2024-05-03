@@ -1,6 +1,6 @@
 package educational.dmitriigurylev;
 
-import educational.dmitriigurylev.customExceptions.UnknownEncodingTypeException;
+import educational.dmitriigurylev.custom_exceptions.UnknownEncodingTypeException;
 import educational.dmitriigurylev.encoders.IntLetterEncoder;
 import educational.dmitriigurylev.encoders.IntegerEncoder;
 import educational.dmitriigurylev.reed_solomon_mapping.ABMap;
@@ -30,7 +30,7 @@ public class QrCreator {
         int[] decimalArr;
         if (objectToEncode.getClass() == Integer.class) {
             decimalArr = new IntegerEncoder((int) objectToEncode).encodeSymbols();
-        } else if (objectToEncode.getClass() == String.class && UtilityClass.isAllLettersUpperCase((String) objectToEncode)) {
+        } else if (objectToEncode.getClass() == String.class && UtilityMethods.containsAllLettersUpperCase((String) objectToEncode)) {
             decimalArr = new IntLetterEncoder((String) objectToEncode).encodeSymbols();
         } else if (objectToEncode.getClass() == String.class || objectToEncode.getClass() == FileInputStream.class) {
 //            decimalArr = ByteEncoder.encodeBytes(objectToEncode);
