@@ -2,24 +2,24 @@ package educational.dmitriigurylev;
 
 import lombok.Getter;
 
-import java.util.EnumMap;
 import java.util.stream.IntStream;
+
+import static educational.dmitriigurylev.VersionMap.*;
 
 public class QrCodeField {
 
-    static EnumMap<Version, Cell[][]> versionFieldMap = createVersionFieldMap();
 
-    private Version version;
+    private final Version version;
 
-    private CorrectionLevel level;
+    private final CorrectionLevel level;
 
     @Getter
-    private Cell[][] field;
+    private final Cell[][] field;
 
     public QrCodeField(Version version, CorrectionLevel level) {
         this.version = version;
         this.level = level;
-        this.field = versionFieldMap.get(version);
+        this.field = getFieldSizeByVersion(version);
         fillFieldWithZeros();
     }
 
@@ -29,12 +29,6 @@ public class QrCodeField {
                 cells[i] = new Cell(false, 0);
             }
         }
-    }
-
-    private static EnumMap<Version, Cell[][]> createVersionFieldMap() {
-        EnumMap<Version, Cell[][]> m = new EnumMap<>(Version.class);
-        m.put(Version.V_1, new Cell[21][21]);
-        return m;
     }
 
     public void addFinderPatterns() {
