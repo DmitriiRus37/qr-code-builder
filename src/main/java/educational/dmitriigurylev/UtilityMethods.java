@@ -5,7 +5,6 @@ import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.IntStream;
 
 public class UtilityMethods {
     public static int binaryToDecimal(String binaryString) {

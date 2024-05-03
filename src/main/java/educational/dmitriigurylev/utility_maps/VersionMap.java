@@ -1,8 +1,14 @@
-package educational.dmitriigurylev;
+package educational.dmitriigurylev.utility_maps;
+
+import educational.dmitriigurylev.Cell;
+import educational.dmitriigurylev.enums.Version;
 
 import java.util.EnumMap;
 
 public class VersionMap {
+
+    private VersionMap() {}
+
     private static final EnumMap<Version, Cell[][]> versionFieldSizeMap = new EnumMap<>(Version.class);
     static {
         versionFieldSizeMap.put(Version.V_1, new Cell[21][21]);
@@ -15,9 +21,5 @@ public class VersionMap {
 
     public static Cell[][] getFieldSizeByVersion(Version v) {
         return versionFieldSizeMap.get(v);
-    }
-
-    public enum Version {
-        V_1,V_2,V_3,V_4,V_5,V_6
     }
 }

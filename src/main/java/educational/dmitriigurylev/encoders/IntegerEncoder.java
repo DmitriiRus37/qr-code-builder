@@ -1,6 +1,7 @@
 package educational.dmitriigurylev.encoders;
 
-import educational.dmitriigurylev.EncodingHeaderMap;
+import educational.dmitriigurylev.enums.EncodingWay;
+import educational.dmitriigurylev.utility_maps.EncodingHeaderMap;
 import educational.dmitriigurylev.UtilityMethods;
 
 import java.util.Map;
@@ -46,7 +47,7 @@ public class IntegerEncoder implements Encoder {
             Map<Integer, String> binaryDigitsCount = Map.of(1, "%4s", 2, "%7s", 3, "%11s");
             arr[i] = String.format(binaryDigitsCount.get(arr[i].length()), binaryString).replace(' ', '0');
         }
-        arr[0] = EncodingHeaderMap.getFieldSizeByVersion(EncodingHeaderMap.EncodingWay.DIGITS);
+        arr[0] = EncodingHeaderMap.getFieldSizeByVersion(EncodingWay.DIGITS);
 
         String binaryString = Integer.toBinaryString(Integer.parseInt(arr[1]));
         arr[1] = String.format("%10s", binaryString).replace(' ', '0');
