@@ -3,8 +3,11 @@ package educational.dmitriigurylev;
 import educational.dmitriigurylev.custom_exceptions.UnknownEncodingTypeException;
 import educational.dmitriigurylev.encoders.IntLetterEncoder;
 import educational.dmitriigurylev.encoders.IntegerEncoder;
+import educational.dmitriigurylev.enums.CorrectionLevel;
+import educational.dmitriigurylev.enums.Version;
 import educational.dmitriigurylev.reed_solomon_mapping.ABMap;
 import educational.dmitriigurylev.reed_solomon_mapping.CDMap;
+import educational.dmitriigurylev.utility_maps.GeneratingPolynomialMap;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -16,7 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static educational.dmitriigurylev.VersionMap.*;
+import static educational.dmitriigurylev.utility_maps.VersionMap.*;
 
 public class QrCreator {
     QrCodeField qrCodeField;
@@ -41,7 +44,7 @@ public class QrCreator {
             throw new UnknownEncodingTypeException("You can encode digits/letters/bytes only");
         }
 
-        int[] generatingPolynomial = GeneratingPolynomial.map.get(17);
+        int[] generatingPolynomial = GeneratingPolynomialMap.getGeneratingPolynomial(17);
 
         List<Integer> listCorrectBytes = Arrays.stream(decimalArr)
                 .boxed()

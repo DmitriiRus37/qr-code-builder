@@ -1,21 +1,20 @@
 package educational.dmitriigurylev;
 
+import educational.dmitriigurylev.enums.CorrectionLevel;
+import educational.dmitriigurylev.enums.FinderPatterLocation;
+import educational.dmitriigurylev.enums.Version;
+import educational.dmitriigurylev.utility_maps.CorrectionLevelAndMaskCodeMap;
 import lombok.Getter;
 
 import java.util.stream.IntStream;
 
-import static educational.dmitriigurylev.VersionMap.*;
+import static educational.dmitriigurylev.utility_maps.VersionMap.*;
 
+@Getter
 public class QrCodeField {
 
-
-    @Getter
     private final Version version;
-
-    @Getter
     private final CorrectionLevel level;
-
-    @Getter
     private final Cell[][] field;
 
     public QrCodeField(Version version, CorrectionLevel level) {
@@ -35,9 +34,9 @@ public class QrCodeField {
 
     public void addFinderPatterns() {
         if (version == Version.V_1) {
-            addSquareStartingWithLeftUpperPoint(0,0, FinderPatterLocation.UpperLeft);
-            addSquareStartingWithLeftUpperPoint(0,14, FinderPatterLocation.UpperRight);
-            addSquareStartingWithLeftUpperPoint(14,0, FinderPatterLocation.LowerLeft);
+            addSquareStartingWithLeftUpperPoint(0,0, FinderPatterLocation.UPPER_LEFT);
+            addSquareStartingWithLeftUpperPoint(0,14, FinderPatterLocation.UPPER_RIGHT);
+            addSquareStartingWithLeftUpperPoint(14,0, FinderPatterLocation.LOWER_LEFT);
         }
     }
 
@@ -58,13 +57,13 @@ public class QrCodeField {
                 field[firstY+y][firstX+x].setBusy(true);
             }
         }
-        if (location == FinderPatterLocation.UpperLeft) {
+        if (location == FinderPatterLocation.UPPER_LEFT) {
             IntStream.range(0, 8).forEach(x -> field[firstY + 7][firstX + x].setBusy(true));
             IntStream.range(0, 7).forEach(y -> field[firstY + y][firstX + 7].setBusy(true));
-        } else if (location == FinderPatterLocation.LowerLeft) {
+        } else if (location == FinderPatterLocation.LOWER_LEFT) {
             IntStream.range(0, 8).forEach(x -> field[firstY - 1][firstX + x].setBusy(true));
             IntStream.range(-1, 7).forEach(y -> field[firstY + y][firstX + 7].setBusy(true));
-        } else if (location == FinderPatterLocation.UpperRight) {
+        } else if (location == FinderPatterLocation.UPPER_RIGHT) {
             IntStream.range(-1, 7).forEach(x -> field[firstY + 7][firstX + x].setBusy(true));
             IntStream.range(0, 7).forEach(y -> field[firstY + y][firstX - 1].setBusy(true));
         }

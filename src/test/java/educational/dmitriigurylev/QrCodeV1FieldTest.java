@@ -1,5 +1,8 @@
 package educational.dmitriigurylev;
 
+import educational.dmitriigurylev.enums.CorrectionLevel;
+import educational.dmitriigurylev.enums.Version;
+import educational.dmitriigurylev.utility_maps.CorrectionLevelAndMaskCodeMap;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -7,7 +10,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 
-import static educational.dmitriigurylev.VersionMap.Version;
 import static org.junit.jupiter.api.Assertions.*;
 
 class QrCodeV1FieldTest {

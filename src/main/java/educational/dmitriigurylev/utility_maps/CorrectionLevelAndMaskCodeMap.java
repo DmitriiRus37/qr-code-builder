@@ -1,12 +1,16 @@
-package educational.dmitriigurylev;
+package educational.dmitriigurylev.utility_maps;
+
+import educational.dmitriigurylev.enums.CorrectionLevel;
 
 import java.util.EnumMap;
 import java.util.Map;
 
 public class CorrectionLevelAndMaskCodeMap {
-    private static EnumMap<CorrectionLevel, Map<Byte, String>> informationTypeBitsMap = new EnumMap<>(CorrectionLevel.class);
+    private CorrectionLevelAndMaskCodeMap() {}
+
+    private static final EnumMap<CorrectionLevel, Map<Byte, String>> map = new EnumMap<>(CorrectionLevel.class);
     static {
-        informationTypeBitsMap.put(CorrectionLevel.LOW, Map.of(
+        map.put(CorrectionLevel.LOW, Map.of(
                 (byte) 0, "111011111000100",
                 (byte) 1, "111001011110011",
                 (byte) 2, "111110110101010",
@@ -16,7 +20,7 @@ public class CorrectionLevelAndMaskCodeMap {
                 (byte) 6, "110110001000001",
                 (byte) 7, "110100101110110"));
 
-        informationTypeBitsMap.put(CorrectionLevel.MIDDLE, Map.of(
+        map.put(CorrectionLevel.MIDDLE, Map.of(
                 (byte) 0, "101010000010010",
                 (byte) 1, "101000100100101",
                 (byte) 2, "101111001111100",
@@ -26,7 +30,7 @@ public class CorrectionLevelAndMaskCodeMap {
                 (byte) 6, "100111110010111",
                 (byte) 7, "100101010100000"));
 
-        informationTypeBitsMap.put(CorrectionLevel.QUARTER, Map.of(
+        map.put(CorrectionLevel.QUARTER, Map.of(
                 (byte) 0, "011010101011111",
                 (byte) 1, "011000001101000",
                 (byte) 2, "011111100110001",
@@ -36,7 +40,7 @@ public class CorrectionLevelAndMaskCodeMap {
                 (byte) 6, "010111011011010",
                 (byte) 7, "010101111101101"));
 
-        informationTypeBitsMap.put(CorrectionLevel.HIGH, Map.of(
+        map.put(CorrectionLevel.HIGH, Map.of(
                 (byte) 0, "001011010001001",
                 (byte) 1, "001001110111110",
                 (byte) 2, "001110011100111",
@@ -48,7 +52,7 @@ public class CorrectionLevelAndMaskCodeMap {
     }
 
     public static String getMaskAndCorrectionLevelCode(CorrectionLevel cl, byte m) {
-        return informationTypeBitsMap.get(cl).get(m);
+        return map.get(cl).get(m);
     }
 
 }
