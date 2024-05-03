@@ -7,6 +7,7 @@ import lombok.*;
 @AllArgsConstructor
 public class Cell {
     private boolean busy = false;
+    private int value = 0;
 
     public Cell setBusy(boolean busy) {
         this.busy = busy;
@@ -18,5 +19,4 @@ public class Cell {
         return this;
     }
 
-    private int value = 0;
 }

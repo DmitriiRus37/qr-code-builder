@@ -9,8 +9,10 @@ import static educational.dmitriigurylev.VersionMap.*;
 public class QrCodeField {
 
 
+    @Getter
     private final Version version;
 
+    @Getter
     private final CorrectionLevel level;
 
     @Getter
