@@ -1,6 +1,7 @@
 package educational.dmitriigurylev;
 
 import educational.dmitriigurylev.custom_exceptions.UnknownEncodingTypeException;
+import educational.dmitriigurylev.encoders.ByteEncoder;
 import educational.dmitriigurylev.encoders.IntLetterEncoder;
 import educational.dmitriigurylev.encoders.IntegerEncoder;
 import educational.dmitriigurylev.enums.CorrectionLevel;
@@ -12,34 +13,28 @@ import educational.dmitriigurylev.utility_maps.GeneratingPolynomialMap;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static educational.dmitriigurylev.utility_maps.VersionMap.*;
-
 public class QrCreator {
     QrCodeField qrCodeField;
 
-    public int[][] createQr() {
+    public int[][] createQr(Object objectToEncode) {
         qrCodeField = new QrCodeField(Version.V_1, CorrectionLevel.HIGH);
         qrCodeField.addFinderPatterns();
         qrCodeField.addSynchronizationLines();
         qrCodeField.addInformationTypeBits();
-
-        Object objectToEncode = "12345678";
 
         int[] decimalArr;
         if (objectToEncode.getClass() == Integer.class) {
             decimalArr = new IntegerEncoder((int) objectToEncode).encodeSymbols();
         } else if (objectToEncode.getClass() == String.class && UtilityMethods.containsAllLettersUpperCase((String) objectToEncode)) {
             decimalArr = new IntLetterEncoder((String) objectToEncode).encodeSymbols();
-        } else if (objectToEncode.getClass() == String.class || objectToEncode.getClass() == FileInputStream.class) {
-//            decimalArr = ByteEncoder.encodeBytes(objectToEncode);
-            throw new RuntimeException("it's not ready yet");
+        } else if (objectToEncode.getClass() == byte[].class) {
+            decimalArr = new ByteEncoder((byte[]) objectToEncode).encodeSymbols();
         } else {
             throw new UnknownEncodingTypeException("You can encode digits/letters/bytes only");
         }
