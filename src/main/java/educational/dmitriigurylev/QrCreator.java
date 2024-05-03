@@ -16,6 +16,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static educational.dmitriigurylev.VersionMap.*;
+
 public class QrCreator {
     QrCodeField qrCodeField;
 

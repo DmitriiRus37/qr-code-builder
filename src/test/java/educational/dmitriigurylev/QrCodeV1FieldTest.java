@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
+import static educational.dmitriigurylev.VersionMap.*;
+
 class QrCodeV1FieldTest {
 
     QrCodeField qrCodeField;
