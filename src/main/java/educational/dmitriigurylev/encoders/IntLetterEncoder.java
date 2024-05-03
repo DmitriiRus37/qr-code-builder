@@ -1,5 +1,6 @@
 package educational.dmitriigurylev.encoders;
 
+import educational.dmitriigurylev.EncodingHeaderMap;
 import educational.dmitriigurylev.UtilityMethods;
 
 import java.util.Map;
@@ -65,7 +66,7 @@ public class IntLetterEncoder implements Encoder {
             Map<Integer, String> binaryDigitsCount = Map.of(1, "%6s", 2, "%11s");
             resArr[i+2] = String.format(binaryDigitsCount.get(arr[i].length), binaryString).replace(' ', '0');
         }
-        resArr[0] = "0010";
+        resArr[0] = EncodingHeaderMap.getFieldSizeByVersion(EncodingHeaderMap.EncodingWay.LETTERS_DIGITS);
 
         String binaryString = Integer.toBinaryString(symbolsCounter);
         resArr[1] = String.format("%9s", binaryString).replace(' ', '0');
