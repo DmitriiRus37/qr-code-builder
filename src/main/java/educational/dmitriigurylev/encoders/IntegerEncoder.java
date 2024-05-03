@@ -2,15 +2,19 @@ package educational.dmitriigurylev.encoders;
 
 import educational.dmitriigurylev.enums.EncodingWay;
 import educational.dmitriigurylev.utility_maps.EncodingHeaderMap;
-import educational.dmitriigurylev.UtilityMethods;
+import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
+@NoArgsConstructor
 public class IntegerEncoder implements Encoder {
 
-    private final int value;
-    public IntegerEncoder(int value) {
-        this.value = value;
+    private int value;
+
+    @Override
+    public Encoder setValueToTransform(Object obj) {
+        this.value = (int) obj;
+        return this;
     }
 
     @Override

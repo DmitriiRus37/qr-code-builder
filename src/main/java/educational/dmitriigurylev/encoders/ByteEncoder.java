@@ -1,24 +1,19 @@
 package educational.dmitriigurylev.encoders;
 
-import educational.dmitriigurylev.UtilityMethods;
 import educational.dmitriigurylev.enums.EncodingWay;
 import educational.dmitriigurylev.utility_maps.EncodingHeaderMap;
+import lombok.NoArgsConstructor;
 
-import java.nio.ByteBuffer;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
+@NoArgsConstructor
 public class ByteEncoder implements Encoder {
 
-    private final byte[] value;
-    public ByteEncoder(byte[] value) {
-        this.value = value;
-    }
+    private byte[] value;
 
+    @Override
+    public Encoder setValueToTransform(Object obj) {
+        this.value = (byte[]) obj;
+        return this;
+    }
 
     @Override
     public String[] transformToBinaryArray() {

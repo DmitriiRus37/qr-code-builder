@@ -1,13 +1,10 @@
 package educational.dmitriigurylev;
 
-import educational.dmitriigurylev.custom_exceptions.UnknownEncodingTypeException;
-import educational.dmitriigurylev.encoders.ByteEncoder;
-import educational.dmitriigurylev.encoders.IntLetterEncoder;
-import educational.dmitriigurylev.encoders.IntegerEncoder;
 import educational.dmitriigurylev.enums.CorrectionLevel;
 import educational.dmitriigurylev.enums.Version;
 import educational.dmitriigurylev.reed_solomon_mapping.ABMap;
 import educational.dmitriigurylev.reed_solomon_mapping.CDMap;
+import educational.dmitriigurylev.utility_maps.EncoderMap;
 import educational.dmitriigurylev.utility_maps.GeneratingPolynomialMap;
 
 import java.util.Arrays;
@@ -82,15 +79,9 @@ public class QrCreator {
     }
 
     private String[] getBinaryArray(Object objectToEncode) {
-        if (objectToEncode.getClass() == Integer.class) {
-            return new IntegerEncoder((int) objectToEncode).transformToBinaryArray();
-        } else if (objectToEncode.getClass() == String.class && UtilityMethods.containsAllLettersUpperCase((String) objectToEncode)) {
-            return new IntLetterEncoder((String) objectToEncode).transformToBinaryArray();
-        } else if (objectToEncode.getClass() == byte[].class) {
-            return new ByteEncoder((byte[]) objectToEncode).transformToBinaryArray();
-        } else {
-            throw new UnknownEncodingTypeException("You can encode digits/letters/bytes only");
-        }
+        return EncoderMap.getEncoder(objectToEncode.getClass())
+                .setValueToTransform(objectToEncode)
+                .transformToBinaryArray();
     }
 
     private void applyMaskPattern() {
