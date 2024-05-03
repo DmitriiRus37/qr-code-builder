@@ -14,11 +14,10 @@ public class IntegerEncoder implements Encoder {
     }
 
     @Override
-    public int[] encodeSymbols() {
+    public String[] transformToBinaryArray() {
         String[] strAr = separateSymbols();
         symbolsArrayToBinaryArray(strAr);
-        String bitString = UtilityMethods.binaryArrayToBitString(strAr);
-        return UtilityMethods.binaryStringToDecimalArray(bitString);
+        return strAr;
     }
 
     private String[] separateSymbols() {

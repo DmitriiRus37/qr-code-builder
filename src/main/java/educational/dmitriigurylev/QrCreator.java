@@ -10,10 +10,6 @@ import educational.dmitriigurylev.reed_solomon_mapping.ABMap;
 import educational.dmitriigurylev.reed_solomon_mapping.CDMap;
 import educational.dmitriigurylev.utility_maps.GeneratingPolynomialMap;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -28,17 +24,17 @@ public class QrCreator {
         qrCodeField.addSynchronizationLines();
         qrCodeField.addInformationTypeBits();
 
-        int[] decimalArr;
-        if (objectToEncode.getClass() == Integer.class) {
-            decimalArr = new IntegerEncoder((int) objectToEncode).encodeSymbols();
-        } else if (objectToEncode.getClass() == String.class && UtilityMethods.containsAllLettersUpperCase((String) objectToEncode)) {
-            decimalArr = new IntLetterEncoder((String) objectToEncode).encodeSymbols();
-        } else if (objectToEncode.getClass() == byte[].class) {
-            decimalArr = new ByteEncoder((byte[]) objectToEncode).encodeSymbols();
-        } else {
-            throw new UnknownEncodingTypeException("You can encode digits/letters/bytes only");
-        }
+        StringBuilder sb = encodeBits(objectToEncode);
+        fillFieldWithBitsSequence(sb);
+        applyMaskPattern();
+        new QrImageDrawer(qrCodeField).drawImage("qr_image.jpg", "jpg");
+        return new int[0][0];
+    }
 
+    private StringBuilder encodeBits(Object objectToEncode) {
+        String[] binaryArr = getBinaryArray(objectToEncode);
+        String bitString = UtilityMethods.binaryArrayToBitString(binaryArr);
+        int[] decimalArr = UtilityMethods.binaryStringToDecimalArray(bitString);
         int[] generatingPolynomial = GeneratingPolynomialMap.getGeneratingPolynomial(17);
 
         List<Integer> listCorrectBytes = Arrays.stream(decimalArr)
@@ -82,10 +78,19 @@ public class QrCreator {
             unitedArr[i] = String.format("%8s", binStr).replace(' ', '0');
             sb.append(unitedArr[i]);
         }
-        encodeBitsSequence(sb);
-        applyMaskPattern();
-        drawImage(qrCodeField.getField());
-        return new int[1][1];
+        return sb;
+    }
+
+    private String[] getBinaryArray(Object objectToEncode) {
+        if (objectToEncode.getClass() == Integer.class) {
+            return new IntegerEncoder((int) objectToEncode).transformToBinaryArray();
+        } else if (objectToEncode.getClass() == String.class && UtilityMethods.containsAllLettersUpperCase((String) objectToEncode)) {
+            return new IntLetterEncoder((String) objectToEncode).transformToBinaryArray();
+        } else if (objectToEncode.getClass() == byte[].class) {
+            return new ByteEncoder((byte[]) objectToEncode).transformToBinaryArray();
+        } else {
+            throw new UnknownEncodingTypeException("You can encode digits/letters/bytes only");
+        }
     }
 
     private void applyMaskPattern() {
@@ -101,30 +106,22 @@ public class QrCreator {
         }
     }
 
-    private void encodeBitsSequence(StringBuilder sb) {
+    private void fillFieldWithBitsSequence(StringBuilder sb) {
         Cell[][] f = qrCodeField.getField();
-        Direction dir = Direction.UP;
+        FillDirection dir = FillDirection.UP;
         int x = f[0].length - 1;
         int y = f.length - 1;
 
         while (!sb.isEmpty()) {
-            while (dir == Direction.UP) {
-                if (!f[y][x].isBusy() && !sb.isEmpty()) {
-                    f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
-                    sb.deleteCharAt(0);
-                    drawImage(f);
-                }
+            while (dir == FillDirection.UP) {
+                fillCell(sb, f, x, y);
                 x--;
 
-                if (!f[y][x].isBusy() && !sb.isEmpty()) {
-                    f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
-                    sb.deleteCharAt(0);
-                    drawImage(f);
-                }
+                fillCell(sb, f, x, y);
                 x++;
                 y--;
                 if (y < 0) {
-                    dir = Direction.DOWN;
+                    dir = FillDirection.DOWN;
                     y++;
                     x-=2;
                     if (x == 6) {
@@ -133,23 +130,15 @@ public class QrCreator {
                 }
             }
 
-            while (dir == Direction.DOWN) {
-                if (!f[y][x].isBusy() && !sb.isEmpty()) {
-                    f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
-                    sb.deleteCharAt(0);
-                    drawImage(f);
-                }
+            while (dir == FillDirection.DOWN) {
+                fillCell(sb, f, x, y);
                 x--;
 
-                if (!f[y][x].isBusy() && !sb.isEmpty()) {
-                    f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
-                    sb.deleteCharAt(0);
-                    drawImage(f);
-                }
+                fillCell(sb, f, x, y);
                 x++;
                 y++;
                 if (y >= f.length) {
-                    dir = Direction.UP;
+                    dir = FillDirection.UP;
                     y--;
                     x-=2;
                     if (x == 6) {
@@ -160,36 +149,13 @@ public class QrCreator {
         }
     }
 
-    private void drawImage(Cell[][] f) {
-        BufferedImage qrImage = new BufferedImage(
-                f[0].length+4,
-                f.length+4,
-                BufferedImage.TYPE_BYTE_GRAY);
-
-        for (int x = 0; x < f[0].length+4; x++) {
-            if (x == 0 || x == 1 || x == f[0].length+2 || x == f[0].length+3) {
-                for (int y = 2; y < f.length+2; y++) {
-                    qrImage.setRGB(x, y, 0xFFFFFF);
-                }
-            }
-            qrImage.setRGB(x, 0, 0xFFFFFF);
-            qrImage.setRGB(x, 1, 0xFFFFFF);
-            qrImage.setRGB(x, f.length+2, 0xFFFFFF);
-            qrImage.setRGB(x, f.length+3, 0xFFFFFF);
-        }
-
-        for (int x = 2; x < f[0].length+2; x++) {
-            for (int y = 2; y < f.length+2; y++) {
-                qrImage.setRGB(x, y, f[y-2][x-2].getValue() == 0 ? 0xFFFFFF : 0x000000);
-            }
-        }
-        File outputQrImageFile = new File("qr_image.jpg");
-        try {
-            ImageIO.write(qrImage, "jpg", outputQrImageFile);
-        } catch (IOException e) {
-            e.printStackTrace();
+    private void fillCell(StringBuilder sb, Cell[][] f, int x, int y) {
+        if (!f[y][x].isBusy() && !sb.isEmpty()) {
+            f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
+            sb.deleteCharAt(0);
         }
     }
-    enum Direction {UP, DOWN}
+
+    private enum FillDirection {UP, DOWN}
 
 }

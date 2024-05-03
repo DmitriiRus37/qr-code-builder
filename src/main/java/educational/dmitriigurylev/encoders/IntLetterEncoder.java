@@ -16,12 +16,10 @@ public class IntLetterEncoder implements Encoder {
     private static final Map<Character, Integer> charIntMap = createCharMap();
 
     @Override
-    public int[] encodeSymbols() {
+    public String[] transformToBinaryArray() {
         String[] strAr = separateSymbols();
         int[][] intAr = mapCharToInt(strAr);
-        String[] binaryArr = symbolsArrayToBinaryArray(intAr);
-        String bitString = UtilityMethods.binaryArrayToBitString(binaryArr);
-        return UtilityMethods.binaryStringToDecimalArray(bitString);
+        return symbolsArrayToBinaryArray(intAr);
     }
 
     private static int[][] mapCharToInt(String[] strAr) {

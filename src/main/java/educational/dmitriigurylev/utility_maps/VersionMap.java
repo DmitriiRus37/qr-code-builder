@@ -11,12 +11,11 @@ public class VersionMap {
 
     private static final EnumMap<Version, Cell[][]> versionFieldSizeMap = new EnumMap<>(Version.class);
     static {
-        versionFieldSizeMap.put(Version.V_1, new Cell[21][21]);
-        versionFieldSizeMap.put(Version.V_2, new Cell[25][25]);
-        versionFieldSizeMap.put(Version.V_3, new Cell[29][29]);
-        versionFieldSizeMap.put(Version.V_4, new Cell[33][33]);
-        versionFieldSizeMap.put(Version.V_5, new Cell[37][37]);
-        versionFieldSizeMap.put(Version.V_6, new Cell[41][41]);
+        int size = 21;
+        for (Version v : Version.values()) {
+            versionFieldSizeMap.put(v, new Cell[size][size]);
+            size+=4;
+        }
     }
 
     public static Cell[][] getFieldSizeByVersion(Version v) {

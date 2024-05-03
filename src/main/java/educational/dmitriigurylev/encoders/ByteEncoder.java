@@ -21,15 +21,13 @@ public class ByteEncoder implements Encoder {
 
 
     @Override
-    public int[] encodeSymbols() {
-        String[] binaryArr = byteArrayToBinaryArray(this.value);
-        String bitString = UtilityMethods.binaryArrayToBitString(binaryArr);
-        return UtilityMethods.binaryStringToDecimalArray(bitString);
+    public String[] transformToBinaryArray() {
+        return byteArrayToBinaryArray(this.value);
     }
 
     private static String[] byteArrayToBinaryArray(byte[] arr) {
-        String[] resArr = new String[3];
         int symbolsCounter = arr.length;
+        String[] resArr = new String[3];
         var binaryString = new StringBuilder();
         for (byte b : arr) {
             binaryString.append(Integer.toBinaryString(b < 0 ? b & 0xff : b));
