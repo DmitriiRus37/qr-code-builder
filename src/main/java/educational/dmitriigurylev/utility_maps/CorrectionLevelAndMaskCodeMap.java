@@ -1,13 +1,14 @@
 package educational.dmitriigurylev.utility_maps;
 
 import educational.dmitriigurylev.enums.CorrectionLevel;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
 import java.util.EnumMap;
 import java.util.Map;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CorrectionLevelAndMaskCodeMap {
-    private CorrectionLevelAndMaskCodeMap() {}
-
     private static final EnumMap<CorrectionLevel, Map<Byte, String>> map = new EnumMap<>(CorrectionLevel.class);
     static {
         map.put(CorrectionLevel.LOW, Map.of(
