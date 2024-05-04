@@ -16,20 +16,24 @@ public class QrCreator {
     QrCodeField qrCodeField;
 
     public int[][] createQr(Object objectToEncode) {
-        qrCodeField = new QrCodeField(Version.V_1, CorrectionLevel.HIGH);
+
+        Version version = Version.V_1;
+        CorrectionLevel correctionLevel = CorrectionLevel.HIGH;
+
+        qrCodeField = new QrCodeField(version, correctionLevel);
         qrCodeField.addFinderPatterns();
         qrCodeField.addSynchronizationLines();
         qrCodeField.addInformationTypeBits();
 
-        StringBuilder sb = encodeBits(objectToEncode);
+        StringBuilder sb = encodeBits(objectToEncode, version);
         fillFieldWithBitsSequence(sb);
         applyMaskPattern();
         new QrImageDrawer(qrCodeField).drawImage("qr_image.jpg", "jpg");
         return new int[0][0];
     }
 
-    private StringBuilder encodeBits(Object objectToEncode) {
-        String[] binaryArr = getBinaryArray(objectToEncode);
+    private StringBuilder encodeBits(Object objectToEncode, Version version) {
+        String[] binaryArr = getBinaryArray(objectToEncode, version);
         String bitString = UtilityMethods.binaryArrayToBitString(binaryArr);
         int[] decimalArr = UtilityMethods.binaryStringToDecimalArray(bitString);
         int[] generatingPolynomial = GeneratingPolynomialMap.getGeneratingPolynomial(17);
@@ -78,9 +82,9 @@ public class QrCreator {
         return sb;
     }
 
-    private String[] getBinaryArray(Object objectToEncode) {
+    private String[] getBinaryArray(Object objectToEncode, Version version) {
         return EncoderMap.getEncoder(objectToEncode.getClass())
-                .setValueToTransform(objectToEncode)
+                .setValueAndVersion(objectToEncode, version)
                 .transformToBinaryArray();
     }
 

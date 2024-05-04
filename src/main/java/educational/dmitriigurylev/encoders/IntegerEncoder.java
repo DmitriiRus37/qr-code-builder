@@ -1,8 +1,11 @@
 package educational.dmitriigurylev.encoders;
 
 import educational.dmitriigurylev.enums.EncodingWay;
+import educational.dmitriigurylev.enums.Version;
+import educational.dmitriigurylev.utility_maps.DataLengthOfServiceInformation;
 import educational.dmitriigurylev.utility_maps.EncodingHeaderMap;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
@@ -10,10 +13,12 @@ import java.util.Map;
 public class IntegerEncoder implements Encoder {
 
     private int value;
+    private Version version;
 
     @Override
-    public Encoder setValueToTransform(Object obj) {
+    public Encoder setValueAndVersion(Object obj, Version version) {
         this.value = (int) obj;
+        this.version = version;
         return this;
     }
 
@@ -43,7 +48,7 @@ public class IntegerEncoder implements Encoder {
         return arr;
     }
 
-    private static void symbolsArrayToBinaryArray(String[] arr) {
+    private void symbolsArrayToBinaryArray(String[] arr) {
         for (int i = 2; i < arr.length; i++) {
             int decimalValue = Integer.parseInt(arr[i]);
             String binaryString = Integer.toBinaryString(decimalValue);
@@ -52,10 +57,11 @@ public class IntegerEncoder implements Encoder {
         }
         arr[0] = EncodingHeaderMap.getFieldSizeByVersion(EncodingWay.DIGITS);
 
-        String binaryString = Integer.toBinaryString(Integer.parseInt(arr[1]));
-        arr[1] = String.format("%10s", binaryString).replace(' ', '0');
+        arr[1] = StringUtils.leftPad(
+                Integer.toBinaryString(Integer.parseInt(arr[1])),
+                DataLengthOfServiceInformation.getDataLengthByVersionAndEncodingWay(version, EncodingWay.DIGITS),
+                '0');
     }
-
 
 }
 

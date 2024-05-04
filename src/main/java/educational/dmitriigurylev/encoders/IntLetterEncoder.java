@@ -2,8 +2,11 @@ package educational.dmitriigurylev.encoders;
 
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
 import educational.dmitriigurylev.enums.EncodingWay;
+import educational.dmitriigurylev.enums.Version;
+import educational.dmitriigurylev.utility_maps.DataLengthOfServiceInformation;
 import educational.dmitriigurylev.utility_maps.EncodingHeaderMap;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
@@ -11,12 +14,14 @@ import java.util.Map;
 public class IntLetterEncoder implements Encoder {
 
     private String value;
+    private Version version;
 
     private static final Map<Character, Integer> charIntMap = createCharMap();
 
     @Override
-    public Encoder setValueToTransform(Object obj) {
+    public Encoder setValueAndVersion(Object obj, Version version) {
         this.value = (String) obj;
+        this.version = version;
         return this;
     }
 
@@ -61,7 +66,7 @@ public class IntLetterEncoder implements Encoder {
         return res;
     }
 
-    private static String[] symbolsArrayToBinaryArray(int[][] arr) {
+    private String[] symbolsArrayToBinaryArray(int[][] arr) {
         int symbolsCounter = 0;
         String[] resArr = new String[arr.length+2];
         for (int i = 0; i < arr.length; i++) {
@@ -76,8 +81,11 @@ public class IntLetterEncoder implements Encoder {
         }
         resArr[0] = EncodingHeaderMap.getFieldSizeByVersion(EncodingWay.LETTERS_DIGITS);
 
-        String binaryString = Integer.toBinaryString(symbolsCounter);
-        resArr[1] = String.format("%9s", binaryString).replace(' ', '0');
+        resArr[1] = StringUtils.leftPad(
+                Integer.toBinaryString(symbolsCounter),
+                DataLengthOfServiceInformation.getDataLengthByVersionAndEncodingWay(version, EncodingWay.LETTERS_DIGITS),
+                '0');
+
         return resArr;
     }
 
