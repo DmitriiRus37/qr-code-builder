@@ -8,6 +8,8 @@ import educational.dmitriigurylev.utility_maps.EncoderMap;
 import educational.dmitriigurylev.utility_maps.InformationBitSizeMap;
 import lombok.Getter;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 @Getter
@@ -24,13 +26,13 @@ public class QrCreator {
         this.qrCodeField = new QrCodeField(version, correctionLevel);
     }
 
-    public int[][] createQr() {
+    public int[][] createQr(String filename) {
         qrCodeField.addFinderPatterns();
         qrCodeField.addSynchronizationLines();
         qrCodeField.addInformationTypeBits();
         qrCodeField.fillFieldWithBitsSequence(encodeBits(objectToEncode));
         qrCodeField.applyMaskPattern();
-        new QrImageDrawer(qrCodeField).drawImage("qr_image.jpg", "jpg");
+        new QrImageDrawer(qrCodeField).drawImage(filename, "jpg");
         return new int[0][0];
     }
 

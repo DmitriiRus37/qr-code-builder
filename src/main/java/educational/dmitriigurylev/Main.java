@@ -15,6 +15,6 @@ public class Main {
 //        byte[] val = "ХАБ".getBytes(StandardCharsets.UTF_8); // ok
 //        byte[] val = "HELLO WO".getBytes(StandardCharsets.UTF_8); // not ok
 
-        new QrCreator(Version.V_1, CorrectionLevel.HIGH, val).createQr();
+        new QrCreator(Version.V_1, CorrectionLevel.HIGH, val).createQr("qr_image.jpg");
     }
 }
