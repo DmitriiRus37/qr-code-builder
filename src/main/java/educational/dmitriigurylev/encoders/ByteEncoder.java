@@ -26,7 +26,7 @@ public class ByteEncoder implements Encoder {
     }
 
     private String[] byteArrayToBinaryArray(byte[] arr) {
-        int symbolsCounter = arr.length;
+        int bytesSize = arr.length;
         String[] resArr = new String[3];
         var binaryString = new StringBuilder();
         for (byte b : arr) {
@@ -35,7 +35,7 @@ public class ByteEncoder implements Encoder {
         resArr[0] = EncodingHeaderMap.getFieldSizeByVersion(EncodingWay.BYTES);
 
         resArr[1] = StringUtils.leftPad(
-                Integer.toBinaryString(symbolsCounter),
+                Integer.toBinaryString(bytesSize),
                 DataLengthOfServiceInformation.getDataLengthByVersionAndEncodingWay(version, EncodingWay.BYTES),
                 '0');
 

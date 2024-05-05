@@ -51,10 +51,10 @@ class UtilityTest {
 
     @Test
     void binaryArrayToBitStringTest() {
-        Assertions.assertEquals("10000000", binaryArrayToBitString(new String[]{"1"}));
-        Assertions.assertEquals("01001100", binaryArrayToBitString(new String[]{"0", "1", "0011"}));
-        Assertions.assertEquals("0100110011000000", binaryArrayToBitString(new String[]{"0", "1", "00110011"}));
-        Assertions.assertEquals("", binaryArrayToBitString(new String[]{}));
+        Assertions.assertEquals("1", binaryArrayToBitString(new String[]{"1"}).toString());
+        Assertions.assertEquals("010011", binaryArrayToBitString(new String[]{"0", "1", "0011"}).toString());
+        Assertions.assertEquals("0100110011", binaryArrayToBitString(new String[]{"0", "1", "00110011"}).toString());
+        Assertions.assertEquals("", binaryArrayToBitString(new String[]{}).toString());
         Assertions.assertThrowsExactly(InvalidInputFormatException.class, () -> binaryArrayToBitString(null));
     }
 }

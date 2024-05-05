@@ -2,11 +2,18 @@ package educational.dmitriigurylev;
 
 
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
+import educational.dmitriigurylev.reed_solomon_mapping.ABMap;
+import educational.dmitriigurylev.reed_solomon_mapping.CDMap;
+import educational.dmitriigurylev.utility_maps.GeneratingPolynomialMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UtilityMethods {
@@ -24,14 +31,17 @@ public class UtilityMethods {
         return decimal;
     }
 
-    public static String binaryArrayToBitString(String[] strAr) {
+    public static StringBuilder binaryArrayToBitString(String[] strAr) {
         if (strAr == null) {
             throw new InvalidInputFormatException();
         }
-        StringBuilder str = new StringBuilder(String.join("", strAr));
-        byte remainToWholeByte = (byte) (8 - str.length() % 8);
-        str.append("0".repeat(remainToWholeByte == 8 ? 0 : remainToWholeByte));
-        return str.toString();
+        return new StringBuilder(String.join("", strAr));
+    }
+
+    public static String addLeadZeros(StringBuilder binaryString) {
+        StringBuilder res = new StringBuilder(binaryString);
+        byte remainToWholeByte = (byte) (8 - binaryString.length() % 8);
+        return res.append("0".repeat(remainToWholeByte == 8 ? 0 : remainToWholeByte)).toString();
     }
 
     public static int[] binaryStringToDecimalArray(String bitString) {
@@ -69,5 +79,34 @@ public class UtilityMethods {
         Pattern pattern = Pattern.compile("^[01]+$");
         Matcher matcher = pattern.matcher(str);
         return matcher.matches();
+    }
+
+    public static List<Integer> getCorrectionBytes(int[] decimalArr, int correctionBytesPerBlock) {
+        int[] generatingPolynomial = GeneratingPolynomialMap.getGeneratingPolynomial(correctionBytesPerBlock);
+        List<Integer> listCorrectBytes = Arrays.stream(decimalArr)
+                .boxed()
+                .collect(Collectors.toCollection(ArrayList::new));
+        while (listCorrectBytes.size() < generatingPolynomial.length) {
+            listCorrectBytes.add(0);
+        }
+
+        for (int count = 0; count < decimalArr.length; count++) {
+            int aValue = listCorrectBytes.remove(0);
+            listCorrectBytes.add(0);
+            if (aValue == 0) {
+                continue;
+            }
+            int bValue = ABMap.getBackGaluaFieldValue(aValue);
+            if (listCorrectBytes.size() < correctionBytesPerBlock) {
+                listCorrectBytes.add(0);
+            }
+
+            for (int i = 0; i < correctionBytesPerBlock; i++) {
+                int cValue = (generatingPolynomial[i] + bValue) % 255;
+                int dValue = CDMap.getGaluaFieldValue(cValue);
+                listCorrectBytes.set(i, dValue ^ listCorrectBytes.get(i));
+            }
+        }
+        return listCorrectBytes;
     }
 }

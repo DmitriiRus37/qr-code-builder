@@ -9,7 +9,7 @@ public class ABMap {
     private ABMap() {}
     private static final Map<Integer, Integer> map = createMap();
 
-    public static int getVal(int a) {
+    public static int getBackGaluaFieldValue(int a) {
         return map.get(a);
     }
 
