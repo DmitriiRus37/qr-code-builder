@@ -8,8 +8,6 @@ import educational.dmitriigurylev.utility_maps.EncoderMap;
 import educational.dmitriigurylev.utility_maps.InformationBitSizeMap;
 import lombok.Getter;
 
-import java.io.File;
-import java.nio.file.Path;
 import java.util.List;
 
 @Getter
@@ -39,7 +37,7 @@ public class QrCreator {
     private StringBuilder encodeBits(Object objectToEncode) {
         String[] binaryArr = getBinaryArray(objectToEncode, version);
         StringBuilder bitStringBuilder = UtilityMethods.binaryArrayToBitString(binaryArr);
-        String bitString = UtilityMethods.addLeadZeros(bitStringBuilder);
+        String bitString = UtilityMethods.addLagZeros(bitStringBuilder);
         int maxBitSequence = InformationBitSizeMap.getInformationBitsSizeByVersionAndCorrectionLevel(version, correctionLevel);
         if (bitString.length() > maxBitSequence) {
             throw new InsuffiecientQrLengthToEncode();
