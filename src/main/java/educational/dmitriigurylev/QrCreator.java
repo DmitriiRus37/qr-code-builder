@@ -46,20 +46,14 @@ public class QrCreator {
         }
         int[] decimalArr = UtilityMethods.addRotationalBytes(decimalRawArr, maxByteSequence);
 
-//        int blocksCount = BlocksCountMap.getBlocksCountByVersionAndCorrectionLevel(version, correctionLevel);
-//        int quotient = bitString.length() / 8 / blocksCount;
-//        int remainder = bitString.length() / 8 % blocksCount;
-
+        int blocksCount = BlocksCountMap.getBlocksCountByVersionAndCorrectionLevel(version, correctionLevel);
         int correctionBytesPerBlock = CorrectionBytesPerBlockMap.getCorrectionBytesSizeByVersionAndCorrectionLevel(version, correctionLevel);
-        List<Integer> listCorrectBytes = UtilityMethods.getCorrectionBytes(decimalArr, correctionBytesPerBlock);
-        String[] unitedArr = new String[decimalArr.length + listCorrectBytes.size()];
-        for (int i = 0; i < decimalArr.length; i++) {
-            unitedArr[i] = String.valueOf(decimalArr[i]);
-        }
-        for (int i = decimalArr.length; i < unitedArr.length; i++) {
-            unitedArr[i] = String.valueOf(listCorrectBytes.remove(0));
-        }
+
+        Block[] blocks = UtilityMethods.splitIntoBlocks(decimalArr, blocksCount);
+        UtilityMethods.calculateCorrectionBytes(blocks, correctionBytesPerBlock);
+
         StringBuilder sb = new StringBuilder();
+        String[] unitedArr = UtilityMethods.uniteBlocks(blocks);
         for (int i = 0; i < unitedArr.length; i++) {
             int decimalValue = Integer.parseInt(unitedArr[i]);
             String binStr = Integer.toBinaryString(decimalValue);
