@@ -3,6 +3,7 @@ package educational.dmitriigurylev;
 import educational.dmitriigurylev.custom_exceptions.InsuffiecientQrLengthToEncode;
 import educational.dmitriigurylev.enums.CorrectionLevel;
 import educational.dmitriigurylev.enums.Version;
+import educational.dmitriigurylev.utility_maps.BlocksCountMap;
 import educational.dmitriigurylev.utility_maps.CorrectionBytesPerBlockMap;
 import educational.dmitriigurylev.utility_maps.EncoderMap;
 import educational.dmitriigurylev.utility_maps.InformationBitSizeMap;
@@ -38,11 +39,17 @@ public class QrCreator {
         String[] binaryArr = getBinaryArray(objectToEncode, version);
         StringBuilder bitStringBuilder = UtilityMethods.binaryArrayToBitString(binaryArr);
         String bitString = UtilityMethods.addLagZeros(bitStringBuilder);
-        int maxBitSequence = InformationBitSizeMap.getInformationBitsSizeByVersionAndCorrectionLevel(version, correctionLevel);
-        if (bitString.length() > maxBitSequence) {
+        int[] decimalRawArr = UtilityMethods.binaryStringToDecimalArray(bitString);
+        int maxByteSequence = InformationBitSizeMap.getInformationBitsSizeByVersionAndCorrectionLevel(version, correctionLevel) / 8;
+        if (decimalRawArr.length > maxByteSequence) {
             throw new InsuffiecientQrLengthToEncode();
         }
-        int[] decimalArr = UtilityMethods.binaryStringToDecimalArray(bitString);
+        int[] decimalArr = UtilityMethods.addRotationalBytes(decimalRawArr, maxByteSequence);
+
+//        int blocksCount = BlocksCountMap.getBlocksCountByVersionAndCorrectionLevel(version, correctionLevel);
+//        int quotient = bitString.length() / 8 / blocksCount;
+//        int remainder = bitString.length() / 8 % blocksCount;
+
         int correctionBytesPerBlock = CorrectionBytesPerBlockMap.getCorrectionBytesSizeByVersionAndCorrectionLevel(version, correctionLevel);
         List<Integer> listCorrectBytes = UtilityMethods.getCorrectionBytes(decimalArr, correctionBytesPerBlock);
         String[] unitedArr = new String[decimalArr.length + listCorrectBytes.size()];

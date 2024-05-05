@@ -48,19 +48,26 @@ public class UtilityMethods {
         if (bitString == null || bitString.isEmpty() || bitString.length() % 8 != 0) {
             throw new InvalidInputFormatException();
         }
-        int[] decimalIntArray = new int[9];
+        int[] decimalIntArray = new int[bitString.length() / 8];
         int i = 0;
         while (!bitString.isEmpty()) {
             decimalIntArray[i++] = UtilityMethods.binaryToDecimal(bitString.substring(0, 8));
             bitString = bitString.substring(8);
         }
-        while (true) {
-            if (i>=9) break;
-            decimalIntArray[i++] = 236;
-            if (i>=9) break;
-            decimalIntArray[i++] = 17;
-        }
         return decimalIntArray;
+    }
+
+    public static int[] addRotationalBytes(int[] decimalArr, int maxByteSequence) {
+        int[] resArray = new int[maxByteSequence];
+        System.arraycopy(decimalArr, 0, resArray, 0, decimalArr.length);
+        int i = decimalArr.length;
+        while (true) {
+            if (i>=resArray.length) break;
+            resArray[i++] = 236;
+            if (i>=resArray.length) break;
+            resArray[i++] = 17;
+        }
+        return resArray;
     }
 
     public static boolean containsAllLettersUpperCase(String str) {
