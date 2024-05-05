@@ -38,7 +38,7 @@ public class UtilityMethods {
         return new StringBuilder(String.join("", strAr));
     }
 
-    public static String addLeadZeros(StringBuilder binaryString) {
+    public static String addLagZeros(StringBuilder binaryString) {
         StringBuilder res = new StringBuilder(binaryString);
         byte remainToWholeByte = (byte) (8 - binaryString.length() % 8);
         return res.append("0".repeat(remainToWholeByte == 8 ? 0 : remainToWholeByte)).toString();
