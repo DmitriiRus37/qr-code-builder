@@ -125,6 +125,71 @@ public class QrCodeField {
         }
     }
 
+    public void fillFieldWithBitsSequence(StringBuilder sb) {
+        Cell[][] f = field;
+        FillDirection dir = FillDirection.UP;
+        int x = f[0].length - 1;
+        int y = f.length - 1;
+
+        while (!sb.isEmpty()) {
+            while (dir == FillDirection.UP) {
+                fillCell(sb, f, x, y);
+                x--;
+
+                fillCell(sb, f, x, y);
+                x++;
+                y--;
+                if (y < 0) {
+                    dir = FillDirection.DOWN;
+                    y++;
+                    x-=2;
+                    if (x == 6) {
+                        x--;
+                    }
+                }
+            }
+
+            while (dir == FillDirection.DOWN) {
+                fillCell(sb, f, x, y);
+                x--;
+
+                fillCell(sb, f, x, y);
+                x++;
+                y++;
+                if (y >= f.length) {
+                    dir = FillDirection.UP;
+                    y--;
+                    x-=2;
+                    if (x == 6) {
+                        x--;
+                    }
+                }
+            }
+        }
+    }
+
+    private void fillCell(StringBuilder sb, Cell[][] f, int x, int y) {
+        if (!f[y][x].isBusy() && !sb.isEmpty()) {
+            f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
+            sb.deleteCharAt(0);
+        }
+    }
+
+    public void applyMaskPattern() {
+        for (int x=0; x<field[0].length; x++) {
+            if (x % 3 == 0) {
+                for (Cell[] cells : field) {
+                    if (cells[x].isBusy()) {
+                        continue;
+                    }
+                    cells[x].setValue(cells[x].getValue() == 1 ? 0 : 1);
+                }
+            }
+        }
+    }
+
+    private enum FillDirection {UP, DOWN}
+
     private void setValueAndBusy(Cell cell, char ch) {
         cell.setValue(ch == '1' ? 1 : 0).setBusy(true);
     }

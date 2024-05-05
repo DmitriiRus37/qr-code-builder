@@ -9,7 +9,7 @@ public class CDMap {
     private CDMap() {}
     private static final Map<Integer, Integer> map = createMap();
 
-    public static int getVal(int a) {
+    public static int getGaluaFieldValue(int a) {
         return map.get(a);
     }
 
