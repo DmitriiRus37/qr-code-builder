@@ -8,9 +8,7 @@ import educational.dmitriigurylev.utility_maps.GeneratingPolynomialMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -115,5 +113,76 @@ public class UtilityMethods {
             }
         }
         return listCorrectBytes;
+    }
+
+    public static Block[] splitIntoBlocks(int[] inputDecimalArr, int blocksCount) {
+        int quotient = inputDecimalArr.length / blocksCount;
+        int remainder = inputDecimalArr.length % blocksCount;
+        Block[] blocks = new Block[blocksCount];
+
+        int counter=0;
+        for (int i = 0; i < blocksCount; i++) {
+            int[] perBlockDecimalArr = new int[(i < (blocksCount - remainder)) ? quotient : (quotient + 1)];
+
+            for (int j = 0; j < perBlockDecimalArr.length; j++) {
+                perBlockDecimalArr[j] = inputDecimalArr[counter++];
+            }
+            blocks[i] = new Block(perBlockDecimalArr);
+        }
+        return blocks;
+    }
+
+    public static void calculateCorrectionBytes(Block[] blocks, int correctionBytesPerBlock) {
+        for (Block block : blocks) {
+            int[] decimalArr = block.getDecimalArr();
+            List<Integer> listCorrectBytes = UtilityMethods.getCorrectionBytes(decimalArr, correctionBytesPerBlock);
+            block.setListCorrectBytes(listCorrectBytes);
+        }
+    }
+
+    public static String[] uniteBlocks(Block[] blocks) {
+
+        LinkedList<List<Integer>> decimalArraysList = new LinkedList<>();
+        LinkedList<LinkedList<Integer>> correctionBytesList = new LinkedList<>();
+
+        List<Integer> decimalIntegersList = new LinkedList<>();
+        List<Integer> correctionIntegersList = new LinkedList<>();
+        for (Block block : blocks) {
+            LinkedList<Integer> decimalList = new LinkedList<>();
+            for (int intValue : block.getDecimalArr()) {
+                decimalList.add(intValue);
+            }
+            decimalArraysList.add(decimalList);
+            correctionBytesList.add(new LinkedList<>(block.getListCorrectBytes()));
+        }
+
+        while (!decimalArraysList.isEmpty()) {
+            for (List<Integer> currentList : decimalArraysList) {
+                decimalIntegersList.add(currentList.remove(0));
+            }
+            decimalArraysList = decimalArraysList.stream()
+                    .filter(list -> !list.isEmpty())
+                    .collect(Collectors.toCollection(LinkedList::new));
+        }
+
+        while (!correctionBytesList.isEmpty()) {
+            for (List<Integer> currentList : correctionBytesList) {
+                correctionIntegersList.add(currentList.remove(0));
+            }
+            correctionBytesList = correctionBytesList.stream()
+                    .filter(list -> !list.isEmpty())
+                    .collect(Collectors.toCollection(LinkedList::new));
+        }
+
+
+        String[] resList = new String[decimalIntegersList.size() + correctionIntegersList.size()];
+        int i = 0;
+        for (int intVal : decimalIntegersList) {
+            resList[i++] = String.valueOf(intVal);
+        }
+        for (int intVal : correctionIntegersList) {
+            resList[i++] = String.valueOf(intVal);
+        }
+        return resList;
     }
 }
