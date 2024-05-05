@@ -3,17 +3,12 @@ package educational.dmitriigurylev;
 import educational.dmitriigurylev.custom_exceptions.InsuffiecientQrLengthToEncode;
 import educational.dmitriigurylev.enums.CorrectionLevel;
 import educational.dmitriigurylev.enums.Version;
-import educational.dmitriigurylev.reed_solomon_mapping.ABMap;
-import educational.dmitriigurylev.reed_solomon_mapping.CDMap;
+import educational.dmitriigurylev.utility_maps.CorrectionBytesPerBlockMap;
 import educational.dmitriigurylev.utility_maps.EncoderMap;
-import educational.dmitriigurylev.utility_maps.GeneratingPolynomialMap;
 import educational.dmitriigurylev.utility_maps.InformationBitSizeMap;
 import lombok.Getter;
 
-import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 public class QrCreator {
@@ -48,7 +43,8 @@ public class QrCreator {
             throw new InsuffiecientQrLengthToEncode();
         }
         int[] decimalArr = UtilityMethods.binaryStringToDecimalArray(bitString);
-        List<Integer> listCorrectBytes = UtilityMethods.getCorrectionBytes(decimalArr);
+        int correctionBytesPerBlock = CorrectionBytesPerBlockMap.getCorrectionBytesSizeByVersionAndCorrectionLevel(version, correctionLevel);
+        List<Integer> listCorrectBytes = UtilityMethods.getCorrectionBytes(decimalArr, correctionBytesPerBlock);
         String[] unitedArr = new String[decimalArr.length + listCorrectBytes.size()];
         for (int i = 0; i < decimalArr.length; i++) {
             unitedArr[i] = String.valueOf(decimalArr[i]);
@@ -71,7 +67,5 @@ public class QrCreator {
                 .setValueAndVersion(objectToEncode, version)
                 .transformToBinaryArray();
     }
-
-
 
 }
