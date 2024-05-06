@@ -10,14 +10,11 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Map;
 
 @NoArgsConstructor
-public class IntegerEncoder implements Encoder {
-
-    private int value;
-    private Version version;
+public class IntegerEncoder extends AbstractEncoder implements Encoder {
 
     @Override
     public Encoder setValueAndVersion(Object obj, Version version) {
-        this.value = (int) obj;
+        this.value = obj.getClass() == String.class ? (String) obj : String.valueOf((int)obj);
         this.version = version;
         return this;
     }

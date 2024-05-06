@@ -8,21 +8,18 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 @NoArgsConstructor
-public class ByteEncoder implements Encoder {
-
-    private byte[] value;
-    private Version version;
+public class ByteEncoder extends AbstractEncoder implements Encoder {
 
     @Override
     public Encoder setValueAndVersion(Object obj, Version version) {
-        this.value = (byte[]) obj;
+        this.value = obj;
         this.version = version;
         return this;
     }
 
     @Override
     public String[] transformToBinaryArray() {
-        return byteArrayToBinaryArray(this.value);
+        return byteArrayToBinaryArray((byte[]) this.value);
     }
 
     private String[] byteArrayToBinaryArray(byte[] arr) {
