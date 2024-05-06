@@ -1,11 +1,16 @@
 package educational.dmitriigurylev;
 
+import lombok.Setter;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 
 public class QrImageDrawer {
+
+    @Setter
+    private boolean isDebug = false;
 
     public QrImageDrawer(QrCodeField qrCodeField) {
         this.qrCodeField = qrCodeField;
@@ -22,9 +27,18 @@ public class QrImageDrawer {
                 BufferedImage.TYPE_BYTE_GRAY);
         drawFrame(qrImage);
 
+        BufferedImage qrImageBusy = new BufferedImage(
+                field[0].length+4,
+                field.length+4,
+                BufferedImage.TYPE_BYTE_GRAY);
+        drawFrame(qrImageBusy);
+
         for (int x = 2; x < field[0].length+2; x++) {
             for (int y = 2; y < field.length+2; y++) {
                 qrImage.setRGB(x, y, field[y-2][x-2].getValue() == 0 ? 0xFFFFFF : 0x000000);
+                if (isDebug) {
+                    qrImageBusy.setRGB(x, y, !field[y-2][x-2].isBusy() ? 0xFFFFFF : 0x000000);
+                }
             }
         }
         File outputQrImageFile = new File(fileName);
@@ -32,6 +46,16 @@ public class QrImageDrawer {
             ImageIO.write(qrImage, fileFormat, outputQrImageFile);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+
+        File outputQrImageBusyFile = new File("debug_" + fileName);
+        if (isDebug) {
+            try {
+                ImageIO.write(qrImageBusy, fileFormat, outputQrImageBusyFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
