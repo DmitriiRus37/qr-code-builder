@@ -1,9 +1,9 @@
 package educational.dmitriigurylev;
 
-import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
 import educational.dmitriigurylev.enums.CorrectionLevel;
 import educational.dmitriigurylev.enums.FinderPatterLocation;
 import educational.dmitriigurylev.enums.Version;
+import educational.dmitriigurylev.utility_maps.AlignmentPatternCentersMap;
 import educational.dmitriigurylev.utility_maps.CorrectionLevelAndMaskCodeMap;
 import lombok.Getter;
 
@@ -196,6 +196,21 @@ public class QrCodeField {
                         continue;
                     }
                     cells[x].setValue(cells[x].getValue() == 1 ? 0 : 1);
+                }
+            }
+        }
+    }
+
+    public void addAlignmentPatterns() {
+        int[] centers = AlignmentPatternCentersMap.getAlignmentPatternCentersByVersion(version);
+
+        for (int cntr : centers) {
+            for (int y = cntr-2; y < cntr+3; y++) {
+                for (int x = cntr-2; x < cntr+3; x++) {
+                    field[y][x].setBusy(true);
+                    if ((x == cntr - 2 || x == cntr + 2) || (y == cntr - 2 || y == cntr + 2) || (x == cntr && y == cntr)) {
+                        field[y][x].setValue(1);
+                    }
                 }
             }
         }

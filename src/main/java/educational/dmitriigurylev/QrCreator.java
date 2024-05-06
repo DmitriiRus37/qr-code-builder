@@ -32,6 +32,7 @@ public class QrCreator {
         qrCodeField.addFinderPatterns();
         qrCodeField.addSynchronizationLines();
         qrCodeField.addInformationTypeBits();
+        qrCodeField.addAlignmentPatterns();
         qrCodeField.fillFieldWithBitsSequence(encodeBits(objectToEncode));
         qrCodeField.applyMaskPattern();
         new QrImageDrawer(qrCodeField).drawImage(filename, "jpg");
