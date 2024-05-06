@@ -52,16 +52,9 @@ public class QrCreator {
         Block[] blocks = UtilityMethods.splitIntoBlocks(decimalArr, blocksCount);
         UtilityMethods.calculateCorrectionBytes(blocks, correctionBytesPerBlock);
 
-        StringBuilder sb = new StringBuilder();
         String[] unitedArr = UtilityMethods.uniteBlocks(blocks);
-        for (int i = 0; i < unitedArr.length; i++) {
-            int decimalValue = Integer.parseInt(unitedArr[i]);
-            String binStr = Integer.toBinaryString(decimalValue);
-            unitedArr[i] = String.format("%8s", binStr).replace(' ', '0');
-            sb.append(unitedArr[i]);
-        }
-        return sb;
-    }
+        return UtilityMethods.getStringBuilder(unitedArr);
+      }
 
     private String[] getBinaryArray(Object objectToEncode, Version version) {
         return EncoderMap.getEncoder(objectToEncode.getClass())
