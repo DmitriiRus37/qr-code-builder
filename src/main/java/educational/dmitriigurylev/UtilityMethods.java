@@ -142,47 +142,44 @@ public class UtilityMethods {
 
     public static String[] uniteBlocks(Block[] blocks) {
 
-        LinkedList<List<Integer>> decimalArraysList = new LinkedList<>();
-        LinkedList<LinkedList<Integer>> correctionBytesList = new LinkedList<>();
+        LinkedList<List<Integer>> decimalvValuesList = new LinkedList<>();
+        LinkedList<List<Integer>> correctionBytesList = new LinkedList<>();
 
-        List<Integer> decimalIntegersList = new LinkedList<>();
-        List<Integer> correctionIntegersList = new LinkedList<>();
         for (Block block : blocks) {
-            LinkedList<Integer> decimalList = new LinkedList<>();
-            for (int intValue : block.getDecimalArr()) {
-                decimalList.add(intValue);
-            }
-            decimalArraysList.add(decimalList);
+            decimalvValuesList.add(Arrays.stream(block.getDecimalArr())
+                    .boxed()
+                    .collect(Collectors.toList()));
             correctionBytesList.add(new LinkedList<>(block.getListCorrectBytes()));
         }
 
-        while (!decimalArraysList.isEmpty()) {
-            for (List<Integer> currentList : decimalArraysList) {
-                decimalIntegersList.add(currentList.remove(0));
-            }
-            decimalArraysList = decimalArraysList.stream()
+        List<Integer> resList = new LinkedList<>();
+        while (!decimalvValuesList.isEmpty()) {
+            decimalvValuesList = decimalvValuesList.stream()
+                    .peek(currentList -> resList.add(currentList.remove(0)))
                     .filter(list -> !list.isEmpty())
                     .collect(Collectors.toCollection(LinkedList::new));
         }
 
         while (!correctionBytesList.isEmpty()) {
-            for (List<Integer> currentList : correctionBytesList) {
-                correctionIntegersList.add(currentList.remove(0));
-            }
             correctionBytesList = correctionBytesList.stream()
+                    .peek(currentList -> resList.add(currentList.remove(0)))
                     .filter(list -> !list.isEmpty())
                     .collect(Collectors.toCollection(LinkedList::new));
         }
 
+        return resList.stream()
+                .map(String::valueOf)
+                .toArray(String[]::new);
+    }
 
-        String[] resList = new String[decimalIntegersList.size() + correctionIntegersList.size()];
-        int i = 0;
-        for (int intVal : decimalIntegersList) {
-            resList[i++] = String.valueOf(intVal);
+    public static StringBuilder getStringBuilder(String[] unitedArr) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < unitedArr.length; i++) {
+            int decimalValue = Integer.parseInt(unitedArr[i]);
+            String binStr = Integer.toBinaryString(decimalValue);
+            unitedArr[i] = String.format("%8s", binStr).replace(' ', '0');
+            sb.append(unitedArr[i]);
         }
-        for (int intVal : correctionIntegersList) {
-            resList[i++] = String.valueOf(intVal);
-        }
-        return resList;
+        return sb;
     }
 }

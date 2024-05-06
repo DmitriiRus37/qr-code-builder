@@ -1,11 +1,15 @@
 package educational.dmitriigurylev;
 
+import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
 import educational.dmitriigurylev.enums.CorrectionLevel;
 import educational.dmitriigurylev.enums.FinderPatterLocation;
 import educational.dmitriigurylev.enums.Version;
 import educational.dmitriigurylev.utility_maps.CorrectionLevelAndMaskCodeMap;
 import lombok.Getter;
 
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static educational.dmitriigurylev.utility_maps.VersionMap.*;
@@ -33,11 +37,9 @@ public class QrCodeField {
     }
 
     public void addFinderPatterns() {
-        if (version == Version.V_1) {
-            addSquareStartingWithLeftUpperPoint(0,0, FinderPatterLocation.UPPER_LEFT);
-            addSquareStartingWithLeftUpperPoint(0,14, FinderPatterLocation.UPPER_RIGHT);
-            addSquareStartingWithLeftUpperPoint(14,0, FinderPatterLocation.LOWER_LEFT);
-        }
+        addSquareStartingWithLeftUpperPoint(0,0, FinderPatterLocation.UPPER_LEFT);
+        addSquareStartingWithLeftUpperPoint(0, field[0].length - 7, FinderPatterLocation.UPPER_RIGHT);
+        addSquareStartingWithLeftUpperPoint(field.length-7,0, FinderPatterLocation.LOWER_LEFT);
     }
 
     private void addSquareStartingWithLeftUpperPoint(int firstY, int firstX, FinderPatterLocation location) {
@@ -70,23 +72,36 @@ public class QrCodeField {
     }
 
     public void addSynchronizationLines() {
-        for (int y=7; y<14; y++) {
-            if (y == 8 || y == 10 || y == 12) {
-                field[6][y].setValue(1);
-            }
-            field[6][y].setBusy(true);
+        int until = switch (version) {
+            case V_1 -> 12;
+            case V_2 -> 16;
+            case V_3 -> 20;
+            case V_4 -> 24;
+            case V_5 -> 28;
+            case V_6 -> 32;
+            case V_7 -> 36;
+            case V_8 -> 40;
+            case V_9 -> 44;
+            case V_10 -> 48;
+        };
+        boolean isOneHere = true;
+        for (int y=8; y<=until; y++) {
+            field[6][y].setValue(isOneHere ? 1 : 0).setBusy(true);
+            isOneHere = !isOneHere;
         }
-        for (int x=7; x<14; x++) {
-            if (x == 8 || x == 10 || x == 12) {
-                field[x][6].setValue(1);
-            }
-            field[x][6].setBusy(true);
+        isOneHere = true;
+        for (int x=8; x<=until; x++) {
+            field[x][6].setValue(isOneHere ? 1 : 0).setBusy(true);
+            isOneHere = !isOneHere;
         }
     }
 
     public void addInformationTypeBits() {
-        String code = CorrectionLevelAndMaskCodeMap.getMaskAndCorrectionLevelCode(level, (byte) 2);
-        StringBuilder typeInformationBits = new StringBuilder(code);
+        List<Character> collected = CorrectionLevelAndMaskCodeMap.getMaskAndCorrectionLevelCode(level, (byte) 2)
+                .chars()
+                .mapToObj(c -> (char) c).collect(Collectors.toList());
+        List<Character> typeInformationBits = new LinkedList<>(collected);
+
         int i = -1;
         int j = -2;
         while (!typeInformationBits.isEmpty()) {
@@ -101,13 +116,12 @@ public class QrCodeField {
             if (currentCell.isBusy()) {
                 continue;
             }
-            setValueAndBusy(currentCell, typeInformationBits.charAt(0));
-            typeInformationBits.deleteCharAt(0);
+            currentCell.setValue(typeInformationBits.remove(0) == '1' ? 1 : 0).setBusy(true);
         }
 
         i = -1;
         j = -2;
-        typeInformationBits = new StringBuilder(code);
+        typeInformationBits = collected;
         while (!typeInformationBits.isEmpty()) {
             i++;
             Cell currentCell;
@@ -117,8 +131,7 @@ public class QrCodeField {
                 j += 2;
                 currentCell = field[8][field[0].length - 1 - i + j];
             }
-            setValueAndBusy(currentCell, typeInformationBits.charAt(0));
-            typeInformationBits.deleteCharAt(0);
+            currentCell.setValue(typeInformationBits.remove(0) == '1' ? 1 : 0).setBusy(true);
             if (i == 7) {
                 field[field.length - i - 1][8].setValue(1).setBusy(true);
             }
@@ -189,9 +202,5 @@ public class QrCodeField {
     }
 
     private enum FillDirection {UP, DOWN}
-
-    private void setValueAndBusy(Cell cell, char ch) {
-        cell.setValue(ch == '1' ? 1 : 0).setBusy(true);
-    }
 
 }
