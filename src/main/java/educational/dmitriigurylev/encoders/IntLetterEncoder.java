@@ -12,14 +12,11 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Map;
 
 @NoArgsConstructor
-public class IntLetterEncoder implements Encoder {
-
-    private String value;
-    private Version version;
+public class IntLetterEncoder extends AbstractEncoder implements Encoder {
 
     @Override
     public Encoder setValueAndVersion(Object obj, Version version) {
-        this.value = (String) obj;
+        this.value = obj;
         this.version = version;
         return this;
     }
@@ -32,17 +29,18 @@ public class IntLetterEncoder implements Encoder {
     }
 
     private String[] separateSymbols() {
-        int symbolsInValue = value.length();
+        String val = (String) this.value;
+        int symbolsInValue = val.length();
         String[] arr = symbolsInValue % 2 == 0 ? new String[symbolsInValue / 2] : new String[symbolsInValue / 2 + 1];
 
         int i = 0;
-        while (!value.isEmpty()) {
-            if (value.length() >= 2) {
-                arr[i++] = value.substring(0, 2);
-                value = value.substring(2);
+        while (!val.isEmpty()) {
+            if (val.length() >= 2) {
+                arr[i++] = val.substring(0, 2);
+                val = val.substring(2);
             } else {
-                arr[i++] = value;
-                value = "";
+                arr[i++] = val;
+                val = "";
             }
         }
         return arr;

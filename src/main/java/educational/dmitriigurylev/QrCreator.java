@@ -1,15 +1,18 @@
 package educational.dmitriigurylev;
 
 import educational.dmitriigurylev.custom_exceptions.InsuffiecientQrLengthToEncode;
+import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
+import educational.dmitriigurylev.encoders.ByteEncoder;
+import educational.dmitriigurylev.encoders.Encoder;
+import educational.dmitriigurylev.encoders.IntLetterEncoder;
+import educational.dmitriigurylev.encoders.IntegerEncoder;
 import educational.dmitriigurylev.enums.CorrectionLevel;
 import educational.dmitriigurylev.enums.Version;
 import educational.dmitriigurylev.utility_maps.BlocksCountMap;
 import educational.dmitriigurylev.utility_maps.CorrectionBytesPerBlockMap;
-import educational.dmitriigurylev.utility_maps.EncoderMap;
 import educational.dmitriigurylev.utility_maps.InformationBitSizeMap;
+import educational.dmitriigurylev.utility_maps.IntLetterEncoderCharMap;
 import lombok.Getter;
-
-import java.util.List;
 
 @Getter
 public class QrCreator {
@@ -36,7 +39,9 @@ public class QrCreator {
     }
 
     private StringBuilder encodeBits(Object objectToEncode) {
-        String[] binaryArr = getBinaryArray(objectToEncode, version);
+        String[] binaryArr = createEncoder(objectToEncode)
+                .setValueAndVersion(objectToEncode, version)
+                .transformToBinaryArray();
         StringBuilder bitStringBuilder = UtilityMethods.binaryArrayToBitString(binaryArr);
         String bitString = UtilityMethods.addLagZeros(bitStringBuilder);
         int[] decimalRawArr = UtilityMethods.binaryStringToDecimalArray(bitString);
@@ -54,12 +59,30 @@ public class QrCreator {
 
         String[] unitedArr = UtilityMethods.uniteBlocks(blocks);
         return UtilityMethods.getStringBuilder(unitedArr);
-      }
+    }
 
-    private String[] getBinaryArray(Object objectToEncode, Version version) {
-        return EncoderMap.getEncoder(objectToEncode.getClass())
-                .setValueAndVersion(objectToEncode, version)
-                .transformToBinaryArray();
+    private Encoder createEncoder(Object objectToEncode) {
+        Class objectClass = objectToEncode.getClass();
+        if (objectClass == byte[].class) {
+            return new ByteEncoder();
+        } else if (objectClass == Integer.class) {
+            return new IntegerEncoder();
+        } else if (objectClass == String.class) {
+            String stringObjectToEncode = (String) objectToEncode;
+            boolean res = stringObjectToEncode.chars()
+                    .mapToObj(i->(char) i)
+                    .allMatch(IntLetterEncoderCharMap::contains);
+
+            if (stringObjectToEncode.matches("\\d+")) {
+                return new IntegerEncoder();
+            } else if (res) {
+                return new IntLetterEncoder();
+            } else {
+                return new ByteEncoder();
+            }
+        } else {
+            throw new InvalidInputFormatException();
+        }
     }
 
 }
