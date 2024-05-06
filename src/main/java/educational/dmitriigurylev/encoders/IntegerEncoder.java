@@ -52,7 +52,7 @@ public class IntegerEncoder implements Encoder {
         for (int i = 2; i < arr.length; i++) {
             int decimalValue = Integer.parseInt(arr[i]);
             String binaryString = Integer.toBinaryString(decimalValue);
-            Map<Integer, String> binaryDigitsCount = Map.of(1, "%4s", 2, "%7s", 3, "%11s");
+            Map<Integer, String> binaryDigitsCount = Map.of(1, "%4s", 2, "%7s", 3, "%10s");
             arr[i] = String.format(binaryDigitsCount.get(arr[i].length()), binaryString).replace(' ', '0');
         }
         arr[0] = EncodingHeaderMap.getFieldSizeByVersion(EncodingWay.DIGITS);
