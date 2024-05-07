@@ -1,6 +1,7 @@
 package educational.dmitriigurylev;
 
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -10,6 +11,7 @@ import java.io.IOException;
 public class QrImageDrawer {
 
     @Setter
+    @Accessors(chain = true)
     private boolean isDebug = false;
 
     public QrImageDrawer(QrCodeField qrCodeField) {

@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import java.util.EnumMap;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class EncodingHeaderMap {
+public class EncodingModeIndicatorMap {
     private static final EnumMap<EncodingWay, String> map = new EnumMap<>(EncodingWay.class);
     static {
         map.put(EncodingWay.DIGITS, "0001");

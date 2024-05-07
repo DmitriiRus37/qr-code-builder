@@ -2,8 +2,8 @@ package educational.dmitriigurylev.encoders;
 
 import educational.dmitriigurylev.enums.EncodingWay;
 import educational.dmitriigurylev.enums.Version;
-import educational.dmitriigurylev.utility_maps.DataLengthOfServiceInformation;
-import educational.dmitriigurylev.utility_maps.EncodingHeaderMap;
+import educational.dmitriigurylev.utility_maps.CharacterCountIndicatorMap;
+import educational.dmitriigurylev.utility_maps.EncodingModeIndicatorMap;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
@@ -52,11 +52,11 @@ public class IntegerEncoder extends AbstractEncoder implements Encoder {
             Map<Integer, String> binaryDigitsCount = Map.of(1, "%4s", 2, "%7s", 3, "%10s");
             arr[i] = String.format(binaryDigitsCount.get(arr[i].length()), binaryString).replace(' ', '0');
         }
-        arr[0] = EncodingHeaderMap.getFieldSizeByVersion(EncodingWay.DIGITS);
+        arr[0] = EncodingModeIndicatorMap.getFieldSizeByVersion(EncodingWay.DIGITS);
 
         arr[1] = StringUtils.leftPad(
                 Integer.toBinaryString(Integer.parseInt(arr[1])),
-                DataLengthOfServiceInformation.getDataLengthByVersionAndEncodingWay(version, EncodingWay.DIGITS),
+                CharacterCountIndicatorMap.getCharacterCountIndicatorByVersionAndEncodingWay(version, EncodingWay.DIGITS),
                 '0');
     }
 

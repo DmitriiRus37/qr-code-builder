@@ -86,7 +86,7 @@ public class UtilityMethods {
         return matcher.matches();
     }
 
-    public static List<Integer> getCorrectionBytes(int[] decimalArr, int correctionBytesPerBlock) {
+    public static int[] getCorrectionBytes(int[] decimalArr, int correctionBytesPerBlock) {
         int[] generatingPolynomial = GeneratingPolynomialMap.getGeneratingPolynomial(correctionBytesPerBlock);
         List<Integer> listCorrectBytes = Arrays.stream(decimalArr)
                 .boxed()
@@ -94,6 +94,7 @@ public class UtilityMethods {
         while (listCorrectBytes.size() < generatingPolynomial.length) {
             listCorrectBytes.add(0);
         }
+        int listCorrectionBytesSize = listCorrectBytes.size();
 
         for (int count = 0; count < decimalArr.length; count++) {
             int aValue = listCorrectBytes.remove(0);
@@ -102,23 +103,22 @@ public class UtilityMethods {
                 continue;
             }
             int bValue = ABMap.getBackGaluaFieldValue(aValue);
-            if (listCorrectBytes.size() < correctionBytesPerBlock) {
-                listCorrectBytes.add(0);
-            }
 
-            for (int i = 0; i < correctionBytesPerBlock; i++) {
+            for (int i = 0; i < listCorrectionBytesSize; i++) {
                 int cValue = (generatingPolynomial[i] + bValue) % 255;
                 int dValue = CDMap.getGaluaFieldValue(cValue);
                 listCorrectBytes.set(i, dValue ^ listCorrectBytes.get(i));
             }
         }
-        return listCorrectBytes;
+        return listCorrectBytes.stream()
+                .mapToInt(val -> val)
+                .toArray();
     }
 
-    public static Block[] splitIntoBlocks(int[] inputDecimalArr, int blocksCount) {
+    public static int[][] splitIntoBlocks(int[] inputDecimalArr, int blocksCount) {
         int quotient = inputDecimalArr.length / blocksCount;
         int remainder = inputDecimalArr.length % blocksCount;
-        Block[] blocks = new Block[blocksCount];
+        int[][] decimalArrays = new int[blocksCount][];
 
         int counter=0;
         for (int i = 0; i < blocksCount; i++) {
@@ -127,21 +127,18 @@ public class UtilityMethods {
             for (int j = 0; j < perBlockDecimalArr.length; j++) {
                 perBlockDecimalArr[j] = inputDecimalArr[counter++];
             }
-            blocks[i] = new Block(perBlockDecimalArr);
+            decimalArrays[i] = perBlockDecimalArr;
         }
-        return blocks;
+        return decimalArrays;
     }
 
-    public static void calculateCorrectionBytes(Block[] blocks, int correctionBytesPerBlock) {
-        for (Block block : blocks) {
-            int[] decimalArr = block.getDecimalArr();
-            List<Integer> listCorrectBytes = UtilityMethods.getCorrectionBytes(decimalArr, correctionBytesPerBlock);
-            block.setListCorrectBytes(listCorrectBytes);
-        }
+    public static Block[] calculateCorrectionBytes(int[][] decimalArrays, int correctionBytesPerBlock) {
+        return Arrays.stream(decimalArrays)
+                .map(arr -> new Block(arr, UtilityMethods.getCorrectionBytes(arr, correctionBytesPerBlock)))
+                .toArray(Block[]::new);
     }
 
     public static String[] uniteBlocks(Block[] blocks) {
-
         LinkedList<List<Integer>> decimalvValuesList = new LinkedList<>();
         LinkedList<List<Integer>> correctionBytesList = new LinkedList<>();
 
@@ -149,7 +146,10 @@ public class UtilityMethods {
             decimalvValuesList.add(Arrays.stream(block.getDecimalArr())
                     .boxed()
                     .collect(Collectors.toList()));
-            correctionBytesList.add(new LinkedList<>(block.getListCorrectBytes()));
+            List<Integer> list = Arrays.stream(block.getCorrectBytesArr())
+                    .boxed()
+                    .collect(Collectors.toCollection(LinkedList::new));
+            correctionBytesList.add(list);
         }
 
         List<Integer> resList = new LinkedList<>();

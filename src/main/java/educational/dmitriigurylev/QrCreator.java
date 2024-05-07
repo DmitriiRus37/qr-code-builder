@@ -53,10 +53,10 @@ public class QrCreator {
         int[] decimalArr = UtilityMethods.addRotationalBytes(decimalRawArr, maxByteSequence);
 
         int blocksCount = BlocksCountMap.getBlocksCountByVersionAndCorrectionLevel(version, correctionLevel);
-        Block[] blocks = UtilityMethods.splitIntoBlocks(decimalArr, blocksCount);
+        int[][] decimalArrays = UtilityMethods.splitIntoBlocks(decimalArr, blocksCount);
 
         int correctionBytesPerBlock = CorrectionBytesPerBlockMap.getCorrectionBytesSizeByVersionAndCorrectionLevel(version, correctionLevel);
-        UtilityMethods.calculateCorrectionBytes(blocks, correctionBytesPerBlock);
+        Block[] blocks = UtilityMethods.calculateCorrectionBytes(decimalArrays, correctionBytesPerBlock);
 
         String[] unitedArr = UtilityMethods.uniteBlocks(blocks);
         return UtilityMethods.getStringBuilder(unitedArr);
@@ -66,7 +66,7 @@ public class QrCreator {
         Class objectClass = objectToEncode.getClass();
         if (objectClass == byte[].class) {
             return new ByteEncoder();
-        } else if (objectClass == Integer.class) {
+        } else if (objectClass == Integer.class || objectClass == Long.class) {
             return new IntegerEncoder();
         } else if (objectClass == String.class) {
             String stringObjectToEncode = (String) objectToEncode;
