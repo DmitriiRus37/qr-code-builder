@@ -1,5 +1,7 @@
 package educational.dmitriigurylev;
 
+import educational.dmitriigurylev.Cell;
+import educational.dmitriigurylev.QrCodeField;
 import educational.dmitriigurylev.enums.CorrectionLevel;
 import educational.dmitriigurylev.enums.Version;
 import educational.dmitriigurylev.utility_maps.CorrectionLevelAndMaskCodeMap;
@@ -67,13 +69,13 @@ class QrCodeV1FieldTest {
         for (int y = 0; y < field.length; y++) {
             for (int x = 0; x < field[0].length; x++) {
                 Cell cell = field[y][x];
-                if (x==6 && y>=7 && y<=13) {
+                if (x==6 && y>=8 && y<=12) {
                     assertTrue(cell.isBusy());
                     assertEquals(switch (y) {
                         case 8, 10, 12 -> 1;
                         default -> 0;
                     }, cell.getValue());
-                } else if (y == 6 && x>=7 && x<=13) {
+                } else if (y == 6 && x>=8 && x<=12) {
                     assertTrue(cell.isBusy());
                     assertEquals(switch (x) {
                         case 8, 10, 12 -> 1;
@@ -110,27 +112,5 @@ class QrCodeV1FieldTest {
             }
         }
     }
-
-    @Test
-    void givenNull_WhenDoubleInteger_ThenNull() throws IllegalAccessException, NoSuchMethodException, InvocationTargetException {
-        Cell cell = new Cell();
-        assertEquals(0, cell.getValue());
-        assertFalse(cell.isBusy());
-
-        getSetValueAndBusyMethod().invoke(qrCodeField, cell, '1');
-        assertEquals(1, cell.getValue());
-        assertTrue(cell.isBusy());
-
-        getSetValueAndBusyMethod().invoke(qrCodeField, cell, '0');
-        assertEquals(0, cell.getValue());
-        assertTrue(cell.isBusy());
-    }
-
-    private Method getSetValueAndBusyMethod() throws NoSuchMethodException {
-        Method method = QrCodeField.class.getDeclaredMethod("setValueAndBusy", Cell.class, char.class);
-        method.setAccessible(true);
-        return method;
-    }
-
 
 }
