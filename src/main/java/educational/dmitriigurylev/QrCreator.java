@@ -28,15 +28,18 @@ public class QrCreator {
         this.qrCodeField = new QrCodeField(version, correctionLevel);
     }
 
-    public int[][] createQr(String filename) {
+    public QrCreator createQr() {
         qrCodeField.addFinderPatterns();
         qrCodeField.addSynchronizationLines();
         qrCodeField.addInformationTypeBits();
         qrCodeField.addAlignmentPatterns();
         qrCodeField.fillFieldWithBitsSequence(encodeBits(objectToEncode));
         qrCodeField.applyMaskPattern();
+        return this;
+    }
+
+    public void drawQr(String filename) {
         new QrImageDrawer(qrCodeField).drawImage(filename, "jpg");
-        return new int[0][0];
     }
 
     private StringBuilder encodeBits(Object objectToEncode) {
