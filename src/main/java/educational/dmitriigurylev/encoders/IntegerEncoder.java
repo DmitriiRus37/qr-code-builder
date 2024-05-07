@@ -1,5 +1,6 @@
 package educational.dmitriigurylev.encoders;
 
+import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
 import educational.dmitriigurylev.enums.EncodingWay;
 import educational.dmitriigurylev.enums.Version;
 import educational.dmitriigurylev.utility_maps.CharacterCountIndicatorMap;
@@ -14,7 +15,16 @@ public class IntegerEncoder extends AbstractEncoder implements Encoder {
 
     @Override
     public Encoder setValueAndVersion(Object obj, Version version) {
-        this.value = obj.getClass() == String.class ? (String) obj : String.valueOf((int)obj);
+        if (obj.getClass() == String.class) {
+            this.value = obj;
+        } else if (obj.getClass() == Integer.class) {
+            this.value = String.valueOf((int)obj);
+        } else if (obj.getClass() == Long.class) {
+            this.value = String.valueOf((long)obj);
+        }
+        else {
+            throw new InvalidInputFormatException();
+        }
         this.version = version;
         return this;
     }
@@ -35,8 +45,9 @@ public class IntegerEncoder extends AbstractEncoder implements Encoder {
         int i = 2;
         while (!strInteger.isEmpty()) {
             if (strInteger.length() >= 3) {
-                arr[i++] = strInteger.substring(0, 3);
+                String substr = StringUtils.stripStart(strInteger.substring(0, 3),"0");
                 strInteger = strInteger.substring(3);
+                arr[i++] = substr;
             } else {
                 arr[i++] = strInteger;
                 strInteger = "";
@@ -46,11 +57,14 @@ public class IntegerEncoder extends AbstractEncoder implements Encoder {
     }
 
     private void symbolsArrayToBinaryArray(String[] arr) {
+        Map<Integer, Integer> binaryDigitsCount = Map.of(1, 4, 2, 7, 3, 10);
         for (int i = 2; i < arr.length; i++) {
             int decimalValue = Integer.parseInt(arr[i]);
             String binaryString = Integer.toBinaryString(decimalValue);
-            Map<Integer, String> binaryDigitsCount = Map.of(1, "%4s", 2, "%7s", 3, "%10s");
-            arr[i] = String.format(binaryDigitsCount.get(arr[i].length()), binaryString).replace(' ', '0');
+            arr[i] = StringUtils.leftPad(
+                    binaryString,
+                    binaryDigitsCount.get(arr[i].length()),
+                    '0');
         }
         arr[0] = EncodingModeIndicatorMap.getFieldSizeByVersion(EncodingWay.DIGITS);
 
