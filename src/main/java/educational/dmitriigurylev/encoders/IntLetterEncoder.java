@@ -64,6 +64,7 @@ public class IntLetterEncoder extends AbstractEncoder implements Encoder {
     }
 
     private String[] symbolsArrayToBinaryArray(int[][] arr) {
+        Map<Integer, String> binaryDigitsCount = Map.of(1, "%6s", 2, "%11s");
         int symbolsCounter = 0;
         String[] resArr = new String[arr.length+2];
         for (int i = 0; i < arr.length; i++) {
@@ -73,7 +74,6 @@ public class IntLetterEncoder extends AbstractEncoder implements Encoder {
                 symbolsCounter++;
             }
             String binaryString = Integer.toBinaryString(decimalValue);
-            Map<Integer, String> binaryDigitsCount = Map.of(1, "%6s", 2, "%11s");
             resArr[i+2] = String.format(binaryDigitsCount.get(arr[i].length), binaryString).replace(' ', '0');
         }
         resArr[0] = EncodingModeIndicatorMap.getFieldSizeByVersion(EncodingWay.LETTERS_DIGITS);
