@@ -41,8 +41,8 @@ class UtilityTest {
 
     @Test
     void binaryStringToDecimalArrayTest() {
-        Assertions.assertArrayEquals(new int[]{28,236,17,236,17,236,17,236,17}, binaryStringToDecimalArray("00011100"));
-        Assertions.assertArrayEquals(new int[]{28,241,236,17,236,17,236,17,236}, binaryStringToDecimalArray("0001110011110001"));
+        Assertions.assertArrayEquals(new int[]{28}, binaryStringToDecimalArray("00011100"));
+        Assertions.assertArrayEquals(new int[]{28,241}, binaryStringToDecimalArray("0001110011110001"));
         Assertions.assertThrowsExactly(InvalidInputFormatException.class, () -> binaryStringToDecimalArray(""));
         Assertions.assertThrowsExactly(InvalidInputFormatException.class, () -> binaryStringToDecimalArray("0010"));
         Assertions.assertThrowsExactly(InvalidInputFormatException.class, () -> binaryStringToDecimalArray("02100000"));

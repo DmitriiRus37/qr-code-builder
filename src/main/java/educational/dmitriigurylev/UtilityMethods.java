@@ -94,7 +94,7 @@ public class UtilityMethods {
         int[] generatingPolynomial = GeneratingPolynomialMap.getGeneratingPolynomial(correctionBytesPerBlock);
         List<Integer> listCorrectBytes = Arrays.stream(decimalArr)
                 .boxed()
-                .collect(Collectors.toCollection(ArrayList::new));
+                .collect(Collectors.toCollection(LinkedList::new));
         while (listCorrectBytes.size() < generatingPolynomial.length) {
             listCorrectBytes.add(0);
         }
@@ -194,4 +194,5 @@ public class UtilityMethods {
         }
         return bs.append("0".repeat(Math.min(remainZeros, 4)));
     }
+
 }
