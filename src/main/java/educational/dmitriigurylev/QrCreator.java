@@ -53,9 +53,9 @@ public class QrCreator {
         int[] decimalArr = UtilityMethods.addRotationalBytes(decimalRawArr, maxByteSequence);
 
         int blocksCount = BlocksCountMap.getBlocksCountByVersionAndCorrectionLevel(version, correctionLevel);
-        int correctionBytesPerBlock = CorrectionBytesPerBlockMap.getCorrectionBytesSizeByVersionAndCorrectionLevel(version, correctionLevel);
-
         Block[] blocks = UtilityMethods.splitIntoBlocks(decimalArr, blocksCount);
+
+        int correctionBytesPerBlock = CorrectionBytesPerBlockMap.getCorrectionBytesSizeByVersionAndCorrectionLevel(version, correctionLevel);
         UtilityMethods.calculateCorrectionBytes(blocks, correctionBytesPerBlock);
 
         String[] unitedArr = UtilityMethods.uniteBlocks(blocks);

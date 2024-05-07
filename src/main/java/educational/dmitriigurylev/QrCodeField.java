@@ -202,6 +202,7 @@ public class QrCodeField {
     }
 
     public void addAlignmentPatterns() {
+//        TODO тут нужны будут доработки
         int[] centers = AlignmentPatternCentersMap.getAlignmentPatternCentersByVersion(version);
 
         for (int cntr : centers) {
