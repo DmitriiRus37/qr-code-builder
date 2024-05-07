@@ -3,8 +3,8 @@ package educational.dmitriigurylev.encoders;
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
 import educational.dmitriigurylev.enums.EncodingWay;
 import educational.dmitriigurylev.enums.Version;
-import educational.dmitriigurylev.utility_maps.DataLengthOfServiceInformation;
-import educational.dmitriigurylev.utility_maps.EncodingHeaderMap;
+import educational.dmitriigurylev.utility_maps.CharacterCountIndicatorMap;
+import educational.dmitriigurylev.utility_maps.EncodingModeIndicatorMap;
 import educational.dmitriigurylev.utility_maps.IntLetterEncoderCharMap;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -76,11 +76,11 @@ public class IntLetterEncoder extends AbstractEncoder implements Encoder {
             Map<Integer, String> binaryDigitsCount = Map.of(1, "%6s", 2, "%11s");
             resArr[i+2] = String.format(binaryDigitsCount.get(arr[i].length), binaryString).replace(' ', '0');
         }
-        resArr[0] = EncodingHeaderMap.getFieldSizeByVersion(EncodingWay.LETTERS_DIGITS);
+        resArr[0] = EncodingModeIndicatorMap.getFieldSizeByVersion(EncodingWay.LETTERS_DIGITS);
 
         resArr[1] = StringUtils.leftPad(
                 Integer.toBinaryString(symbolsCounter),
-                DataLengthOfServiceInformation.getDataLengthByVersionAndEncodingWay(version, EncodingWay.LETTERS_DIGITS),
+                CharacterCountIndicatorMap.getCharacterCountIndicatorByVersionAndEncodingWay(version, EncodingWay.LETTERS_DIGITS),
                 '0');
 
         return resArr;

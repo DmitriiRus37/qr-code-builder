@@ -2,8 +2,8 @@ package educational.dmitriigurylev.encoders;
 
 import educational.dmitriigurylev.enums.EncodingWay;
 import educational.dmitriigurylev.enums.Version;
-import educational.dmitriigurylev.utility_maps.DataLengthOfServiceInformation;
-import educational.dmitriigurylev.utility_maps.EncodingHeaderMap;
+import educational.dmitriigurylev.utility_maps.CharacterCountIndicatorMap;
+import educational.dmitriigurylev.utility_maps.EncodingModeIndicatorMap;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
@@ -29,11 +29,11 @@ public class ByteEncoder extends AbstractEncoder implements Encoder {
         for (byte b : arr) {
             binaryString.append(Integer.toBinaryString(b < 0 ? b & 0xff : b));
         }
-        resArr[0] = EncodingHeaderMap.getFieldSizeByVersion(EncodingWay.BYTES);
+        resArr[0] = EncodingModeIndicatorMap.getFieldSizeByVersion(EncodingWay.BYTES);
 
         resArr[1] = StringUtils.leftPad(
                 Integer.toBinaryString(bytesSize),
-                DataLengthOfServiceInformation.getDataLengthByVersionAndEncodingWay(version, EncodingWay.BYTES),
+                CharacterCountIndicatorMap.getCharacterCountIndicatorByVersionAndEncodingWay(version, EncodingWay.BYTES),
                 '0');
 
         resArr[2] = binaryString.toString();

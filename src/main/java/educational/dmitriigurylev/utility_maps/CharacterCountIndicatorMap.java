@@ -9,7 +9,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class DataLengthOfServiceInformation {
+public class CharacterCountIndicatorMap {
 
     private static final EnumMap<Version, Map<EncodingWay, Integer>> map = new EnumMap<>(Version.class);
 
@@ -49,7 +49,7 @@ public class DataLengthOfServiceInformation {
         }
     }
 
-    public static int getDataLengthByVersionAndEncodingWay(Version v, EncodingWay ew) {
+    public static int getCharacterCountIndicatorByVersionAndEncodingWay(Version v, EncodingWay ew) {
         return map.get(v).get(ew);
     }
 }
