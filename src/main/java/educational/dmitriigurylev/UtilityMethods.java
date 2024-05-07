@@ -1,10 +1,14 @@
 package educational.dmitriigurylev;
 
 
+import educational.dmitriigurylev.custom_exceptions.InsuffiecientQrLengthToEncode;
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
+import educational.dmitriigurylev.enums.CorrectionLevel;
+import educational.dmitriigurylev.enums.Version;
 import educational.dmitriigurylev.reed_solomon_mapping.ABMap;
 import educational.dmitriigurylev.reed_solomon_mapping.CDMap;
 import educational.dmitriigurylev.utility_maps.GeneratingPolynomialMap;
+import educational.dmitriigurylev.utility_maps.InformationBitSizeMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
@@ -181,5 +185,13 @@ public class UtilityMethods {
             sb.append(unitedArr[i]);
         }
         return sb;
+    }
+
+    public static StringBuilder addTerminator(StringBuilder bs, int maxBitSequence) {
+        int remainZeros = maxBitSequence - bs.length();
+        if (remainZeros < 0) {
+            throw new InsuffiecientQrLengthToEncode();
+        }
+        return bs.append("0".repeat(Math.min(remainZeros, 4)));
     }
 }

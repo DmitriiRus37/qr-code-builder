@@ -44,13 +44,12 @@ public class QrCreator {
                 .setValueAndVersion(objectToEncode, version)
                 .transformToBinaryArray();
         StringBuilder bitStringBuilder = UtilityMethods.binaryArrayToBitString(binaryArr);
-        String bitString = UtilityMethods.addLagZeros(bitStringBuilder);
+
+        int maxBitSeq = InformationBitSizeMap.getInformationBitsSizeByVersionAndCorrectionLevel(version, correctionLevel);
+        StringBuilder bitStringBuilderWithTerminator = UtilityMethods.addTerminator(bitStringBuilder, maxBitSeq);
+        String bitString = UtilityMethods.addLagZeros(bitStringBuilderWithTerminator);
         int[] decimalRawArr = UtilityMethods.binaryStringToDecimalArray(bitString);
-        int maxByteSequence = InformationBitSizeMap.getInformationBitsSizeByVersionAndCorrectionLevel(version, correctionLevel) / 8;
-        if (decimalRawArr.length > maxByteSequence) {
-            throw new InsuffiecientQrLengthToEncode();
-        }
-        int[] decimalArr = UtilityMethods.addRotationalBytes(decimalRawArr, maxByteSequence);
+        int[] decimalArr = UtilityMethods.addRotationalBytes(decimalRawArr, maxBitSeq / 8);
 
         int blocksCount = BlocksCountMap.getBlocksCountByVersionAndCorrectionLevel(version, correctionLevel);
         int[][] decimalArrays = UtilityMethods.splitIntoBlocks(decimalArr, blocksCount);
