@@ -55,10 +55,6 @@ class DecodeRoundTripTest {
      * @return the plan step expected to fix this combination, or empty if it must decode correctly
      */
     static Optional<String> knownBroken(Version v, CorrectionLevel l, Sample s) {
-        // Step 6: numeric mode strips leading zeros inside 3-digit groups
-        if (s.expected().equals("1000000") || s.expected().equals("1000012")) {
-            return Optional.of("Step 6");
-        }
         // Steps 7 + 8: alignment patterns placed on the diagonal only, no version information
         if (v.getNumber() >= 7) {
             return Optional.of("Steps 7-8");

@@ -1,12 +1,12 @@
 package educational.dmitriigurylev.encoders;
 
+import educational.dmitriigurylev.UtilityMethods;
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
 import educational.dmitriigurylev.enums.EncodingWay;
 import educational.dmitriigurylev.enums.Version;
 import educational.dmitriigurylev.utility_maps.CharacterCountIndicatorMap;
 import educational.dmitriigurylev.utility_maps.EncodingModeIndicatorMap;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
@@ -15,16 +15,19 @@ public class IntegerEncoder extends AbstractEncoder implements Encoder {
 
     @Override
     public Encoder setValueAndVersion(Object obj, Version version) {
-        if (obj.getClass() == String.class) {
-            this.value = obj;
-        } else if (obj.getClass() == Integer.class) {
-            this.value = String.valueOf((int)obj);
-        } else if (obj.getClass() == Long.class) {
-            this.value = String.valueOf((long)obj);
-        }
-        else {
+        String digits;
+        if (obj instanceof String str) {
+            digits = str;
+        } else if (obj instanceof Integer || obj instanceof Long) {
+            digits = String.valueOf(obj);
+        } else {
             throw new InvalidInputFormatException();
         }
+        // numeric mode holds the digits 0-9 only: no sign, no blanks, not empty
+        if (!digits.matches("\\d+")) {
+            throw new InvalidInputFormatException("numeric mode accepts digits 0-9 only: " + digits);
+        }
+        this.value = digits;
         this.version = version;
         return this;
     }
@@ -37,7 +40,7 @@ public class IntegerEncoder extends AbstractEncoder implements Encoder {
     }
 
     private String[] separateSymbols() {
-        String strInteger = String.valueOf(value);
+        String strInteger = (String) value;
         int digitsInValue = strInteger.length();
         String[] arr = digitsInValue % 3 == 0 ? new String[digitsInValue / 3 + 2] : new String[digitsInValue / 3 + 3];
         arr[1] = String.valueOf(digitsInValue);
@@ -45,9 +48,9 @@ public class IntegerEncoder extends AbstractEncoder implements Encoder {
         int i = 2;
         while (!strInteger.isEmpty()) {
             if (strInteger.length() >= 3) {
-                String substr = StringUtils.stripStart(strInteger.substring(0, 3),"0");
+                // leading zeros are kept: "012" is still a 3-digit group
+                arr[i++] = strInteger.substring(0, 3);
                 strInteger = strInteger.substring(3);
-                arr[i++] = substr;
             } else {
                 arr[i++] = strInteger;
                 strInteger = "";
@@ -57,23 +60,16 @@ public class IntegerEncoder extends AbstractEncoder implements Encoder {
     }
 
     private void symbolsArrayToBinaryArray(String[] arr) {
+        // the group width depends on the number of digits, never on the value ("012" takes 10 bits)
         Map<Integer, Integer> binaryDigitsCount = Map.of(1, 4, 2, 7, 3, 10);
         for (int i = 2; i < arr.length; i++) {
-            int decimalValue = Integer.parseInt(arr[i]);
-            String binaryString = Integer.toBinaryString(decimalValue);
-            arr[i] = StringUtils.leftPad(
-                    binaryString,
-                    binaryDigitsCount.get(arr[i].length()),
-                    '0');
+            arr[i] = UtilityMethods.toBits(Integer.parseInt(arr[i]), binaryDigitsCount.get(arr[i].length()));
         }
         arr[0] = EncodingModeIndicatorMap.getFieldSizeByVersion(EncodingWay.DIGITS);
 
-        arr[1] = StringUtils.leftPad(
-                Integer.toBinaryString(Integer.parseInt(arr[1])),
-                CharacterCountIndicatorMap.getCharacterCountIndicatorByVersionAndEncodingWay(version, EncodingWay.DIGITS),
-                '0');
+        arr[1] = UtilityMethods.characterCountToBits(
+                Integer.parseInt(arr[1]),
+                CharacterCountIndicatorMap.getCharacterCountIndicatorByVersionAndEncodingWay(version, EncodingWay.DIGITS));
     }
 
 }
-
-

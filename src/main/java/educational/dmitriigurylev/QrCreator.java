@@ -43,8 +43,13 @@ public class QrCreator {
     }
 
     private StringBuilder encodeBits(Object objectToEncode) {
-        String[] binaryArr = createEncoder(objectToEncode)
-                .setValueAndVersion(objectToEncode, version)
+        // numbers become their decimal text upfront, so the mode is chosen by the characters:
+        // "-5" is not numeric ('-' is not a digit) but fits the alphanumeric set
+        Object input = objectToEncode instanceof Integer || objectToEncode instanceof Long
+                ? String.valueOf(objectToEncode)
+                : objectToEncode;
+        String[] binaryArr = createEncoder(input)
+                .setValueAndVersion(input, version)
                 .transformToBinaryArray();
         StringBuilder bitStringBuilder = UtilityMethods.binaryArrayToBitString(binaryArr);
 
@@ -68,8 +73,6 @@ public class QrCreator {
         Class objectClass = objectToEncode.getClass();
         if (objectClass == byte[].class) {
             return new ByteEncoder();
-        } else if (objectClass == Integer.class || objectClass == Long.class) {
-            return new IntegerEncoder();
         } else if (objectClass == String.class) {
             String stringObjectToEncode = (String) objectToEncode;
             boolean res = stringObjectToEncode.chars()
