@@ -96,7 +96,12 @@ public final class QrTestSupport {
 
     /** @return decoded text, or throws {@link ReaderException} when the matrix is not a readable QR code */
     public static String decode(Cell[][] field) throws ReaderException {
-        var bitmap = new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(render(field))));
+        return decode(render(field));
+    }
+
+    /** ZXing decoding of an image produced elsewhere (e.g. a PNG written by QrImageDrawer and read back). */
+    public static String decode(BufferedImage image) throws ReaderException {
+        var bitmap = new BinaryBitmap(new HybridBinarizer(new BufferedImageLuminanceSource(image)));
         return new MultiFormatReader().decode(bitmap, HINTS).getText();
     }
 
@@ -107,15 +112,16 @@ public final class QrTestSupport {
      * @return the decoded text, or null if BoofCV finds no single readable QR code
      */
     public static String decodeBoofcv(Cell[][] field) {
-        int n = field.length;
-        int size = (n + 2 * QUIET_ZONE) * SCALE;
-        GrayU8 image = new GrayU8(size, size);
-        for (int y = 0; y < size; y++) {
-            for (int x = 0; x < size; x++) {
-                int row = y / SCALE - QUIET_ZONE;
-                int col = x / SCALE - QUIET_ZONE;
-                boolean dark = row >= 0 && col >= 0 && row < n && col < n && field[row][col].getValue() == 1;
-                image.set(x, y, dark ? 0 : 255);
+        return decodeBoofcv(render(field));
+    }
+
+    /** BoofCV decoding of any image; each pixel's gray level is the mean of its RGB channels. */
+    public static String decodeBoofcv(BufferedImage img) {
+        GrayU8 image = new GrayU8(img.getWidth(), img.getHeight());
+        for (int y = 0; y < img.getHeight(); y++) {
+            for (int x = 0; x < img.getWidth(); x++) {
+                int rgb = img.getRGB(x, y);
+                image.set(x, y, (((rgb >> 16) & 0xFF) + ((rgb >> 8) & 0xFF) + (rgb & 0xFF)) / 3);
             }
         }
         ConfigQrCode config = new ConfigQrCode();

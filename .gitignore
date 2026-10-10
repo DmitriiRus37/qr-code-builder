@@ -33,3 +33,7 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+### Generated QR images ###
+/qr_image.*
+/debug_*

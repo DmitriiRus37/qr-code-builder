@@ -18,6 +18,7 @@ import educational.dmitriigurylev.utility_maps.IntLetterEncoderCharMap;
 import lombok.AccessLevel;
 import lombok.Getter;
 
+import java.nio.file.Path;
 import java.util.Objects;
 
 /**
@@ -132,10 +133,21 @@ public class QrCreator {
         return this;
     }
 
-    /** Writes the symbol built by the last {@link #createQr()} or {@link #build()}; throws if there is none yet. */
-    public void drawQr(String filename) {
+    /**
+     * Writes the symbol built by the last {@link #createQr()} or {@link #build()} with the default scale (10 px per
+     * module) and quiet zone (4 modules), as PNG or SVG by the file extension. Use {@link #drawer()} for other settings.
+     */
+    public void drawQr(Path path) {
+        drawer().write(path);
+    }
+
+    /**
+     * A drawer for the symbol built by the last {@link #createQr()} or {@link #build()}, e.g.
+     * {@code creator.drawer().setScale(4).setQuietZone(6).write(Path.of("qr.svg"))}; throws if there is none yet.
+     */
+    public QrImageDrawer drawer() {
         Objects.requireNonNull(qrCodeField, "call createQr()/build() first");
-        new QrImageDrawer(qrCodeField).drawImage(filename, "jpg");
+        return new QrImageDrawer(qrCodeField);
     }
 
     /** Number of characters (numeric, alphanumeric) or bytes (byte mode) in the payload. */

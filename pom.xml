@@ -16,7 +16,6 @@
         <lombok.version>1.18.48</lombok.version>
         <junit.version>6.1.3</junit.version>
         <commonsLang3.version>3.21.0</commonsLang3.version>
-        <twelvemonkeysImageio.version>3.15.3</twelvemonkeysImageio.version>
         <zxing.version>3.5.4</zxing.version>
         <boofcv.version>1.1.7</boofcv.version>
 
@@ -44,11 +43,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>${commonsLang3.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.twelvemonkeys.imageio</groupId>
-            <artifactId>imageio-jpeg</artifactId>
-            <version>${twelvemonkeysImageio.version}</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>

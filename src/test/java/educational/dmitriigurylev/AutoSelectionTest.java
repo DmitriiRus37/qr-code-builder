@@ -14,6 +14,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -287,7 +288,7 @@ class AutoSelectionTest {
     @Test
     void drawBeforeBuildIsRejected() {
         var e = assertThrowsExactly(NullPointerException.class,
-                () -> QrCreator.of("HELLO", CorrectionLevel.LOW).drawQr("never-written.jpg"));
+                () -> QrCreator.of("HELLO", CorrectionLevel.LOW).drawQr(Path.of("never-written.png")));
         assertEquals("call createQr()/build() first", e.getMessage());
     }
 
