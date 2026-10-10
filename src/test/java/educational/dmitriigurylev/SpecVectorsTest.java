@@ -3,14 +3,12 @@ package educational.dmitriigurylev;
 import educational.dmitriigurylev.encoders.IntLetterEncoder;
 import educational.dmitriigurylev.enums.CorrectionLevel;
 import educational.dmitriigurylev.enums.Version;
-import educational.dmitriigurylev.reed_solomon_mapping.ABMap;
-import educational.dmitriigurylev.reed_solomon_mapping.CDMap;
+import educational.dmitriigurylev.reed_solomon_mapping.GaloisField;
 import educational.dmitriigurylev.utility_maps.BlocksCountMap;
 import educational.dmitriigurylev.utility_maps.CorrectionBytesPerBlockMap;
 import educational.dmitriigurylev.utility_maps.CorrectionLevelAndMaskCodeMap;
 import educational.dmitriigurylev.utility_maps.GeneratingPolynomialMap;
 import educational.dmitriigurylev.utility_maps.InformationBitSizeMap;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
@@ -26,7 +24,7 @@ class SpecVectorsTest {
 
     private static final int PRIMITIVE = 0x11D;
 
-    /** Reference exp table built from the field definition, independent of CDMap. */
+    /** Reference exp table built from the field definition, independent of GaloisField. */
     private static int[] referenceExp() {
         int[] exp = new int[256];
         for (int i = 0, x = 1; i < 256; i++) {
@@ -43,16 +41,15 @@ class SpecVectorsTest {
     void antilogTableMatchesFieldDefinition() {
         int[] exp = referenceExp();
         for (int i = 0; i < 256; i++) {
-            assertEquals(exp[i], CDMap.getGaluaFieldValue(i), "exp(" + i + ")");
+            assertEquals(exp[i], GaloisField.exp(i), "exp(" + i + ")");
         }
     }
 
-    @Disabled("Step 4: ABMap has log(241) = 1174 instead of 174")
     @Test
     void logTableIsInverseOfAntilog() {
         int[] exp = referenceExp();
         for (int i = 0; i < 255; i++) {
-            assertEquals(i, ABMap.getBackGaluaFieldValue(exp[i]), "log(" + exp[i] + ")");
+            assertEquals(i, GaloisField.log(exp[i]), "log(" + exp[i] + ")");
         }
     }
 
@@ -94,7 +91,6 @@ class SpecVectorsTest {
         assertArrayEquals(new int[]{32, 91, 11, 120, 209, 114, 220, 77, 67, 64, 236, 17, 236, 17, 236, 17}, codewords);
     }
 
-    @Disabled("Step 4: getCorrectionBytes throws when data codewords (16) > EC codewords (10)")
     @Test
     void helloWorld1MErrorCorrectionCodewords() {
         int[] data = {32, 91, 11, 120, 209, 114, 220, 77, 67, 64, 236, 17, 236, 17, 236, 17};

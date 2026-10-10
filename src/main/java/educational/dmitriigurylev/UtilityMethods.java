@@ -5,8 +5,7 @@ import educational.dmitriigurylev.custom_exceptions.InsuffiecientQrLengthToEncod
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
 import educational.dmitriigurylev.enums.CorrectionLevel;
 import educational.dmitriigurylev.enums.Version;
-import educational.dmitriigurylev.reed_solomon_mapping.ABMap;
-import educational.dmitriigurylev.reed_solomon_mapping.CDMap;
+import educational.dmitriigurylev.reed_solomon_mapping.GaloisField;
 import educational.dmitriigurylev.utility_maps.GeneratingPolynomialMap;
 import educational.dmitriigurylev.utility_maps.InformationBitSizeMap;
 import lombok.AccessLevel;
@@ -90,33 +89,29 @@ public class UtilityMethods {
         return matcher.matches();
     }
 
+    /**
+     * Reed–Solomon EC codewords = remainder of data(x) * x^n divided by the generator g(x).
+     * Classic shift-register division: the remainder never grows beyond n coefficients,
+     * so it works for any ratio of data to EC codewords.
+     */
     public static int[] getCorrectionBytes(int[] decimalArr, int correctionBytesPerBlock) {
+        // α-exponents of g(x) without the leading coefficient α^0
         int[] generatingPolynomial = GeneratingPolynomialMap.getGeneratingPolynomial(correctionBytesPerBlock);
-        List<Integer> listCorrectBytes = Arrays.stream(decimalArr)
-                .boxed()
-                .collect(Collectors.toCollection(LinkedList::new));
-        while (listCorrectBytes.size() < generatingPolynomial.length) {
-            listCorrectBytes.add(0);
-        }
-        int listCorrectionBytesSize = listCorrectBytes.size();
+        int[] remainder = new int[correctionBytesPerBlock];
 
-        for (int count = 0; count < decimalArr.length; count++) {
-            int aValue = listCorrectBytes.remove(0);
-            listCorrectBytes.add(0);
-            if (aValue == 0) {
+        for (int dataByte : decimalArr) {
+            int factor = dataByte ^ remainder[0];
+            System.arraycopy(remainder, 1, remainder, 0, correctionBytesPerBlock - 1);
+            remainder[correctionBytesPerBlock - 1] = 0;
+            if (factor == 0) {
                 continue;
             }
-            int bValue = ABMap.getBackGaluaFieldValue(aValue);
-
-            for (int i = 0; i < listCorrectionBytesSize; i++) {
-                int cValue = (generatingPolynomial[i] + bValue) % 255;
-                int dValue = CDMap.getGaluaFieldValue(cValue);
-                listCorrectBytes.set(i, dValue ^ listCorrectBytes.get(i));
+            int logFactor = GaloisField.log(factor);
+            for (int i = 0; i < correctionBytesPerBlock; i++) {
+                remainder[i] ^= GaloisField.exp((generatingPolynomial[i] + logFactor) % 255);
             }
         }
-        return listCorrectBytes.stream()
-                .mapToInt(val -> val)
-                .toArray();
+        return remainder;
     }
 
     public static int[][] splitIntoBlocks(int[] inputDecimalArr, int blocksCount) {

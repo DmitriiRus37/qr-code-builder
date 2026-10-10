@@ -55,10 +55,6 @@ class DecodeRoundTripTest {
      * @return the plan step expected to fix this combination, or empty if it must decode correctly
      */
     static Optional<String> knownBroken(Version v, CorrectionLevel l, Sample s) {
-        // Step 4: Reed–Solomon indexes past the generator when data codewords > EC codewords per block
-        if (l == CorrectionLevel.LOW || l == CorrectionLevel.MIDDLE) {
-            return Optional.of("Step 4");
-        }
         // Step 5: byte mode drops leading zeros of each byte; String input -> ClassCastException
         if (s.mode() == Mode.BYTE) {
             return Optional.of("Step 5");
@@ -71,13 +67,9 @@ class DecodeRoundTripTest {
         if (v.getNumber() >= 7) {
             return Optional.of("Steps 7-8");
         }
-        // Step 4: ABMap log(241) = 1174 typo gives wrong EC bytes; ZXing "corrects" valid data into "A1 $%*$W./"
-        if (s.input().equals("A1 $%*+-./") && List.of("V2-Q", "V3-H", "V3-Q", "V5-H", "V5-Q").contains(key(v, l))) {
-            return Optional.of("Step 4");
-        }
         // Step 9: fixed mask 2 leaves finder-like patterns in the data area; the bits are valid
         // (ZXing decodes them with PURE_BARCODE) but the detector cannot locate the symbol
-        if (s.input().equals("A1 $%*+-./") && List.of("V6-H", "V6-Q").contains(key(v, l))) {
+        if (s.input().equals("A1 $%*+-./") && List.of("V6-H", "V6-Q", "V6-M").contains(key(v, l))) {
             return Optional.of("Step 9");
         }
         return Optional.empty();
