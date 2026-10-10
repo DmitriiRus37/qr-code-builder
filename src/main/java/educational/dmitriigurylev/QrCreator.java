@@ -31,10 +31,11 @@ public class QrCreator {
     public QrCreator createQr() {
         qrCodeField.addFinderPatterns();
         qrCodeField.addSynchronizationLines();
-        qrCodeField.addInformationTypeBits();
         qrCodeField.addAlignmentPatterns();
+        qrCodeField.reserveInformationAreas();
         qrCodeField.fillFieldWithBitsSequence(encodeBits(objectToEncode));
         qrCodeField.applyMaskPattern();
+        qrCodeField.addInformationTypeBits();
         return this;
     }
 

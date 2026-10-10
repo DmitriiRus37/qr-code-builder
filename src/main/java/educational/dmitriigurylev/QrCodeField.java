@@ -93,16 +93,21 @@ public class QrCodeField {
         int j = -2;
         while (!typeInformationBits.isEmpty()) {
             i++;
-            Cell currentCell;
+            int row;
+            int col;
             if (i < 8) {
-                currentCell = field[8][i];
+                row = 8;
+                col = i;
             } else {
                 j += 2;
-                currentCell = field[i - j][8];
+                row = i - j;
+                col = 8;
             }
-            if (currentCell.isBusy()) {
+            if (row == 6 || col == 6) {
+                // timing pattern
                 continue;
             }
+            Cell currentCell = field[row][col];
             currentCell.setValue(typeInformationBits.remove(0) == '1' ? 1 : 0).setBusy(true);
         }
 
@@ -189,16 +194,55 @@ public class QrCodeField {
     }
 
     public void addAlignmentPatterns() {
-//        TODO тут нужны будут доработки
         int[] centers = AlignmentPatternCentersMap.getAlignmentPatternCentersByVersion(version);
+        if (centers.length == 0) {
+            return;
+        }
+        int first = centers[0];
+        int last = centers[centers.length - 1];
 
-        for (int cntr : centers) {
-            for (int y = cntr-2; y < cntr+3; y++) {
-                for (int x = cntr-2; x < cntr+3; x++) {
-                    field[y][x].setBusy(true);
-                    if ((x == cntr - 2 || x == cntr + 2) || (y == cntr - 2 || y == cntr + 2) || (x == cntr && y == cntr)) {
-                        field[y][x].setValue(1);
-                    }
+        for (int centerY : centers) {
+            for (int centerX : centers) {
+                // these three positions overlap the finder patterns
+                boolean overlapsFinder = (centerY == first && centerX == first)
+                        || (centerY == first && centerX == last)
+                        || (centerY == last && centerX == first);
+                if (!overlapsFinder) {
+                    addAlignmentPattern(centerY, centerX);
+                }
+            }
+        }
+    }
+
+    private void addAlignmentPattern(int centerY, int centerX) {
+        for (int y = centerY - 2; y <= centerY + 2; y++) {
+            for (int x = centerX - 2; x <= centerX + 2; x++) {
+                boolean isDark = Math.max(Math.abs(y - centerY), Math.abs(x - centerX)) != 1;
+                field[y][x].setValue(isDark ? 1 : 0).setBusy(true);
+            }
+        }
+    }
+
+    /**
+     * Marks the format information cells (and, from V7 on, the version information blocks) as busy,
+     * so data bits and the mask skip them. The format bits are written later by {@link #addInformationTypeBits()}.
+     */
+    public void reserveInformationAreas() {
+        int size = field.length;
+        for (int i = 0; i <= 8; i++) {
+            field[8][i].setBusy(true);
+            field[i][8].setBusy(true);
+        }
+        for (int i = size - 8; i < size; i++) {
+            field[8][i].setBusy(true);
+            field[i][8].setBusy(true);
+        }
+        if (version.getNumber() >= 7) {
+            // 6x3 blocks: rows 0-5 x cols size-11..size-9 (top-right) and the transpose (bottom-left)
+            for (int far = size - 11; far < size - 8; far++) {
+                for (int near = 0; near < 6; near++) {
+                    field[near][far].setBusy(true);
+                    field[far][near].setBusy(true);
                 }
             }
         }

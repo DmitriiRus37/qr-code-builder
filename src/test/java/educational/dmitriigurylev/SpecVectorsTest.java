@@ -133,7 +133,7 @@ class SpecVectorsTest {
     }
 
     /** Modules left for data + EC after all function patterns, format and version info. */
-    private static int rawDataModules(int version) {
+    static int rawDataModules(int version) {
         int result = (16 * version + 128) * version + 64;
         if (version >= 2) {
             int alignCount = version / 7 + 2;
