@@ -126,7 +126,7 @@ class SpecVectorsTest {
     @Test
     void capacityTablesAddUpToSymbolSize() {
         for (Version v : Version.values()) {
-            int total = rawDataModules(v.ordinal() + 1) / 8;
+            int total = rawDataModules(v.getNumber()) / 8;
             for (CorrectionLevel l : CorrectionLevel.values()) {
                 int data = InformationBitSizeMap.getInformationBitsSizeByVersionAndCorrectionLevel(v, l) / 8;
                 int ec = BlocksCountMap.getBlocksCountByVersionAndCorrectionLevel(v, l)

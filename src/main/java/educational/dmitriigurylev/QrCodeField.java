@@ -12,8 +12,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static educational.dmitriigurylev.utility_maps.VersionMap.*;
-
 @Getter
 public class QrCodeField {
 
@@ -24,7 +22,7 @@ public class QrCodeField {
     public QrCodeField(Version version, CorrectionLevel level) {
         this.version = version;
         this.level = level;
-        this.field = getFieldSizeByVersion(version);
+        this.field = new Cell[version.size()][version.size()];
         fillFieldWithZeros();
     }
 
@@ -72,18 +70,7 @@ public class QrCodeField {
     }
 
     public void addSynchronizationLines() {
-        int until = switch (version) {
-            case V_1 -> 12;
-            case V_2 -> 16;
-            case V_3 -> 20;
-            case V_4 -> 24;
-            case V_5 -> 28;
-            case V_6 -> 32;
-            case V_7 -> 36;
-            case V_8 -> 40;
-            case V_9 -> 44;
-            case V_10 -> 48;
-        };
+        int until = field.length - 9;
         boolean isOneHere = true;
         for (int y=8; y<=until; y++) {
             field[6][y].setValue(isOneHere ? 1 : 0).setBusy(true);

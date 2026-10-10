@@ -68,7 +68,7 @@ class DecodeRoundTripTest {
             return Optional.of("Step 6");
         }
         // Steps 7 + 8: alignment patterns placed on the diagonal only, no version information
-        if (v.ordinal() + 1 >= 7) {
+        if (v.getNumber() >= 7) {
             return Optional.of("Steps 7-8");
         }
         // Step 4: ABMap log(241) = 1174 typo gives wrong EC bytes; ZXing "corrects" valid data into "A1 $%*$W./"
@@ -84,7 +84,7 @@ class DecodeRoundTripTest {
     }
 
     private static String key(Version v, CorrectionLevel l) {
-        return "V" + (v.ordinal() + 1) + "-" + l.name().charAt(0);
+        return "V" + (v.getNumber()) + "-" + l.name().charAt(0);
     }
 
     @ParameterizedTest(name = "{0} {1} {2}")
