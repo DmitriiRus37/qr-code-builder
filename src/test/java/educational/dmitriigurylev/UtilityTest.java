@@ -1,5 +1,6 @@
 package educational.dmitriigurylev;
 
+import educational.dmitriigurylev.custom_exceptions.InsuffiecientQrLengthToEncode;
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -56,5 +57,27 @@ class UtilityTest {
         Assertions.assertEquals("0100110011", binaryArrayToBitString(new String[]{"0", "1", "00110011"}).toString());
         Assertions.assertEquals("", binaryArrayToBitString(new String[]{}).toString());
         Assertions.assertThrowsExactly(InvalidInputFormatException.class, () -> binaryArrayToBitString(null));
+    }
+
+    @Test
+    void toBitsTest() {
+        Assertions.assertEquals("0", toBits(0, 1));
+        Assertions.assertEquals("00000000", toBits(0, 8));
+        Assertions.assertEquals("01000001", toBits('A', 8));
+        Assertions.assertEquals("11111111", toBits(255, 8));
+        Assertions.assertEquals("0000000000001100", toBits(12, 16));
+        Assertions.assertEquals("0000001100", toBits(12, 10));
+        Assertions.assertThrowsExactly(InvalidInputFormatException.class, () -> toBits(256, 8));
+        Assertions.assertThrowsExactly(InvalidInputFormatException.class, () -> toBits(2, 1));
+        Assertions.assertThrowsExactly(InvalidInputFormatException.class, () -> toBits(-1, 8));
+        Assertions.assertThrowsExactly(InvalidInputFormatException.class, () -> toBits(0, 0));
+    }
+
+    @Test
+    void characterCountToBitsTest() {
+        Assertions.assertEquals("00000101", characterCountToBits(5, 8));
+        Assertions.assertEquals("11111111", characterCountToBits(255, 8));
+        Assertions.assertThrowsExactly(InsuffiecientQrLengthToEncode.class, () -> characterCountToBits(256, 8));
+        Assertions.assertThrowsExactly(InsuffiecientQrLengthToEncode.class, () -> characterCountToBits(512, 9));
     }
 }

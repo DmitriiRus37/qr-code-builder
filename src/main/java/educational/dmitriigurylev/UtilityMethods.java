@@ -32,6 +32,33 @@ public class UtilityMethods {
         return decimal;
     }
 
+    /**
+     * Big-endian binary representation of {@code value} in exactly {@code width} bits, left-padded with zeros.
+     * Every QR field has a fixed width (e.g. 8 bits per byte), so a value that does not fit is an error, never truncated.
+     */
+    public static String toBits(int value, int width) {
+        if (width < 1 || width > 31 || value < 0 || value >= 1 << width) {
+            throw new InvalidInputFormatException("value " + value + " does not fit in " + width + " bits");
+        }
+        StringBuilder bits = new StringBuilder(width);
+        for (int i = width - 1; i >= 0; i--) {
+            bits.append((value >>> i) & 1);
+        }
+        return bits.toString();
+    }
+
+    /**
+     * Character-count indicator in exactly {@code width} bits. A count that does not fit the field
+     * can never fit the symbol either, so it is reported as a capacity problem, not as bad input.
+     */
+    public static String characterCountToBits(int count, int width) {
+        if (count >= 1 << width) {
+            throw new InsuffiecientQrLengthToEncode(
+                    "character count " + count + " does not fit the " + width + "-bit count field");
+        }
+        return toBits(count, width);
+    }
+
     public static StringBuilder binaryArrayToBitString(String[] strAr) {
         if (strAr == null) {
             throw new InvalidInputFormatException();

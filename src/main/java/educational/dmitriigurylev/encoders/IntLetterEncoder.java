@@ -1,5 +1,6 @@
 package educational.dmitriigurylev.encoders;
 
+import educational.dmitriigurylev.UtilityMethods;
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
 import educational.dmitriigurylev.enums.EncodingWay;
 import educational.dmitriigurylev.enums.Version;
@@ -7,7 +8,6 @@ import educational.dmitriigurylev.utility_maps.CharacterCountIndicatorMap;
 import educational.dmitriigurylev.utility_maps.EncodingModeIndicatorMap;
 import educational.dmitriigurylev.utility_maps.IntLetterEncoderCharMap;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 
@@ -64,7 +64,7 @@ public class IntLetterEncoder extends AbstractEncoder implements Encoder {
     }
 
     private String[] symbolsArrayToBinaryArray(int[][] arr) {
-        Map<Integer, String> binaryDigitsCount = Map.of(1, "%6s", 2, "%11s");
+        Map<Integer, Integer> binaryDigitsCount = Map.of(1, 6, 2, 11);
         int symbolsCounter = 0;
         String[] resArr = new String[arr.length+2];
         for (int i = 0; i < arr.length; i++) {
@@ -73,15 +73,13 @@ public class IntLetterEncoder extends AbstractEncoder implements Encoder {
                 decimalValue = decimalValue * 45 + curVal;
                 symbolsCounter++;
             }
-            String binaryString = Integer.toBinaryString(decimalValue);
-            resArr[i+2] = String.format(binaryDigitsCount.get(arr[i].length), binaryString).replace(' ', '0');
+            resArr[i+2] = UtilityMethods.toBits(decimalValue, binaryDigitsCount.get(arr[i].length));
         }
         resArr[0] = EncodingModeIndicatorMap.getFieldSizeByVersion(EncodingWay.LETTERS_DIGITS);
 
-        resArr[1] = StringUtils.leftPad(
-                Integer.toBinaryString(symbolsCounter),
-                CharacterCountIndicatorMap.getCharacterCountIndicatorByVersionAndEncodingWay(version, EncodingWay.LETTERS_DIGITS),
-                '0');
+        resArr[1] = UtilityMethods.characterCountToBits(
+                symbolsCounter,
+                CharacterCountIndicatorMap.getCharacterCountIndicatorByVersionAndEncodingWay(version, EncodingWay.LETTERS_DIGITS));
 
         return resArr;
     }

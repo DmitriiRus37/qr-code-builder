@@ -55,10 +55,6 @@ class DecodeRoundTripTest {
      * @return the plan step expected to fix this combination, or empty if it must decode correctly
      */
     static Optional<String> knownBroken(Version v, CorrectionLevel l, Sample s) {
-        // Step 5: byte mode drops leading zeros of each byte; String input -> ClassCastException
-        if (s.mode() == Mode.BYTE) {
-            return Optional.of("Step 5");
-        }
         // Step 6: numeric mode strips leading zeros inside 3-digit groups
         if (s.expected().equals("1000000") || s.expected().equals("1000012")) {
             return Optional.of("Step 6");
