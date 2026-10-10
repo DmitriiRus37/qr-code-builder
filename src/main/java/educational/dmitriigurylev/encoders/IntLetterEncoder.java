@@ -12,24 +12,19 @@ import lombok.NoArgsConstructor;
 import java.util.Map;
 
 @NoArgsConstructor
-public class IntLetterEncoder extends AbstractEncoder implements Encoder {
+public class IntLetterEncoder implements Encoder {
 
     @Override
-    public Encoder setValueAndVersion(Object obj, Version version) {
-        this.value = obj;
-        this.version = version;
-        return this;
-    }
-
-    @Override
-    public String[] transformToBinaryArray() {
-        String[] strAr = separateSymbols();
+    public String[] encode(Object obj, Version version) {
+        if (!(obj instanceof String val)) {
+            throw new InvalidInputFormatException();
+        }
+        String[] strAr = separateSymbols(val);
         int[][] intAr = mapCharToInt(strAr);
-        return symbolsArrayToBinaryArray(intAr);
+        return symbolsArrayToBinaryArray(intAr, version);
     }
 
-    private String[] separateSymbols() {
-        String val = (String) this.value;
+    private static String[] separateSymbols(String val) {
         int symbolsInValue = val.length();
         String[] arr = symbolsInValue % 2 == 0 ? new String[symbolsInValue / 2] : new String[symbolsInValue / 2 + 1];
 
@@ -63,7 +58,7 @@ public class IntLetterEncoder extends AbstractEncoder implements Encoder {
         return res;
     }
 
-    private String[] symbolsArrayToBinaryArray(int[][] arr) {
+    private static String[] symbolsArrayToBinaryArray(int[][] arr, Version version) {
         Map<Integer, Integer> binaryDigitsCount = Map.of(1, 6, 2, 11);
         int symbolsCounter = 0;
         String[] resArr = new String[arr.length+2];

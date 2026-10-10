@@ -13,8 +13,8 @@ class QrCodeFieldIsolationTest {
 
     @Test
     void creatorsWithSameVersionDoNotShareMatrix() {
-        var first = new QrCreator(Version.V_1, CorrectionLevel.HIGH, 1);
-        var second = new QrCreator(Version.V_1, CorrectionLevel.HIGH, 2);
+        var first = new QrCreator(Version.V_1, CorrectionLevel.HIGH, 1).createQr();
+        var second = new QrCreator(Version.V_1, CorrectionLevel.HIGH, 2).createQr();
 
         assertNotSame(first.getQrCodeField().getField(), second.getQrCodeField().getField());
     }

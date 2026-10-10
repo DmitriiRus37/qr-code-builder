@@ -7,32 +7,94 @@ import educational.dmitriigurylev.encoders.Encoder;
 import educational.dmitriigurylev.encoders.IntLetterEncoder;
 import educational.dmitriigurylev.encoders.IntegerEncoder;
 import educational.dmitriigurylev.enums.CorrectionLevel;
+import educational.dmitriigurylev.enums.EncodingWay;
 import educational.dmitriigurylev.enums.MaskPattern;
 import educational.dmitriigurylev.enums.Version;
 import educational.dmitriigurylev.utility_maps.BlocksCountMap;
+import educational.dmitriigurylev.utility_maps.CharacterCountIndicatorMap;
 import educational.dmitriigurylev.utility_maps.CorrectionBytesPerBlockMap;
 import educational.dmitriigurylev.utility_maps.InformationBitSizeMap;
 import educational.dmitriigurylev.utility_maps.IntLetterEncoderCharMap;
 import lombok.AccessLevel;
 import lombok.Getter;
 
+import java.util.Objects;
+
+/**
+ * Builds one QR code. Usual entry point:
+ * <pre>{@code QrCodeField field = QrCreator.of("HELLO WORLD", CorrectionLevel.MIDDLE).build();}</pre>
+ * The mode is the most compact one that covers every character (numeric, then alphanumeric, then byte as UTF-8),
+ * the version is the smallest one the payload fits, and the mask is the one with the lowest penalty.
+ * {@link #version(Version)} and {@link #forceMask(int)} override the automatic choices.
+ * Empty input is rejected: a symbol that carries nothing is almost certainly a caller error.
+ * <p>{@code of(...).build()} is the recommended API; {@code new QrCreator(version, level, input).createQr()} is the
+ * legacy form, kept for existing callers. The class is mutable (a builder that keeps its last result) and not
+ * thread-safe: use one instance per thread.
+ */
 @Getter
 public class QrCreator {
-    private final QrCodeField qrCodeField;
-    private final Version version;
+    private static final int MODE_INDICATOR_BITS = 4;
+
+    private static final Encoder NUMERIC_ENCODER = new IntegerEncoder();
+    private static final Encoder ALPHANUMERIC_ENCODER = new IntLetterEncoder();
+    private static final Encoder BYTE_ENCODER = new ByteEncoder();
+
+    /** The field built by the last {@link #createQr()}; null before that. */
+    private QrCodeField qrCodeField;
+    /** Set by {@link #version(Version)} or the fixed-version constructor; null means "the smallest that fits". */
+    @Getter(AccessLevel.NONE)
+    private Version requestedVersion;
+    /** The version used by the last {@link #createQr()}; null before that. */
+    private Version version;
     private final CorrectionLevel correctionLevel;
-    private final Object objectToEncode;
+    /** The mode chosen from the characters of the input; {@code byte[]} input is always byte mode. */
+    private final EncodingWay encodingWay;
+    /** What the encoder gets: the text for numeric and alphanumeric mode, the bytes for byte mode. */
+    @Getter(AccessLevel.NONE)
+    private final Object payload;
     /** Set by {@link #forceMask(int)}; null means "choose the mask with the lowest penalty". */
     @Getter(AccessLevel.NONE)
     private MaskPattern forcedMask;
     /** The mask applied by the last {@link #createQr()}. */
     private MaskPattern maskPattern;
 
+    /**
+     * Fixed-version form, kept for existing callers. {@code objectToEncode} is a {@code String}, a {@code byte[]},
+     * or an {@code Integer}/{@code Long} (encoded as its decimal text).
+     */
     public QrCreator(Version version, CorrectionLevel correctionLevel, Object objectToEncode) {
-        this.version = version;
-        this.correctionLevel = correctionLevel;
-        this.objectToEncode = objectToEncode;
-        this.qrCodeField = new QrCodeField(version, correctionLevel);
+        this(correctionLevel, objectToEncode);
+        this.requestedVersion = Objects.requireNonNull(version, "version");
+    }
+
+    private QrCreator(CorrectionLevel correctionLevel, Object objectToEncode) {
+        this.correctionLevel = Objects.requireNonNull(correctionLevel, "correctionLevel");
+        Object input = normalize(objectToEncode);
+        if (input instanceof byte[] bytes) {
+            this.encodingWay = EncodingWay.BYTES;
+            // defensive copy: the caller may change its array after of(...)
+            this.payload = bytes.clone();
+        } else {
+            String text = (String) input;
+            this.encodingWay = chooseMode(text);
+            this.payload = encodingWay == EncodingWay.BYTES ? ByteEncoder.toUtf8(text) : text;
+        }
+    }
+
+    /** Text: the mode follows the characters; anything outside the alphanumeric set goes to byte mode as UTF-8. */
+    public static QrCreator of(String text, CorrectionLevel correctionLevel) {
+        return new QrCreator(correctionLevel, Objects.requireNonNull(text, "text"));
+    }
+
+    /** Raw bytes: always byte mode, written as they are. The array is copied. */
+    public static QrCreator of(byte[] data, CorrectionLevel correctionLevel) {
+        return new QrCreator(correctionLevel, Objects.requireNonNull(data, "data"));
+    }
+
+    /** Uses {@code version} instead of the smallest one that fits; {@link #createQr()} throws if the payload does not fit. */
+    public QrCreator version(Version version) {
+        this.requestedVersion = Objects.requireNonNull(version, "version");
+        return this;
     }
 
     /**
@@ -44,12 +106,25 @@ public class QrCreator {
         return this;
     }
 
+    /** Builds the symbol and returns its field; same as {@code createQr().getQrCodeField()}. */
+    public QrCodeField build() {
+        return createQr().getQrCodeField();
+    }
+
+    /**
+     * Picks (or checks) the version, then builds a fresh field. Each call starts over: without a requested version
+     * the smallest fitting one is chosen again, and a {@link #version(Version)} set after a build is honoured.
+     *
+     * @throws InsuffiecientQrLengthToEncode if the payload does not fit the requested version or, without one, V10
+     */
     public QrCreator createQr() {
+        version = requestedVersion == null ? chooseVersion() : checkFits(requestedVersion);
+        qrCodeField = new QrCodeField(version, correctionLevel);
         qrCodeField.addFinderPatterns();
         qrCodeField.addSynchronizationLines();
         qrCodeField.addAlignmentPatterns();
         qrCodeField.reserveInformationAreas();
-        qrCodeField.fillFieldWithBitsSequence(encodeBits(objectToEncode));
+        qrCodeField.fillFieldWithBitsSequence(encodeBits());
         maskPattern = forcedMask != null ? forcedMask : MaskEvaluator.chooseBest(qrCodeField);
         qrCodeField.applyMaskPattern(maskPattern);
         qrCodeField.addInformationTypeBits(maskPattern);
@@ -57,22 +132,102 @@ public class QrCreator {
         return this;
     }
 
+    /** Writes the symbol built by the last {@link #createQr()} or {@link #build()}; throws if there is none yet. */
     public void drawQr(String filename) {
+        Objects.requireNonNull(qrCodeField, "call createQr()/build() first");
         new QrImageDrawer(qrCodeField).drawImage(filename, "jpg");
     }
 
-    private StringBuilder encodeBits(Object objectToEncode) {
-        // numbers become their decimal text upfront, so the mode is chosen by the characters:
-        // "-5" is not numeric ('-' is not a digit) but fits the alphanumeric set
-        Object input = objectToEncode instanceof Integer || objectToEncode instanceof Long
-                ? String.valueOf(objectToEncode)
-                : objectToEncode;
-        String[] binaryArr = createEncoder(input)
-                .setValueAndVersion(input, version)
-                .transformToBinaryArray();
+    /** Number of characters (numeric, alphanumeric) or bytes (byte mode) in the payload. */
+    private int payloadLength() {
+        return payload instanceof byte[] bytes ? bytes.length : ((String) payload).length();
+    }
+
+    private Version chooseVersion() {
+        for (Version v : Version.values()) {
+            if (requiredBits(encodingWay, payloadLength(), v) <= capacityBits(v)) {
+                return v;
+            }
+        }
+        Version largest = Version.values()[Version.values().length - 1];
+        throw new InsuffiecientQrLengthToEncode(overflowMessage(largest) + " (the largest supported version)");
+    }
+
+    private Version checkFits(Version v) {
+        if (requiredBits(encodingWay, payloadLength(), v) > capacityBits(v)) {
+            throw new InsuffiecientQrLengthToEncode(overflowMessage(v));
+        }
+        return v;
+    }
+
+    private int capacityBits(Version v) {
+        return InformationBitSizeMap.getInformationBitsSizeByVersionAndCorrectionLevel(v, correctionLevel);
+    }
+
+    /** E.g. "alphanumeric payload of 155 characters needs 873 bits, V5-L holds 864". */
+    private String overflowMessage(Version v) {
+        String mode = switch (encodingWay) {
+            case DIGITS -> "numeric payload of %d digits";
+            case LETTERS_DIGITS -> "alphanumeric payload of %d characters";
+            case BYTES -> "byte payload of %d bytes";
+        };
+        return mode.formatted(payloadLength())
+                + " needs " + requiredBits(encodingWay, payloadLength(), v) + " bits, V" + v.getNumber()
+                + "-" + correctionLevel.name().charAt(0) + " holds " + capacityBits(v);
+    }
+
+    /** Mode indicator + character count indicator (its width depends on the version) + data bits. */
+    static int requiredBits(EncodingWay mode, int length, Version v) {
+        return MODE_INDICATOR_BITS
+                + CharacterCountIndicatorMap.getCharacterCountIndicatorByVersionAndEncodingWay(v, mode)
+                + dataBits(mode, length);
+    }
+
+    /** Data bits of a segment of {@code length} digits, characters or bytes (independent of the version). */
+    static int dataBits(EncodingWay mode, int length) {
+        return switch (mode) {
+            case DIGITS -> 10 * (length / 3) + new int[]{0, 4, 7}[length % 3];
+            case LETTERS_DIGITS -> 11 * (length / 2) + 6 * (length % 2);
+            case BYTES -> 8 * length;
+        };
+    }
+
+    /** The most compact mode covering every character: numeric ⊂ alphanumeric ⊂ byte. */
+    static EncodingWay chooseMode(String text) {
+        if (text.matches("\\d+")) {
+            return EncodingWay.DIGITS;
+        } else if (text.chars().allMatch(c -> IntLetterEncoderCharMap.contains((char) c))) {
+            return EncodingWay.LETTERS_DIGITS;
+        } else {
+            return EncodingWay.BYTES;
+        }
+    }
+
+    /** Numbers become their decimal text, so the mode follows the characters: "-5" is alphanumeric, not numeric. */
+    private static Object normalize(Object input) {
+        Object normalized = switch (input) {
+            case null -> throw new InvalidInputFormatException("nothing to encode: the input is null");
+            case Integer _, Long _ -> String.valueOf(input);
+            case String _, byte[] _ -> input;
+            default -> throw new InvalidInputFormatException("unsupported input type: " + input.getClass().getName());
+        };
+        boolean empty = normalized instanceof byte[] bytes ? bytes.length == 0 : ((String) normalized).isEmpty();
+        if (empty) {
+            throw new InvalidInputFormatException("nothing to encode: the input is empty");
+        }
+        return normalized;
+    }
+
+    private StringBuilder encodeBits() {
+        Encoder encoder = switch (encodingWay) {
+            case DIGITS -> NUMERIC_ENCODER;
+            case LETTERS_DIGITS -> ALPHANUMERIC_ENCODER;
+            case BYTES -> BYTE_ENCODER;
+        };
+        String[] binaryArr = encoder.encode(payload, version);
         StringBuilder bitStringBuilder = UtilityMethods.binaryArrayToBitString(binaryArr);
 
-        int maxBitSeq = InformationBitSizeMap.getInformationBitsSizeByVersionAndCorrectionLevel(version, correctionLevel);
+        int maxBitSeq = capacityBits(version);
         StringBuilder bitStringBuilderWithTerminator = UtilityMethods.addTerminator(bitStringBuilder, maxBitSeq);
         String bitString = UtilityMethods.addLagZeros(bitStringBuilderWithTerminator);
         int[] decimalRawArr = UtilityMethods.binaryStringToDecimalArray(bitString);
@@ -86,28 +241,6 @@ public class QrCreator {
 
         String[] unitedArr = UtilityMethods.uniteBlocks(blocks);
         return UtilityMethods.getStringBuilder(unitedArr);
-    }
-
-    private Encoder createEncoder(Object objectToEncode) {
-        Class objectClass = objectToEncode.getClass();
-        if (objectClass == byte[].class) {
-            return new ByteEncoder();
-        } else if (objectClass == String.class) {
-            String stringObjectToEncode = (String) objectToEncode;
-            boolean res = stringObjectToEncode.chars()
-                    .mapToObj(i->(char) i)
-                    .allMatch(IntLetterEncoderCharMap::contains);
-
-            if (stringObjectToEncode.matches("\\d+")) {
-                return new IntegerEncoder();
-            } else if (res) {
-                return new IntLetterEncoder();
-            } else {
-                return new ByteEncoder();
-            }
-        } else {
-            throw new InvalidInputFormatException();
-        }
     }
 
 }

@@ -82,7 +82,7 @@ class SpecVectorsTest {
     /** thonky.com worked example: "HELLO WORLD", version 1, level M. */
     @Test
     void helloWorld1MDataCodewords() {
-        String[] parts = new IntLetterEncoder().setValueAndVersion("HELLO WORLD", Version.V_1).transformToBinaryArray();
+        String[] parts = new IntLetterEncoder().encode("HELLO WORLD", Version.V_1);
         int maxBits = InformationBitSizeMap.getInformationBitsSizeByVersionAndCorrectionLevel(Version.V_1, CorrectionLevel.MIDDLE);
         StringBuilder bits = UtilityMethods.addTerminator(UtilityMethods.binaryArrayToBitString(parts), maxBits);
         int[] codewords = UtilityMethods.addRotationalBytes(

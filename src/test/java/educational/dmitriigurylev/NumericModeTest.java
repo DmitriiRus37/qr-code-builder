@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 class NumericModeTest {
 
     private static String[] encode(Object input) {
-        return new IntegerEncoder().setValueAndVersion(input, Version.V_1).transformToBinaryArray();
+        return new IntegerEncoder().encode(input, Version.V_1);
     }
 
     @Test
@@ -54,14 +54,14 @@ class NumericModeTest {
     @ParameterizedTest
     @ValueSource(strings = {"-5", "12a", "", " 1", "1 2", "+1", "１２"})
     void nonDigitStringIsRejected(String input) {
-        assertThrowsExactly(InvalidInputFormatException.class, () -> new IntegerEncoder().setValueAndVersion(input, Version.V_1));
+        assertThrowsExactly(InvalidInputFormatException.class, () -> new IntegerEncoder().encode(input, Version.V_1));
     }
 
     @Test
     void negativeNumberAndUnsupportedTypeAreRejectedByTheEncoder() {
-        assertThrowsExactly(InvalidInputFormatException.class, () -> new IntegerEncoder().setValueAndVersion(-5, Version.V_1));
-        assertThrowsExactly(InvalidInputFormatException.class, () -> new IntegerEncoder().setValueAndVersion(-5L, Version.V_1));
-        assertThrowsExactly(InvalidInputFormatException.class, () -> new IntegerEncoder().setValueAndVersion(1.5, Version.V_1));
+        assertThrowsExactly(InvalidInputFormatException.class, () -> new IntegerEncoder().encode(-5, Version.V_1));
+        assertThrowsExactly(InvalidInputFormatException.class, () -> new IntegerEncoder().encode(-5L, Version.V_1));
+        assertThrowsExactly(InvalidInputFormatException.class, () -> new IntegerEncoder().encode(1.5, Version.V_1));
     }
 
     @Test

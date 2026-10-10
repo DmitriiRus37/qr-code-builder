@@ -11,10 +11,16 @@ import lombok.NoArgsConstructor;
 import java.util.Map;
 
 @NoArgsConstructor
-public class IntegerEncoder extends AbstractEncoder implements Encoder {
+public class IntegerEncoder implements Encoder {
 
     @Override
-    public Encoder setValueAndVersion(Object obj, Version version) {
+    public String[] encode(Object obj, Version version) {
+        String[] strAr = separateSymbols(toDigits(obj));
+        symbolsArrayToBinaryArray(strAr, version);
+        return strAr;
+    }
+
+    private static String toDigits(Object obj) {
         String digits;
         if (obj instanceof String str) {
             digits = str;
@@ -27,20 +33,10 @@ public class IntegerEncoder extends AbstractEncoder implements Encoder {
         if (!digits.matches("\\d+")) {
             throw new InvalidInputFormatException("numeric mode accepts digits 0-9 only: " + digits);
         }
-        this.value = digits;
-        this.version = version;
-        return this;
+        return digits;
     }
 
-    @Override
-    public String[] transformToBinaryArray() {
-        String[] strAr = separateSymbols();
-        symbolsArrayToBinaryArray(strAr);
-        return strAr;
-    }
-
-    private String[] separateSymbols() {
-        String strInteger = (String) value;
+    private static String[] separateSymbols(String strInteger) {
         int digitsInValue = strInteger.length();
         String[] arr = digitsInValue % 3 == 0 ? new String[digitsInValue / 3 + 2] : new String[digitsInValue / 3 + 3];
         arr[1] = String.valueOf(digitsInValue);
@@ -59,7 +55,7 @@ public class IntegerEncoder extends AbstractEncoder implements Encoder {
         return arr;
     }
 
-    private void symbolsArrayToBinaryArray(String[] arr) {
+    private static void symbolsArrayToBinaryArray(String[] arr, Version version) {
         // the group width depends on the number of digits, never on the value ("012" takes 10 bits)
         Map<Integer, Integer> binaryDigitsCount = Map.of(1, 4, 2, 7, 3, 10);
         for (int i = 2; i < arr.length; i++) {

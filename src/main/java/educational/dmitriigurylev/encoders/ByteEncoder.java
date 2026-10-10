@@ -15,29 +15,22 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 @NoArgsConstructor
-public class ByteEncoder extends AbstractEncoder implements Encoder {
+public class ByteEncoder implements Encoder {
 
     @Override
-    public Encoder setValueAndVersion(Object obj, Version version) {
+    public String[] encode(Object obj, Version version) {
         // Strings are encoded as UTF-8 (no ECI header): practically every reader detects it
         if (obj instanceof String str) {
-            this.value = toUtf8(str);
+            return byteArrayToBinaryArray(toUtf8(str), version);
         } else if (obj instanceof byte[] bytes) {
-            this.value = bytes.clone();
+            return byteArrayToBinaryArray(bytes, version);
         } else {
             throw new InvalidInputFormatException();
         }
-        this.version = version;
-        return this;
-    }
-
-    @Override
-    public String[] transformToBinaryArray() {
-        return byteArrayToBinaryArray((byte[]) this.value);
     }
 
     /** Strict UTF-8: a lone surrogate is an error instead of a silent '?' (String.getBytes would replace it). */
-    private static byte[] toUtf8(String str) {
+    public static byte[] toUtf8(String str) {
         try {
             var buffer = StandardCharsets.UTF_8.newEncoder()
                     .onMalformedInput(CodingErrorAction.REPORT)
@@ -49,7 +42,7 @@ public class ByteEncoder extends AbstractEncoder implements Encoder {
         }
     }
 
-    private String[] byteArrayToBinaryArray(byte[] arr) {
+    private static String[] byteArrayToBinaryArray(byte[] arr, Version version) {
         String[] resArr = new String[3];
         var binaryString = new StringBuilder();
         for (byte b : arr) {

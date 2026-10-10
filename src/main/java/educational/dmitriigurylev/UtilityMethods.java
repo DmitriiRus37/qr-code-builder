@@ -212,7 +212,8 @@ public class UtilityMethods {
     public static StringBuilder addTerminator(StringBuilder bs, int maxBitSequence) {
         int remainZeros = maxBitSequence - bs.length();
         if (remainZeros < 0) {
-            throw new InsuffiecientQrLengthToEncode();
+            throw new InsuffiecientQrLengthToEncode(
+                    "needs " + bs.length() + " bits, the symbol holds " + maxBitSequence);
         }
         return bs.append("0".repeat(Math.min(remainZeros, 4)));
     }

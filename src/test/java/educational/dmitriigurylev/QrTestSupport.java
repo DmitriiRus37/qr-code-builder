@@ -143,6 +143,22 @@ public final class QrTestSupport {
     }
 
     /**
+     * Same oracle for a creator that was already built (e.g. through {@code QrCreator.of(...)}): its own field is
+     * decoded, so the automatic choices are what gets checked, not a rebuild through the fixed-version constructor.
+     */
+    public static void assertRoundTrip(QrCreator built, Object input, String expected) throws Exception {
+        Version version = built.getVersion();
+        CorrectionLevel level = built.getCorrectionLevel();
+        if (UNDETECTABLE_BY_ZXING.contains(new UndetectableByZxing(version, level, expected))) {
+            assertOnlyZxingDetectorFails(version, level, input, expected);
+            return;
+        }
+        Cell[][] field = built.getQrCodeField().getField();
+        assertEquals(expected, decodeBoofcv(field), "BoofCV");
+        assertEquals(expected, decode(field), "ZXing");
+    }
+
+    /**
      * Like {@link #decode}, but with {@code PURE_BARCODE}: no finder-pattern detection, so it shows whether the
      * bits are right even when the detector cannot locate the symbol.
      */

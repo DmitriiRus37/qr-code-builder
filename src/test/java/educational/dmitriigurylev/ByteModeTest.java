@@ -45,30 +45,29 @@ class ByteModeTest {
     @Test
     void bytesAreLeftPaddedToEightBits() {
         // 'A' = 0x41, 'b' = 0x62: both below 0x80, so the old code dropped their leading zero
-        String[] bits = new ByteEncoder().setValueAndVersion("Ab".getBytes(StandardCharsets.US_ASCII), Version.V_1)
-                .transformToBinaryArray();
+        String[] bits = new ByteEncoder().encode("Ab".getBytes(StandardCharsets.US_ASCII), Version.V_1);
         assertArrayEquals(new String[]{"0100", "00000010", "0100000101100010"}, bits);
     }
 
     @Test
     void rawBytesAtOrAbove0x80AreEncodedUnsigned() {
-        String[] bits = new ByteEncoder().setValueAndVersion(new byte[]{(byte) 0xFF, (byte) 0x80}, Version.V_1)
-                .transformToBinaryArray();
+        String[] bits = new ByteEncoder().encode(new byte[]{(byte) 0xFF, (byte) 0x80}, Version.V_1);
         assertArrayEquals(new String[]{"0100", "00000010", "1111111110000000"}, bits);
     }
 
     @Test
     void byteArrayInputIsCopied() {
+        // the encoder is stateless now, so the copy is taken where the input is kept: in QrCreator
         byte[] input = {0x41};
-        var encoder = new ByteEncoder().setValueAndVersion(input, Version.V_1);
+        var creator = QrCreator.of(input, CorrectionLevel.LOW);
         input[0] = 0x42;
-        assertEquals("01000001", encoder.transformToBinaryArray()[2]);
+        assertEquals("A", QrTestSupport.decodeBoofcv(creator.build().getField()));
     }
 
     @Test
     void loneSurrogateIsRejected() {
         assertThrowsExactly(InvalidInputFormatException.class,
-                () -> new ByteEncoder().setValueAndVersion("a\uD83Db", Version.V_1));
+                () -> new ByteEncoder().encode("a\uD83Db", Version.V_1));
     }
 
     @Test
@@ -83,20 +82,20 @@ class ByteModeTest {
     @Test
     void stringIsEncodedAsUtf8AndCountIsBytes() {
         // "Хаб" = D0 A5 D0 B0 D0 B1: 3 chars, 6 bytes
-        String[] bits = new ByteEncoder().setValueAndVersion("Хаб", Version.V_1).transformToBinaryArray();
+        String[] bits = new ByteEncoder().encode("Хаб", Version.V_1);
         assertEquals("00000110", bits[1]);
         assertEquals("110100001010010111010000101100001101000010110001", bits[2]);
     }
 
     @Test
     void characterCountIsSixteenBitsFromV10() {
-        String[] bits = new ByteEncoder().setValueAndVersion("hello", Version.V_10).transformToBinaryArray();
+        String[] bits = new ByteEncoder().encode("hello", Version.V_10);
         assertEquals("0000000000000101", bits[1]);
     }
 
     @Test
     void unsupportedInputTypeIsRejected() {
-        assertThrowsExactly(InvalidInputFormatException.class, () -> new ByteEncoder().setValueAndVersion(1.5, Version.V_1));
+        assertThrowsExactly(InvalidInputFormatException.class, () -> new ByteEncoder().encode(1.5, Version.V_1));
     }
 
     // literal "Done when" check of plan Step 5
