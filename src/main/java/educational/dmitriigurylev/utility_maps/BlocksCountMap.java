@@ -27,11 +27,11 @@ public class BlocksCountMap {
     }
 
 
-    private static Map<CorrectionLevel, Integer> addInfoByCorrectionLevel(int low, int middle, int quarter, int high) {
+    private static Map<CorrectionLevel, Integer> addInfoByCorrectionLevel(int low, int medium, int quartile, int high) {
         return Map.of(
                 CorrectionLevel.LOW, low,
-                CorrectionLevel.MIDDLE, middle,
-                CorrectionLevel.QUARTER, quarter,
+                CorrectionLevel.MEDIUM, medium,
+                CorrectionLevel.QUARTILE, quartile,
                 CorrectionLevel.HIGH, high);
     }
 

@@ -1,6 +1,6 @@
 package educational.dmitriigurylev;
 
-import educational.dmitriigurylev.encoders.IntLetterEncoder;
+import educational.dmitriigurylev.encoders.AlphanumericEncoder;
 import educational.dmitriigurylev.enums.CorrectionLevel;
 import educational.dmitriigurylev.enums.Version;
 import educational.dmitriigurylev.reed_solomon_mapping.GaloisField;
@@ -82,8 +82,8 @@ class SpecVectorsTest {
     /** thonky.com worked example: "HELLO WORLD", version 1, level M. */
     @Test
     void helloWorld1MDataCodewords() {
-        String[] parts = new IntLetterEncoder().encode("HELLO WORLD", Version.V_1);
-        int maxBits = InformationBitSizeMap.getInformationBitsSizeByVersionAndCorrectionLevel(Version.V_1, CorrectionLevel.MIDDLE);
+        String[] parts = new AlphanumericEncoder().encode("HELLO WORLD", Version.V_1);
+        int maxBits = InformationBitSizeMap.getInformationBitsSizeByVersionAndCorrectionLevel(Version.V_1, CorrectionLevel.MEDIUM);
         StringBuilder bits = UtilityMethods.addTerminator(UtilityMethods.binaryArrayToBitString(parts), maxBits);
         int[] codewords = UtilityMethods.addRotationalBytes(
                 UtilityMethods.binaryStringToDecimalArray(UtilityMethods.addLagZeros(bits)), maxBits / 8);
@@ -101,8 +101,8 @@ class SpecVectorsTest {
     @Test
     void formatStringsAreBchEncoded() {
         Map<CorrectionLevel, Integer> ecBits = Map.of(
-                CorrectionLevel.LOW, 0b01, CorrectionLevel.MIDDLE, 0b00,
-                CorrectionLevel.QUARTER, 0b11, CorrectionLevel.HIGH, 0b10);
+                CorrectionLevel.LOW, 0b01, CorrectionLevel.MEDIUM, 0b00,
+                CorrectionLevel.QUARTILE, 0b11, CorrectionLevel.HIGH, 0b10);
         for (CorrectionLevel level : CorrectionLevel.values()) {
             for (int mask = 0; mask < 8; mask++) {
                 int data = ecBits.get(level) << 3 | mask;

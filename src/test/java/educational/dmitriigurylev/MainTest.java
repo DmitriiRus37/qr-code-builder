@@ -54,7 +54,7 @@ class MainTest {
         Path file = tempDir.resolve("a/b/x.png");
         assertEquals(Main.EXIT_OK, run(URL, "-o", file.toString()));
 
-        int mask = QrCreator.of(URL, CorrectionLevel.MIDDLE).createQr().getMaskPattern().getNumber();
+        int mask = QrCreator.of(URL, CorrectionLevel.MEDIUM).createQr().getMaskPattern().getNumber();
         assertEquals("wrote " + file + " (V2-M, byte mode, mask " + mask + ")" + System.lineSeparator(), out());
         assertEquals("", err());
         BufferedImage image = ImageIO.read(file.toFile());

@@ -42,9 +42,9 @@ public class CharacterCountIndicatorMap {
 //                currentByteSize = byteSize_27_40;
 //            }
             map.put(v, Map.of(
-                    EncodingWay.DIGITS, currentDigitSize,
-                    EncodingWay.LETTERS_DIGITS, currentLetterDigitSize,
-                    EncodingWay.BYTES, currentByteSize
+                    EncodingWay.NUMERIC, currentDigitSize,
+                    EncodingWay.ALPHANUMERIC, currentLetterDigitSize,
+                    EncodingWay.BYTE, currentByteSize
                     ));
         }
     }

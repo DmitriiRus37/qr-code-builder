@@ -4,20 +4,19 @@ import educational.dmitriigurylev.UtilityMethods;
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
 import educational.dmitriigurylev.enums.EncodingWay;
 import educational.dmitriigurylev.enums.Version;
+import educational.dmitriigurylev.utility_maps.AlphanumericCharMap;
 import educational.dmitriigurylev.utility_maps.CharacterCountIndicatorMap;
 import educational.dmitriigurylev.utility_maps.EncodingModeIndicatorMap;
-import educational.dmitriigurylev.utility_maps.IntLetterEncoderCharMap;
-import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
-@NoArgsConstructor
-public class IntLetterEncoder implements Encoder {
+public class AlphanumericEncoder implements Encoder {
 
     @Override
     public String[] encode(Object obj, Version version) {
         if (!(obj instanceof String val)) {
-            throw new InvalidInputFormatException();
+            throw new InvalidInputFormatException("alphanumeric mode takes a String, got "
+                    + (obj == null ? "null" : obj.getClass().getName()));
         }
         String[] strAr = separateSymbols(val);
         int[][] intAr = mapCharToInt(strAr);
@@ -47,10 +46,10 @@ public class IntLetterEncoder implements Encoder {
             String str = strAr[j];
             int[] ar = new int[str.length()];
             for (int i = 0; i < str.length(); i++) {
-                if (IntLetterEncoderCharMap.contains(str.charAt(i))) {
-                    ar[i] = IntLetterEncoderCharMap.getIntByChar(str.charAt(i));
+                if (AlphanumericCharMap.contains(str.charAt(i))) {
+                    ar[i] = AlphanumericCharMap.getIntByChar(str.charAt(i));
                 } else {
-                    throw new InvalidInputFormatException();
+                    throw new InvalidInputFormatException("not an alphanumeric character: '" + str.charAt(i) + "'");
                 }
             }
             res[j] = ar;
@@ -63,18 +62,18 @@ public class IntLetterEncoder implements Encoder {
         int symbolsCounter = 0;
         String[] resArr = new String[arr.length+2];
         for (int i = 0; i < arr.length; i++) {
-            int decimalValue = 0;
+            int pairValue = 0;
             for (int curVal : arr[i]) {
-                decimalValue = decimalValue * 45 + curVal;
+                pairValue = pairValue * 45 + curVal;
                 symbolsCounter++;
             }
-            resArr[i+2] = UtilityMethods.toBits(decimalValue, binaryDigitsCount.get(arr[i].length));
+            resArr[i+2] = UtilityMethods.toBits(pairValue, binaryDigitsCount.get(arr[i].length));
         }
-        resArr[0] = EncodingModeIndicatorMap.getFieldSizeByVersion(EncodingWay.LETTERS_DIGITS);
+        resArr[0] = EncodingModeIndicatorMap.getModeIndicator(EncodingWay.ALPHANUMERIC);
 
         resArr[1] = UtilityMethods.characterCountToBits(
                 symbolsCounter,
-                CharacterCountIndicatorMap.getCharacterCountIndicatorByVersionAndEncodingWay(version, EncodingWay.LETTERS_DIGITS));
+                CharacterCountIndicatorMap.getCharacterCountIndicatorByVersionAndEncodingWay(version, EncodingWay.ALPHANUMERIC));
 
         return resArr;
     }

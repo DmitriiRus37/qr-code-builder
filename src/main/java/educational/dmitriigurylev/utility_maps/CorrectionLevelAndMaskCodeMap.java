@@ -21,7 +21,7 @@ public class CorrectionLevelAndMaskCodeMap {
                 (byte) 6, "110110001000001",
                 (byte) 7, "110100101110110"));
 
-        map.put(CorrectionLevel.MIDDLE, Map.of(
+        map.put(CorrectionLevel.MEDIUM, Map.of(
                 (byte) 0, "101010000010010",
                 (byte) 1, "101000100100101",
                 (byte) 2, "101111001111100",
@@ -31,7 +31,7 @@ public class CorrectionLevelAndMaskCodeMap {
                 (byte) 6, "100111110010111",
                 (byte) 7, "100101010100000"));
 
-        map.put(CorrectionLevel.QUARTER, Map.of(
+        map.put(CorrectionLevel.QUARTILE, Map.of(
                 (byte) 0, "011010101011111",
                 (byte) 1, "011000001101000",
                 (byte) 2, "011111100110001",

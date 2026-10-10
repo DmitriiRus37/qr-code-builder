@@ -1,6 +1,6 @@
 package educational.dmitriigurylev;
 
-import educational.dmitriigurylev.custom_exceptions.InsuffiecientQrLengthToEncode;
+import educational.dmitriigurylev.custom_exceptions.InsufficientCapacityException;
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
 
 import java.io.IOException;
@@ -67,13 +67,13 @@ public class Main {
                     .write(output, options.format());
 
             out.println("wrote " + output + " (V" + creator.getVersion().getNumber() + "-"
-                    + CliOptions.levelLetter(creator.getCorrectionLevel()) + ", "
-                    + modeName(creator) + " mode, mask " + creator.getMaskPattern().getNumber() + ")");
+                    + creator.getCorrectionLevel().letter() + ", "
+                    + creator.getEncodingWay().displayName() + " mode, mask " + creator.getMaskPattern().getNumber() + ")");
             if (options.debug()) {
                 out.println("wrote " + QrImageDrawer.debugPath(output));
             }
             return EXIT_OK;
-        } catch (InsuffiecientQrLengthToEncode | InvalidInputFormatException e) {
+        } catch (InsufficientCapacityException | InvalidInputFormatException e) {
             err.println("error: cannot encode the text: " + e.getMessage());
             return EXIT_FAILURE;
         } catch (UncheckedIOException e) {
@@ -89,14 +89,6 @@ public class Main {
         } catch (IOException e) {
             throw new UncheckedIOException("cannot create directory " + parent, e);
         }
-    }
-
-    private static String modeName(QrCreator creator) {
-        return switch (creator.getEncodingWay()) {
-            case DIGITS -> "numeric";
-            case LETTERS_DIGITS -> "alphanumeric";
-            case BYTES -> "byte";
-        };
     }
 
     /** NIO exceptions often carry only the path as their message, so the class name says what went wrong. */

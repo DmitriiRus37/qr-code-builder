@@ -1,6 +1,6 @@
-package educational.dmitriigurylev.v1IntLetterTests.v1IntegerTests;
+package educational.dmitriigurylev.v1AlphanumericTests;
 
-public class QrCodeFileds_V1_H_Mask2 {
+public class QrCodeFields_V1_H_Mask2 {
 
     public static String getFieldOfValue_A() {
         return """
@@ -251,31 +251,6 @@ public class QrCodeFileds_V1_H_Mask2 {
                 1 0 1 1 1 0 1 0 1 0 1 0 0 1 0 1 0 1 1 0 0\s
                 1 0 0 0 0 0 1 0 0 0 1 1 1 0 0 0 1 1 1 0 1\s
                 1 1 1 1 1 1 1 0 0 1 0 1 1 0 0 0 0 1 1 0 0\s
-                """;
-    }
-    public static String getFieldOfValue_ABCDEFGHIJK() {
-        return """
-                1 1 1 1 1 1 1 0 1 1 1 1 0 0 1 1 1 1 1 1 1\s
-                1 0 0 0 0 0 1 0 1 0 1 1 0 0 1 0 0 0 0 0 1\s
-                1 0 1 1 1 0 1 0 1 0 1 0 1 0 1 0 1 1 1 0 1\s
-                1 0 1 1 1 0 1 0 0 1 1 1 0 0 1 0 1 1 1 0 1\s
-                1 0 1 1 1 0 1 0 0 0 0 1 0 0 1 0 1 1 1 0 1\s
-                1 0 0 0 0 0 1 0 1 0 1 1 0 0 1 0 0 0 0 0 1\s
-                1 1 1 1 1 1 1 0 1 0 1 0 1 0 1 1 1 1 1 1 1\s
-                0 0 0 0 0 0 0 0 1 0 0 1 1 0 0 0 0 0 0 0 0\s
-                0 0 1 1 1 0 1 0 1 1 1 1 0 1 1 1 0 0 1 1 1\s
-                0 0 1 1 0 1 0 0 1 0 0 0 0 0 1 0 0 1 0 0 0\s
-                1 1 0 1 0 1 1 0 0 0 1 0 1 0 0 1 0 0 0 0 0\s
-                1 1 1 0 1 1 0 1 0 1 1 0 1 0 1 0 0 1 0 0 0\s
-                1 0 0 0 1 1 1 1 0 1 0 0 0 0 1 1 0 0 1 1 0\s
-                0 0 0 0 0 0 0 0 1 1 0 0 0 0 1 1 0 0 1 0 0\s
-                1 1 1 1 1 1 1 0 0 1 1 0 0 0 0 0 1 1 1 1 0\s
-                1 0 0 0 0 0 1 0 0 0 0 0 1 1 0 1 1 0 1 0 0\s
-                1 0 1 1 1 0 1 0 1 0 0 1 0 0 0 0 1 1 1 0 0\s
-                1 0 1 1 1 0 1 0 1 1 1 0 0 1 1 0 0 1 0 0 0\s
-                1 0 1 1 1 0 1 0 1 1 1 1 1 0 0 1 0 0 0 0 0\s
-                1 0 0 0 0 0 1 0 0 0 0 0 0 1 1 0 0 1 0 1 0\s
-                1 1 1 1 1 1 1 0 0 0 0 0 1 1 0 1 0 0 1 0 0\s
                 """;
     }
 }

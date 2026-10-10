@@ -1,17 +1,15 @@
 package educational.dmitriigurylev;
 
-
-import educational.dmitriigurylev.custom_exceptions.InsuffiecientQrLengthToEncode;
+import educational.dmitriigurylev.custom_exceptions.InsufficientCapacityException;
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
-import educational.dmitriigurylev.enums.CorrectionLevel;
-import educational.dmitriigurylev.enums.Version;
 import educational.dmitriigurylev.reed_solomon_mapping.GaloisField;
 import educational.dmitriigurylev.utility_maps.GeneratingPolynomialMap;
-import educational.dmitriigurylev.utility_maps.InformationBitSizeMap;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -20,7 +18,7 @@ import java.util.stream.Collectors;
 public class UtilityMethods {
     public static int binaryToDecimal(String binaryString) {
         if (binaryString == null || binaryString.isEmpty() || !containsZerosAndOnesOnly(binaryString)) {
-            throw new InvalidInputFormatException();
+            throw new InvalidInputFormatException("not a binary string: " + quote(binaryString));
         }
         int decimal = 0;
         int length = binaryString.length();
@@ -53,7 +51,7 @@ public class UtilityMethods {
      */
     public static String characterCountToBits(int count, int width) {
         if (count >= 1 << width) {
-            throw new InsuffiecientQrLengthToEncode(
+            throw new InsufficientCapacityException(
                     "character count " + count + " does not fit the " + width + "-bit count field");
         }
         return toBits(count, width);
@@ -61,7 +59,7 @@ public class UtilityMethods {
 
     public static StringBuilder binaryArrayToBitString(String[] strAr) {
         if (strAr == null) {
-            throw new InvalidInputFormatException();
+            throw new InvalidInputFormatException("no bit strings to join: null");
         }
         return new StringBuilder(String.join("", strAr));
     }
@@ -74,7 +72,8 @@ public class UtilityMethods {
 
     public static int[] binaryStringToDecimalArray(String bitString) {
         if (bitString == null || bitString.isEmpty() || bitString.length() % 8 != 0) {
-            throw new InvalidInputFormatException();
+            throw new InvalidInputFormatException("bit string length must be a positive multiple of 8: "
+                    + quote(bitString));
         }
         int[] decimalIntArray = new int[bitString.length() / 8];
         int i = 0;
@@ -98,18 +97,9 @@ public class UtilityMethods {
         return resArray;
     }
 
-    public static boolean containsAllLettersUpperCase(String str) {
-        if (str == null) {
-            throw new InvalidInputFormatException();
-        }
-        return str.chars()
-                .filter(Character::isLetter)
-                .allMatch(Character::isUpperCase);
-    }
-
     public static boolean containsZerosAndOnesOnly(String str) {
         if (str == null) {
-            throw new InvalidInputFormatException();
+            throw new InvalidInputFormatException("not a binary string: null");
         }
         Pattern pattern = Pattern.compile("^[01]+$");
         Matcher matcher = pattern.matcher(str);
@@ -165,22 +155,22 @@ public class UtilityMethods {
     }
 
     public static String[] uniteBlocks(Block[] blocks) {
-        LinkedList<List<Integer>> decimalvValuesList = new LinkedList<>();
+        LinkedList<List<Integer>> dataCodewords = new LinkedList<>();
         LinkedList<List<Integer>> correctionBytesList = new LinkedList<>();
 
         for (Block block : blocks) {
-            decimalvValuesList.add(Arrays.stream(block.getDecimalArr())
+            dataCodewords.add(Arrays.stream(block.getDataCodewords())
                     .boxed()
                     .collect(Collectors.toList()));
-            List<Integer> list = Arrays.stream(block.getCorrectBytesArr())
+            List<Integer> list = Arrays.stream(block.getEcCodewords())
                     .boxed()
                     .collect(Collectors.toCollection(LinkedList::new));
             correctionBytesList.add(list);
         }
 
         List<Integer> resList = new LinkedList<>();
-        while (!decimalvValuesList.isEmpty()) {
-            decimalvValuesList = decimalvValuesList.stream()
+        while (!dataCodewords.isEmpty()) {
+            dataCodewords = dataCodewords.stream()
                     .peek(currentList -> resList.add(currentList.remove(0)))
                     .filter(list -> !list.isEmpty())
                     .collect(Collectors.toCollection(LinkedList::new));
@@ -198,21 +188,23 @@ public class UtilityMethods {
                 .toArray(String[]::new);
     }
 
-    public static StringBuilder getStringBuilder(String[] unitedArr) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < unitedArr.length; i++) {
-            int decimalValue = Integer.parseInt(unitedArr[i]);
-            String binStr = Integer.toBinaryString(decimalValue);
-            unitedArr[i] = String.format("%8s", binStr).replace(' ', '0');
-            sb.append(unitedArr[i]);
+    /** The final bit stream: each codeword (decimal text, 0-255) as 8 bits. The input array is not changed. */
+    public static StringBuilder codewordsToBits(String[] codewords) {
+        StringBuilder sb = new StringBuilder(codewords.length * 8);
+        for (String codeword : codewords) {
+            sb.append(toBits(Integer.parseInt(codeword), 8));
         }
         return sb;
+    }
+
+    private static String quote(String s) {
+        return s == null ? "null" : "'" + s + "'";
     }
 
     public static StringBuilder addTerminator(StringBuilder bs, int maxBitSequence) {
         int remainZeros = maxBitSequence - bs.length();
         if (remainZeros < 0) {
-            throw new InsuffiecientQrLengthToEncode(
+            throw new InsufficientCapacityException(
                     "needs " + bs.length() + " bits, the symbol holds " + maxBitSequence);
         }
         return bs.append("0".repeat(Math.min(remainZeros, 4)));

@@ -42,12 +42,12 @@ class MaskSelectionTest {
         for (Version v : Version.values()) {
             for (CorrectionLevel l : CorrectionLevel.values()) {
                 for (int i = 0; i < PAYLOADS_PER_MODE; i++) {
-                    cases.add(Arguments.of(v, l, randomText(random, NUMERIC, capacity(v, l, EncodingWay.DIGITS))));
-                    cases.add(Arguments.of(v, l, randomText(random, ALPHANUMERIC, capacity(v, l, EncodingWay.LETTERS_DIGITS))));
+                    cases.add(Arguments.of(v, l, randomText(random, NUMERIC, capacity(v, l, EncodingWay.NUMERIC))));
+                    cases.add(Arguments.of(v, l, randomText(random, ALPHANUMERIC, capacity(v, l, EncodingWay.ALPHANUMERIC))));
                     // a leading lower-case letter keeps it in byte mode
-                    cases.add(Arguments.of(v, l, "a" + randomText(random, ASCII, capacity(v, l, EncodingWay.BYTES) - 1)));
+                    cases.add(Arguments.of(v, l, "a" + randomText(random, ASCII, capacity(v, l, EncodingWay.BYTE) - 1)));
                     // 2 UTF-8 bytes per character (3 for '€'), so a third of the byte capacity always fits
-                    cases.add(Arguments.of(v, l, randomText(random, NON_LATIN, capacity(v, l, EncodingWay.BYTES) / 3)));
+                    cases.add(Arguments.of(v, l, randomText(random, NON_LATIN, capacity(v, l, EncodingWay.BYTE) / 3)));
                 }
             }
         }
@@ -68,9 +68,9 @@ class MaskSelectionTest {
         int bits = InformationBitSizeMap.getInformationBitsSizeByVersionAndCorrectionLevel(v, l) - 4
                 - CharacterCountIndicatorMap.getCharacterCountIndicatorByVersionAndEncodingWay(v, mode);
         return switch (mode) {
-            case DIGITS -> bits / 10 * 3 + (bits % 10 >= 7 ? 2 : bits % 10 >= 4 ? 1 : 0);
-            case LETTERS_DIGITS -> bits / 11 * 2 + (bits % 11 >= 6 ? 1 : 0);
-            case BYTES -> bits / 8;
+            case NUMERIC -> bits / 10 * 3 + (bits % 10 >= 7 ? 2 : bits % 10 >= 4 ? 1 : 0);
+            case ALPHANUMERIC -> bits / 11 * 2 + (bits % 11 >= 6 ? 1 : 0);
+            case BYTE -> bits / 8;
         };
     }
 

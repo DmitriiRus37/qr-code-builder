@@ -6,12 +6,10 @@ import educational.dmitriigurylev.enums.EncodingWay;
 import educational.dmitriigurylev.enums.Version;
 import educational.dmitriigurylev.utility_maps.CharacterCountIndicatorMap;
 import educational.dmitriigurylev.utility_maps.EncodingModeIndicatorMap;
-import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
-@NoArgsConstructor
-public class IntegerEncoder implements Encoder {
+public class NumericEncoder implements Encoder {
 
     @Override
     public String[] encode(Object obj, Version version) {
@@ -20,14 +18,11 @@ public class IntegerEncoder implements Encoder {
         return strAr;
     }
 
+    /** QrCreator passes the text; numbers were already turned into their decimal text there. */
     private static String toDigits(Object obj) {
-        String digits;
-        if (obj instanceof String str) {
-            digits = str;
-        } else if (obj instanceof Integer || obj instanceof Long) {
-            digits = String.valueOf(obj);
-        } else {
-            throw new InvalidInputFormatException();
+        if (!(obj instanceof String digits)) {
+            throw new InvalidInputFormatException("numeric mode takes a String, got "
+                    + (obj == null ? "null" : obj.getClass().getName()));
         }
         // numeric mode holds the digits 0-9 only: no sign, no blanks, not empty
         if (!digits.matches("\\d+")) {
@@ -61,11 +56,11 @@ public class IntegerEncoder implements Encoder {
         for (int i = 2; i < arr.length; i++) {
             arr[i] = UtilityMethods.toBits(Integer.parseInt(arr[i]), binaryDigitsCount.get(arr[i].length()));
         }
-        arr[0] = EncodingModeIndicatorMap.getFieldSizeByVersion(EncodingWay.DIGITS);
+        arr[0] = EncodingModeIndicatorMap.getModeIndicator(EncodingWay.NUMERIC);
 
         arr[1] = UtilityMethods.characterCountToBits(
                 Integer.parseInt(arr[1]),
-                CharacterCountIndicatorMap.getCharacterCountIndicatorByVersionAndEncodingWay(version, EncodingWay.DIGITS));
+                CharacterCountIndicatorMap.getCharacterCountIndicatorByVersionAndEncodingWay(version, EncodingWay.NUMERIC));
     }
 
 }

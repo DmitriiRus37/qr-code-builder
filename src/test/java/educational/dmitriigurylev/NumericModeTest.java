@@ -1,9 +1,10 @@
 package educational.dmitriigurylev;
 
-import educational.dmitriigurylev.custom_exceptions.InsuffiecientQrLengthToEncode;
+import educational.dmitriigurylev.custom_exceptions.InsufficientCapacityException;
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
-import educational.dmitriigurylev.encoders.IntegerEncoder;
+import educational.dmitriigurylev.encoders.NumericEncoder;
 import educational.dmitriigurylev.enums.CorrectionLevel;
+import educational.dmitriigurylev.enums.EncodingWay;
 import educational.dmitriigurylev.enums.Version;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,8 +22,8 @@ import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 /** Numeric mode (Step 6): the group width follows the digit count, so groups with leading zeros keep their width. */
 class NumericModeTest {
 
-    private static String[] encode(Object input) {
-        return new IntegerEncoder().encode(input, Version.V_1);
+    private static String[] encode(String input) {
+        return new NumericEncoder().encode(input, Version.V_1);
     }
 
     @Test
@@ -47,21 +48,27 @@ class NumericModeTest {
 
     @Test
     void integerAndLongInputAreTheirDecimalDigits() {
-        assertArrayEquals(encode("1000000"), encode(1000000));
-        assertArrayEquals(encode("1000000"), encode(1000000L));
+        // QrCreator turns numbers into their decimal text before choosing the encoder
+        String expected = FieldUtil.fieldToString(new QrCreator(Version.V_1, CorrectionLevel.LOW, "1000000").createQr().getQrCodeField().getField());
+        for (Object input : List.of(1000000, 1000000L)) {
+            QrCreator creator = new QrCreator(Version.V_1, CorrectionLevel.LOW, input).createQr();
+            assertEquals(EncodingWay.NUMERIC, creator.getEncodingWay());
+            assertEquals(expected, FieldUtil.fieldToString(creator.getQrCodeField().getField()));
+        }
     }
 
     @ParameterizedTest
     @ValueSource(strings = {"-5", "12a", "", " 1", "1 2", "+1", "１２"})
     void nonDigitStringIsRejected(String input) {
-        assertThrowsExactly(InvalidInputFormatException.class, () -> new IntegerEncoder().encode(input, Version.V_1));
+        assertThrowsExactly(InvalidInputFormatException.class, () -> new NumericEncoder().encode(input, Version.V_1));
     }
 
     @Test
-    void negativeNumberAndUnsupportedTypeAreRejectedByTheEncoder() {
-        assertThrowsExactly(InvalidInputFormatException.class, () -> new IntegerEncoder().encode(-5, Version.V_1));
-        assertThrowsExactly(InvalidInputFormatException.class, () -> new IntegerEncoder().encode(-5L, Version.V_1));
-        assertThrowsExactly(InvalidInputFormatException.class, () -> new IntegerEncoder().encode(1.5, Version.V_1));
+    void nonStringInputIsRejectedByTheEncoder() {
+        // the encoder only takes text: QrCreator converts numbers, so -5 never reaches numeric mode
+        assertThrowsExactly(InvalidInputFormatException.class, () -> new NumericEncoder().encode(5, Version.V_1));
+        assertThrowsExactly(InvalidInputFormatException.class, () -> new NumericEncoder().encode(-5L, Version.V_1));
+        assertThrowsExactly(InvalidInputFormatException.class, () -> new NumericEncoder().encode(1.5, Version.V_1));
     }
 
     @Test
@@ -80,7 +87,7 @@ class NumericModeTest {
         String fits = "0".repeat(17);
         QrTestSupport.assertRoundTrip(Version.V_1, CorrectionLevel.HIGH, fits, fits);
 
-        assertThrowsExactly(InsuffiecientQrLengthToEncode.class,
+        assertThrowsExactly(InsufficientCapacityException.class,
                 () -> new QrCreator(Version.V_1, CorrectionLevel.HIGH, "0".repeat(18)).createQr());
     }
 

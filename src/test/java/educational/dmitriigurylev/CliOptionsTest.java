@@ -37,7 +37,7 @@ class CliOptionsTest {
     void defaults() {
         CliOptions o = parse("HELLO WORLD");
         assertEquals("HELLO WORLD", o.text());
-        assertEquals(CorrectionLevel.MIDDLE, o.level());
+        assertEquals(CorrectionLevel.MEDIUM, o.level());
         assertNull(o.version());
         assertNull(o.mask());
         assertEquals(QrImageDrawer.DEFAULT_SCALE, o.scale());
@@ -52,15 +52,15 @@ class CliOptionsTest {
     void everyOptionTogether() {
         CliOptions o = parse("-l", "Q", "-v", "7", "-m", "3", "-s", "4", "-q", "6", "-o", "out/x.svg", "--debug",
                 "https://example.com", "--svg");
-        assertEquals(new CliOptions("https://example.com", CorrectionLevel.QUARTER, Version.V_7, 3, 4, 6,
+        assertEquals(new CliOptions("https://example.com", CorrectionLevel.QUARTILE, Version.V_7, 3, 4, 6,
                 Path.of("out/x.svg"), Format.SVG, true, false), o);
     }
 
     @ParameterizedTest
-    @CsvSource({"L, LOW", "M, MIDDLE", "Q, QUARTER", "H, HIGH", "l, LOW", "h, HIGH"})
+    @CsvSource({"L, LOW", "M, MEDIUM", "Q, QUARTILE", "H, HIGH", "l, LOW", "h, HIGH"})
     void levels(String letter, CorrectionLevel level) {
         assertEquals(level, parse("X", "-l", letter).level());
-        assertEquals(letter.toUpperCase(Locale.ROOT), CliOptions.levelLetter(level));
+        assertEquals(letter.toUpperCase(Locale.ROOT), level.letter());
     }
 
     @Test

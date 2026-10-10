@@ -49,18 +49,18 @@ class DecodeRoundTripTest {
     static final List<Arguments> REGRESSIONS = List.of(
             Arguments.of(Version.V_2, CorrectionLevel.HIGH,
                     numeric("0".repeat(33) + "7")),
-            Arguments.of(Version.V_3, CorrectionLevel.MIDDLE,
+            Arguments.of(Version.V_3, CorrectionLevel.MEDIUM,
                     numeric("078161009481839")),
-            Arguments.of(Version.V_6, CorrectionLevel.QUARTER,
+            Arguments.of(Version.V_6, CorrectionLevel.QUARTILE,
                     numeric("5074145457")),
             // the rest come from a seeded sweep of random payloads (java.util.Random(42)) on all versions x levels
-            Arguments.of(Version.V_7, CorrectionLevel.QUARTER,
+            Arguments.of(Version.V_7, CorrectionLevel.QUARTILE,
                     alphanumeric("0%$R.2CV++4$S3I/O XJJ8E-P4Y- %GLMFVOYQFESVY7JXXH8/IZVT3$F2")),
             Arguments.of(Version.V_8, CorrectionLevel.HIGH,
                     alphanumeric("N%9ZXB .*GI3/AJ7:DJT:LI1XAKY.HT5HCCKFAP/FB*- WDV0 JPGK78QVKL8A78*Q5$2D+%S")),
             Arguments.of(Version.V_8, CorrectionLevel.HIGH,
                     bytes("a0tncr#g4pgiyt82oban&_1!4oju2wp06")),
-            Arguments.of(Version.V_8, CorrectionLevel.QUARTER,
+            Arguments.of(Version.V_8, CorrectionLevel.QUARTILE,
                     bytes("apny5q=yugc9urgf627rr#ox!me&lg2y#~xq73quqwppi")),
             Arguments.of(Version.V_9, CorrectionLevel.HIGH,
                     numeric("55258294937699303991991207")));

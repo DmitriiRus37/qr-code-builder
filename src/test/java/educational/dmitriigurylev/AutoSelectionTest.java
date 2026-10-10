@@ -1,10 +1,10 @@
 package educational.dmitriigurylev;
 
-import educational.dmitriigurylev.custom_exceptions.InsuffiecientQrLengthToEncode;
+import educational.dmitriigurylev.custom_exceptions.InsufficientCapacityException;
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
+import educational.dmitriigurylev.encoders.AlphanumericEncoder;
 import educational.dmitriigurylev.encoders.ByteEncoder;
-import educational.dmitriigurylev.encoders.IntLetterEncoder;
-import educational.dmitriigurylev.encoders.IntegerEncoder;
+import educational.dmitriigurylev.encoders.NumericEncoder;
 import educational.dmitriigurylev.enums.CorrectionLevel;
 import educational.dmitriigurylev.enums.EncodingWay;
 import educational.dmitriigurylev.enums.Version;
@@ -46,13 +46,13 @@ class AutoSelectionTest {
             Version.V_9, new int[]{552, 335, 230, 432, 262, 180, 312, 189, 130, 235, 143, 98},
             Version.V_10, new int[]{652, 395, 271, 513, 311, 213, 364, 221, 151, 288, 174, 119});
 
-    private static final List<EncodingWay> MODES = List.of(EncodingWay.DIGITS, EncodingWay.LETTERS_DIGITS, EncodingWay.BYTES);
+    private static final List<EncodingWay> MODES = List.of(EncodingWay.NUMERIC, EncodingWay.ALPHANUMERIC, EncodingWay.BYTE);
 
     private static int capacity(Version v, CorrectionLevel l, EncodingWay mode) {
         int level = switch (l) {
             case LOW -> 0;
-            case MIDDLE -> 1;
-            case QUARTER -> 2;
+            case MEDIUM -> 1;
+            case QUARTILE -> 2;
             case HIGH -> 3;
         };
         return CAPACITY.get(v)[level * 3 + MODES.indexOf(mode)];
@@ -61,9 +61,9 @@ class AutoSelectionTest {
     /** A payload of exactly {@code length} characters that selects {@code mode}; byte mode uses ASCII lower case. */
     private static String payload(EncodingWay mode, int length) {
         String alphabet = switch (mode) {
-            case DIGITS -> "0123456789";
-            case LETTERS_DIGITS -> ALPHANUMERIC_SET;
-            case BYTES -> "abcdefghijklmnopqrstuvwxyz";
+            case NUMERIC -> "0123456789";
+            case ALPHANUMERIC -> ALPHANUMERIC_SET;
+            case BYTE -> "abcdefghijklmnopqrstuvwxyz";
         };
         var sb = new StringBuilder(length);
         for (int i = 0; i < length; i++) {
@@ -77,15 +77,15 @@ class AutoSelectionTest {
     }
 
     @Test
-    void helloWorldAtMiddlePicksV1Alphanumeric() throws Exception {
-        QrCreator creator = QrCreator.of("HELLO WORLD", CorrectionLevel.MIDDLE);
+    void helloWorldAtMediumPicksV1Alphanumeric() throws Exception {
+        QrCreator creator = QrCreator.of("HELLO WORLD", CorrectionLevel.MEDIUM);
         assertNull(creator.getVersion(), "no version before createQr");
         QrCodeField field = creator.build();
 
         assertEquals(Version.V_1, creator.getVersion());
-        assertEquals(EncodingWay.LETTERS_DIGITS, creator.getEncodingWay());
+        assertEquals(EncodingWay.ALPHANUMERIC, creator.getEncodingWay());
         // same symbol as the fixed-version form
-        QrCreator fixed = new QrCreator(Version.V_1, CorrectionLevel.MIDDLE, "HELLO WORLD").createQr();
+        QrCreator fixed = new QrCreator(Version.V_1, CorrectionLevel.MEDIUM, "HELLO WORLD").createQr();
         assertEquals(FieldUtil.fieldToString(fixed.getQrCodeField().getField()), FieldUtil.fieldToString(field.getField()));
         QrTestSupport.assertRoundTrip(creator, "HELLO WORLD", "HELLO WORLD");
     }
@@ -93,8 +93,8 @@ class AutoSelectionTest {
     // literal "Done when" check of plan Step 10
     @Test
     void alphanumeric154AtLowPicksV5And155PicksV6() throws Exception {
-        String fits = payload(EncodingWay.LETTERS_DIGITS, 154);
-        String oneMore = payload(EncodingWay.LETTERS_DIGITS, 155);
+        String fits = payload(EncodingWay.ALPHANUMERIC, 154);
+        String oneMore = payload(EncodingWay.ALPHANUMERIC, 155);
 
         QrCreator first = QrCreator.of(fits, CorrectionLevel.LOW).createQr();
         QrCreator second = QrCreator.of(oneMore, CorrectionLevel.LOW).createQr();
@@ -127,7 +127,7 @@ class AutoSelectionTest {
         assertEquals(mode, fits.getEncodingWay());
 
         if (v == Version.V_10) {
-            assertThrowsExactly(InsuffiecientQrLengthToEncode.class, () -> QrCreator.of(payload(mode, max + 1), l).createQr());
+            assertThrowsExactly(InsufficientCapacityException.class, () -> QrCreator.of(payload(mode, max + 1), l).createQr());
         } else {
             assertEquals(next(v), QrCreator.of(payload(mode, max + 1), l).createQr().getVersion());
         }
@@ -135,15 +135,15 @@ class AutoSelectionTest {
 
     static Stream<Arguments> roundTripBoundaries() {
         return Stream.of(
-                Arguments.of(Version.V_1, CorrectionLevel.LOW, EncodingWay.DIGITS),
-                Arguments.of(Version.V_3, CorrectionLevel.HIGH, EncodingWay.DIGITS),
-                Arguments.of(Version.V_9, CorrectionLevel.MIDDLE, EncodingWay.DIGITS),
-                Arguments.of(Version.V_2, CorrectionLevel.QUARTER, EncodingWay.LETTERS_DIGITS),
-                Arguments.of(Version.V_8, CorrectionLevel.HIGH, EncodingWay.LETTERS_DIGITS),
-                Arguments.of(Version.V_1, CorrectionLevel.HIGH, EncodingWay.BYTES),
-                Arguments.of(Version.V_6, CorrectionLevel.MIDDLE, EncodingWay.BYTES),
+                Arguments.of(Version.V_1, CorrectionLevel.LOW, EncodingWay.NUMERIC),
+                Arguments.of(Version.V_3, CorrectionLevel.HIGH, EncodingWay.NUMERIC),
+                Arguments.of(Version.V_9, CorrectionLevel.MEDIUM, EncodingWay.NUMERIC),
+                Arguments.of(Version.V_2, CorrectionLevel.QUARTILE, EncodingWay.ALPHANUMERIC),
+                Arguments.of(Version.V_8, CorrectionLevel.HIGH, EncodingWay.ALPHANUMERIC),
+                Arguments.of(Version.V_1, CorrectionLevel.HIGH, EncodingWay.BYTE),
+                Arguments.of(Version.V_6, CorrectionLevel.MEDIUM, EncodingWay.BYTE),
                 // V9 -> V10 also crosses the character count width change (8 -> 16 bits for bytes)
-                Arguments.of(Version.V_9, CorrectionLevel.LOW, EncodingWay.BYTES));
+                Arguments.of(Version.V_9, CorrectionLevel.LOW, EncodingWay.BYTE));
     }
 
     /** The boundary payloads are real symbols: both sides of the boundary decode. */
@@ -172,24 +172,24 @@ class AutoSelectionTest {
 
     static Stream<Arguments> modeCases() {
         return Stream.of(
-                Arguments.of("0123456789", EncodingWay.DIGITS),
-                Arguments.of("007", EncodingWay.DIGITS),
-                Arguments.of("HELLO WORLD $%*+-./:", EncodingWay.LETTERS_DIGITS),
-                Arguments.of("12A", EncodingWay.LETTERS_DIGITS),
-                Arguments.of("-5", EncodingWay.LETTERS_DIGITS),
-                Arguments.of(" ", EncodingWay.LETTERS_DIGITS),
-                Arguments.of("hello", EncodingWay.BYTES),
-                Arguments.of("Hello", EncodingWay.BYTES),
-                Arguments.of("HELLO!", EncodingWay.BYTES),
-                Arguments.of("Хаб", EncodingWay.BYTES),
-                Arguments.of("１２", EncodingWay.BYTES), // full-width digits are not ASCII digits
-                Arguments.of("https://example.com/?q=1", EncodingWay.BYTES));
+                Arguments.of("0123456789", EncodingWay.NUMERIC),
+                Arguments.of("007", EncodingWay.NUMERIC),
+                Arguments.of("HELLO WORLD $%*+-./:", EncodingWay.ALPHANUMERIC),
+                Arguments.of("12A", EncodingWay.ALPHANUMERIC),
+                Arguments.of("-5", EncodingWay.ALPHANUMERIC),
+                Arguments.of(" ", EncodingWay.ALPHANUMERIC),
+                Arguments.of("hello", EncodingWay.BYTE),
+                Arguments.of("Hello", EncodingWay.BYTE),
+                Arguments.of("HELLO!", EncodingWay.BYTE),
+                Arguments.of("Хаб", EncodingWay.BYTE),
+                Arguments.of("１２", EncodingWay.BYTE), // full-width digits are not ASCII digits
+                Arguments.of("https://example.com/?q=1", EncodingWay.BYTE));
     }
 
     @ParameterizedTest(name = "\"{0}\" -> {1}")
     @MethodSource("modeCases")
     void modeIsTheMostCompactOneCoveringEveryCharacter(String text, EncodingWay expected) throws Exception {
-        QrCreator creator = QrCreator.of(text, CorrectionLevel.MIDDLE).createQr();
+        QrCreator creator = QrCreator.of(text, CorrectionLevel.MEDIUM).createQr();
         assertEquals(expected, creator.getEncodingWay());
         QrTestSupport.assertRoundTrip(creator, text, text);
     }
@@ -198,15 +198,15 @@ class AutoSelectionTest {
     void byteArrayIsAlwaysByteMode() throws Exception {
         byte[] digits = "123".getBytes(StandardCharsets.US_ASCII);
         QrCreator creator = QrCreator.of(digits, CorrectionLevel.HIGH).createQr();
-        assertEquals(EncodingWay.BYTES, creator.getEncodingWay());
+        assertEquals(EncodingWay.BYTE, creator.getEncodingWay());
         assertEquals(Version.V_1, creator.getVersion());
         assertEquals("123", QrTestSupport.decodeBoofcv(creator.getQrCodeField().getField()));
     }
 
     @Test
     void numbersInTheFixedVersionFormFollowTheirDigits() {
-        assertEquals(EncodingWay.DIGITS, new QrCreator(Version.V_1, CorrectionLevel.HIGH, 1234).getEncodingWay());
-        assertEquals(EncodingWay.LETTERS_DIGITS, new QrCreator(Version.V_1, CorrectionLevel.HIGH, -5L).getEncodingWay());
+        assertEquals(EncodingWay.NUMERIC, new QrCreator(Version.V_1, CorrectionLevel.HIGH, 1234).getEncodingWay());
+        assertEquals(EncodingWay.ALPHANUMERIC, new QrCreator(Version.V_1, CorrectionLevel.HIGH, -5L).getEncodingWay());
     }
 
     /** Empty input is rejected: a symbol that carries nothing is almost certainly a caller error. */
@@ -234,17 +234,17 @@ class AutoSelectionTest {
 
     @Test
     void overflowBeyondV10HasAMessage() {
-        var alphanumeric = assertThrowsExactly(InsuffiecientQrLengthToEncode.class,
-                () -> QrCreator.of(payload(EncodingWay.LETTERS_DIGITS, 396), CorrectionLevel.LOW).build());
+        var alphanumeric = assertThrowsExactly(InsufficientCapacityException.class,
+                () -> QrCreator.of(payload(EncodingWay.ALPHANUMERIC, 396), CorrectionLevel.LOW).build());
         assertEquals("alphanumeric payload of 396 characters needs 2193 bits, V10-L holds 2192 (the largest supported version)",
                 alphanumeric.getMessage());
 
-        var bytes = assertThrowsExactly(InsuffiecientQrLengthToEncode.class,
+        var bytes = assertThrowsExactly(InsufficientCapacityException.class,
                 () -> QrCreator.of(new byte[272], CorrectionLevel.HIGH).build());
         assertEquals("byte payload of 272 bytes needs 2196 bits, V10-H holds 976 (the largest supported version)",
                 bytes.getMessage());
 
-        var numeric = assertThrowsExactly(InsuffiecientQrLengthToEncode.class,
+        var numeric = assertThrowsExactly(InsufficientCapacityException.class,
                 () -> QrCreator.of("1".repeat(289), CorrectionLevel.HIGH).build());
         assertEquals("numeric payload of 289 digits needs 980 bits, V10-H holds 976 (the largest supported version)",
                 numeric.getMessage());
@@ -252,12 +252,12 @@ class AutoSelectionTest {
 
     @Test
     void explicitVersionTooSmallHasAMessage() {
-        var e = assertThrowsExactly(InsuffiecientQrLengthToEncode.class,
+        var e = assertThrowsExactly(InsufficientCapacityException.class,
                 () -> QrCreator.of("HELLO WORLD", CorrectionLevel.HIGH).version(Version.V_1).build());
         assertEquals("alphanumeric payload of 11 characters needs 74 bits, V1-H holds 72", e.getMessage());
 
         // the fixed-version constructor is checked the same way, before anything is encoded
-        var old = assertThrowsExactly(InsuffiecientQrLengthToEncode.class,
+        var old = assertThrowsExactly(InsufficientCapacityException.class,
                 () -> new QrCreator(Version.V_1, CorrectionLevel.LOW, "a".repeat(18)).createQr());
         assertEquals("byte payload of 18 bytes needs 156 bits, V1-L holds 152", old.getMessage());
     }
@@ -271,7 +271,7 @@ class AutoSelectionTest {
 
     @Test
     void maskOverrideWorksWithAutomaticVersion() {
-        QrCreator creator = QrCreator.of("HELLO WORLD", CorrectionLevel.MIDDLE).forceMask(5).createQr();
+        QrCreator creator = QrCreator.of("HELLO WORLD", CorrectionLevel.MEDIUM).forceMask(5).createQr();
         assertEquals(5, creator.getMaskPattern().getNumber());
         assertEquals(Version.V_1, creator.getVersion());
     }
@@ -294,7 +294,7 @@ class AutoSelectionTest {
 
     @Test
     void createQrCanBeCalledAgain() {
-        QrCreator creator = QrCreator.of("HELLO WORLD", CorrectionLevel.MIDDLE);
+        QrCreator creator = QrCreator.of("HELLO WORLD", CorrectionLevel.MEDIUM);
         String first = FieldUtil.fieldToString(creator.build().getField());
         assertEquals(first, FieldUtil.fieldToString(creator.build().getField()));
     }
@@ -304,9 +304,9 @@ class AutoSelectionTest {
     void requiredBitsMatchEncoderOutput() {
         for (Version v : List.of(Version.V_1, Version.V_9, Version.V_10)) {
             for (int n = 1; n <= 12; n++) {
-                assertBits(new IntegerEncoder().encode(payload(EncodingWay.DIGITS, n), v), EncodingWay.DIGITS, n, v);
-                assertBits(new IntLetterEncoder().encode(payload(EncodingWay.LETTERS_DIGITS, n), v), EncodingWay.LETTERS_DIGITS, n, v);
-                assertBits(new ByteEncoder().encode(new byte[n], v), EncodingWay.BYTES, n, v);
+                assertBits(new NumericEncoder().encode(payload(EncodingWay.NUMERIC, n), v), EncodingWay.NUMERIC, n, v);
+                assertBits(new AlphanumericEncoder().encode(payload(EncodingWay.ALPHANUMERIC, n), v), EncodingWay.ALPHANUMERIC, n, v);
+                assertBits(new ByteEncoder().encode(new byte[n], v), EncodingWay.BYTE, n, v);
             }
         }
     }

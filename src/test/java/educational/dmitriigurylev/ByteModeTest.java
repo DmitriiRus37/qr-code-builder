@@ -1,6 +1,6 @@
 package educational.dmitriigurylev;
 
-import educational.dmitriigurylev.custom_exceptions.InsuffiecientQrLengthToEncode;
+import educational.dmitriigurylev.custom_exceptions.InsufficientCapacityException;
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
 import educational.dmitriigurylev.encoders.ByteEncoder;
 import educational.dmitriigurylev.enums.CorrectionLevel;
@@ -35,8 +35,8 @@ class ByteModeTest {
     private static int byteCapacity(Version v, CorrectionLevel l) {
         int index = switch (l) {
             case LOW -> 0;
-            case MIDDLE -> 1;
-            case QUARTER -> 2;
+            case MEDIUM -> 1;
+            case QUARTILE -> 2;
             case HIGH -> 3;
         };
         return BYTE_CAPACITY.get(v)[index];
@@ -67,35 +67,37 @@ class ByteModeTest {
     @Test
     void loneSurrogateIsRejected() {
         assertThrowsExactly(InvalidInputFormatException.class,
-                () -> new ByteEncoder().encode("a\uD83Db", Version.V_1));
+                () -> ByteEncoder.toUtf8("a\uD83Db"));
     }
 
     @Test
     void countLargerThanCountFieldIsACapacityError() {
         // 300 bytes need more than the 8-bit count field of V1-V9
-        assertThrowsExactly(InsuffiecientQrLengthToEncode.class,
+        assertThrowsExactly(InsufficientCapacityException.class,
                 () -> new QrCreator(Version.V_1, CorrectionLevel.LOW, "a".repeat(300)).createQr());
-        assertThrowsExactly(InsuffiecientQrLengthToEncode.class,
+        assertThrowsExactly(InsufficientCapacityException.class,
                 () -> new QrCreator(Version.V_9, CorrectionLevel.LOW, "a".repeat(300)).createQr());
     }
 
     @Test
     void stringIsEncodedAsUtf8AndCountIsBytes() {
         // "Хаб" = D0 A5 D0 B0 D0 B1: 3 chars, 6 bytes
-        String[] bits = new ByteEncoder().encode("Хаб", Version.V_1);
+        String[] bits = new ByteEncoder().encode(ByteEncoder.toUtf8("Хаб"), Version.V_1);
         assertEquals("00000110", bits[1]);
         assertEquals("110100001010010111010000101100001101000010110001", bits[2]);
     }
 
     @Test
     void characterCountIsSixteenBitsFromV10() {
-        String[] bits = new ByteEncoder().encode("hello", Version.V_10);
+        String[] bits = new ByteEncoder().encode("hello".getBytes(StandardCharsets.US_ASCII), Version.V_10);
         assertEquals("0000000000000101", bits[1]);
     }
 
     @Test
     void unsupportedInputTypeIsRejected() {
         assertThrowsExactly(InvalidInputFormatException.class, () -> new ByteEncoder().encode(1.5, Version.V_1));
+        // text is turned into UTF-8 by QrCreator (ByteEncoder.toUtf8), so the encoder itself only takes bytes
+        assertThrowsExactly(InvalidInputFormatException.class, () -> new ByteEncoder().encode("hello", Version.V_1));
     }
 
     // literal "Done when" check of plan Step 5
@@ -104,7 +106,7 @@ class ByteModeTest {
         String fits = "a".repeat(17);
         QrTestSupport.assertRoundTrip(Version.V_1, CorrectionLevel.LOW, fits, fits);
 
-        assertThrowsExactly(InsuffiecientQrLengthToEncode.class,
+        assertThrowsExactly(InsufficientCapacityException.class,
                 () -> new QrCreator(Version.V_1, CorrectionLevel.LOW, "a".repeat(18)).createQr());
     }
 
@@ -121,7 +123,7 @@ class ByteModeTest {
         if (length <= byteCapacity(v, l)) {
             QrTestSupport.assertRoundTrip(v, l, URL, URL);
         } else {
-            assertThrowsExactly(InsuffiecientQrLengthToEncode.class, () -> new QrCreator(v, l, URL).createQr());
+            assertThrowsExactly(InsufficientCapacityException.class, () -> new QrCreator(v, l, URL).createQr());
         }
     }
 
@@ -132,6 +134,6 @@ class ByteModeTest {
         String max = "x".repeat(byteCapacity(v, l));
         QrTestSupport.assertRoundTrip(v, l, max, max);
 
-        assertThrowsExactly(InsuffiecientQrLengthToEncode.class, () -> new QrCreator(v, l, max + "x").createQr());
+        assertThrowsExactly(InsufficientCapacityException.class, () -> new QrCreator(v, l, max + "x").createQr());
     }
 }

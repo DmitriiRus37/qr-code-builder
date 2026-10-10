@@ -62,7 +62,7 @@ public final class QrTestSupport {
     public record UndetectableByZxing(Version version, CorrectionLevel level, String text) {
         @Override
         public String toString() {
-            return "V" + version.getNumber() + "-" + level.name().charAt(0) + " \"" + text + "\"";
+            return "V" + version.getNumber() + "-" + level.letter() + " \"" + text + "\"";
         }
     }
 
@@ -75,12 +75,12 @@ public final class QrTestSupport {
      * in the data area for a real one. A seeded sweep of 960 random payloads hits this for about 1 % of them.
      */
     public static final List<UndetectableByZxing> UNDETECTABLE_BY_ZXING = List.of(
-            new UndetectableByZxing(Version.V_1, CorrectionLevel.QUARTER, "007"),
+            new UndetectableByZxing(Version.V_1, CorrectionLevel.QUARTILE, "007"),
             new UndetectableByZxing(Version.V_5, CorrectionLevel.LOW, "Хаб"),
-            new UndetectableByZxing(Version.V_6, CorrectionLevel.QUARTER, "HELLO"),
-            new UndetectableByZxing(Version.V_6, CorrectionLevel.MIDDLE, "A1 $%*+-./"),
-            new UndetectableByZxing(Version.V_10, CorrectionLevel.QUARTER, "A1 $%*+-./"),
-            new UndetectableByZxing(Version.V_6, CorrectionLevel.QUARTER, "5074145457"));
+            new UndetectableByZxing(Version.V_6, CorrectionLevel.QUARTILE, "HELLO"),
+            new UndetectableByZxing(Version.V_6, CorrectionLevel.MEDIUM, "A1 $%*+-./"),
+            new UndetectableByZxing(Version.V_10, CorrectionLevel.QUARTILE, "A1 $%*+-./"),
+            new UndetectableByZxing(Version.V_6, CorrectionLevel.QUARTILE, "5074145457"));
 
     private QrTestSupport() {
     }

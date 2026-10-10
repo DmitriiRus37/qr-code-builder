@@ -1,13 +1,13 @@
 package educational.dmitriigurylev;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
 
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
 public class Cell {
-    private boolean busy = false;
-    private int value = 0;
+    private boolean busy;
+    private int value;
 
     public Cell setBusy(boolean busy) {
         this.busy = busy;

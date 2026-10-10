@@ -129,7 +129,7 @@ class MaskEvaluatorTest {
 
     @Test
     void chooseBestDoesNotChangeTheField() {
-        QrCodeField qrCodeField = new QrCodeField(Version.V_2, CorrectionLevel.MIDDLE);
+        QrCodeField qrCodeField = new QrCodeField(Version.V_2, CorrectionLevel.MEDIUM);
         qrCodeField.addFinderPatterns();
         qrCodeField.addSynchronizationLines();
         qrCodeField.addAlignmentPatterns();

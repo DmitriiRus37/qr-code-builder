@@ -1,6 +1,6 @@
 package educational.dmitriigurylev;
 
-import educational.dmitriigurylev.custom_exceptions.InsuffiecientQrLengthToEncode;
+import educational.dmitriigurylev.custom_exceptions.InsufficientCapacityException;
 import educational.dmitriigurylev.custom_exceptions.InvalidInputFormatException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,16 +28,6 @@ class UtilityTest {
         Assertions.assertFalse(containsZerosAndOnesOnly(""));
         Assertions.assertFalse(containsZerosAndOnesOnly("000111w"));
         Assertions.assertThrowsExactly(InvalidInputFormatException.class, () -> containsZerosAndOnesOnly(null));
-    }
-
-    @Test
-    void containsAllLettersUpperCaseTest() {
-        Assertions.assertTrue(containsAllLettersUpperCase("0"));
-        Assertions.assertTrue(containsAllLettersUpperCase("ABC"));
-        Assertions.assertTrue(containsAllLettersUpperCase("54321ABC12345"));
-        Assertions.assertTrue(containsAllLettersUpperCase(""));
-        Assertions.assertFalse(containsAllLettersUpperCase("ABCqwe"));
-        Assertions.assertThrowsExactly(InvalidInputFormatException.class, () -> containsAllLettersUpperCase(null));
     }
 
     @Test
@@ -77,7 +67,7 @@ class UtilityTest {
     void characterCountToBitsTest() {
         Assertions.assertEquals("00000101", characterCountToBits(5, 8));
         Assertions.assertEquals("11111111", characterCountToBits(255, 8));
-        Assertions.assertThrowsExactly(InsuffiecientQrLengthToEncode.class, () -> characterCountToBits(256, 8));
-        Assertions.assertThrowsExactly(InsuffiecientQrLengthToEncode.class, () -> characterCountToBits(512, 9));
+        Assertions.assertThrowsExactly(InsufficientCapacityException.class, () -> characterCountToBits(256, 8));
+        Assertions.assertThrowsExactly(InsufficientCapacityException.class, () -> characterCountToBits(512, 9));
     }
 }

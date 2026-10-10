@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import java.util.Map;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class IntLetterEncoderCharMap {
+public class AlphanumericCharMap {
     private static final Map<Character, Integer> map = Map.ofEntries(
             Map.entry('0', 0),
             Map.entry('1', 1),

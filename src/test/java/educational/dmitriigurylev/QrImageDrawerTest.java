@@ -75,7 +75,7 @@ class QrImageDrawerTest {
     @ParameterizedTest(name = "scale {0}, quiet zone {1}")
     @MethodSource("scalesAndQuietZones")
     void customScaleAndQuietZone(int scale, int quietZone) throws Exception {
-        QrCreator creator = built(Version.V_3, CorrectionLevel.MIDDLE);
+        QrCreator creator = built(Version.V_3, CorrectionLevel.MEDIUM);
         Path file = tempDir.resolve("custom.png");
         creator.drawer().setScale(scale).setQuietZone(quietZone).write(file);
 
@@ -95,7 +95,7 @@ class QrImageDrawerTest {
     @ParameterizedTest(name = "{0}")
     @EnumSource(Version.class)
     void svgIsWellFormedAndMatchesTheMatrix(Version version) throws Exception {
-        QrCreator creator = built(version, CorrectionLevel.QUARTER);
+        QrCreator creator = built(version, CorrectionLevel.QUARTILE);
         Cell[][] field = creator.getQrCodeField().getField();
         Path file = tempDir.resolve("qr.SVG");
         creator.drawer().setScale(3).write(file);

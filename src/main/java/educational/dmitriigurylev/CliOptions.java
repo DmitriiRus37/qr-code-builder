@@ -63,7 +63,7 @@ public record CliOptions(String text, CorrectionLevel level, Version version, In
             QrImageDrawer.MAX_SCALE, QrImageDrawer.DEFAULT_SCALE,
             QrImageDrawer.MAX_QUIET_ZONE, QrImageDrawer.DEFAULT_QUIET_ZONE);
 
-    public static final CorrectionLevel DEFAULT_LEVEL = CorrectionLevel.MIDDLE;
+    public static final CorrectionLevel DEFAULT_LEVEL = CorrectionLevel.MEDIUM;
     public static final String DEFAULT_OUTPUT_NAME = "qr";
     /** The options that take a value; the argument after them is never read as an option. */
     private static final Set<String> VALUE_OPTIONS = Set.of("-l", "-v", "-m", "-s", "-q", "-o");
@@ -207,13 +207,11 @@ public record CliOptions(String text, CorrectionLevel level, Version version, In
     }
 
     private static CorrectionLevel parseLevel(String value) {
-        return switch (value.toUpperCase(Locale.ROOT)) {
-            case "L" -> CorrectionLevel.LOW;
-            case "M" -> CorrectionLevel.MIDDLE;
-            case "Q" -> CorrectionLevel.QUARTER;
-            case "H" -> CorrectionLevel.HIGH;
-            default -> throw new UsageException("-l must be L, M, Q or H, got '" + value + "'");
-        };
+        try {
+            return CorrectionLevel.fromLetter(value);
+        } catch (IllegalArgumentException e) {
+            throw new UsageException("-l must be L, M, Q or H, got '" + value + "'");
+        }
     }
 
     private static int parseInt(String value, String option, int min, int max) {
@@ -227,15 +225,5 @@ public record CliOptions(String text, CorrectionLevel level, Version version, In
             throw new UsageException(option + " must be " + min + ".." + max + ", got " + n);
         }
         return n;
-    }
-
-    /** The one-letter name of a level, as {@code -l} takes it. */
-    public static String levelLetter(CorrectionLevel level) {
-        return switch (level) {
-            case LOW -> "L";
-            case MIDDLE -> "M";
-            case QUARTER -> "Q";
-            case HIGH -> "H";
-        };
     }
 }
