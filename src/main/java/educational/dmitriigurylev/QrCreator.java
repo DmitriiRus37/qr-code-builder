@@ -36,6 +36,7 @@ public class QrCreator {
         qrCodeField.fillFieldWithBitsSequence(encodeBits(objectToEncode));
         qrCodeField.applyMaskPattern();
         qrCodeField.addInformationTypeBits();
+        qrCodeField.addVersionInformation();
         return this;
     }
 

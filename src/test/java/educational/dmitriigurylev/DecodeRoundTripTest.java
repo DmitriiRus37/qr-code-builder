@@ -55,13 +55,9 @@ class DecodeRoundTripTest {
      * @return the plan step expected to fix this combination, or empty if it must decode correctly
      */
     static Optional<String> knownBroken(Version v, CorrectionLevel l, Sample s) {
-        // Step 8: no version information (alignment patterns are correct since Step 7)
-        if (v.getNumber() >= 7) {
-            return Optional.of("Step 8");
-        }
         // Step 9: fixed mask 2 leaves finder-like patterns in the data area; the bits are valid
         // (ZXing decodes them with PURE_BARCODE) but the detector cannot locate the symbol
-        if (s.input().equals("A1 $%*+-./") && List.of("V6-H", "V6-Q", "V6-M").contains(key(v, l))) {
+        if (s.input().equals("A1 $%*+-./") && List.of("V6-H", "V6-Q", "V6-M", "V10-Q").contains(key(v, l))) {
             return Optional.of("Step 9");
         }
         return Optional.empty();

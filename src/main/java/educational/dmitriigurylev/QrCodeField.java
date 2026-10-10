@@ -248,6 +248,38 @@ public class QrCodeField {
         }
     }
 
+    /**
+     * Writes the 18 version information bits into the two 6x3 blocks reserved by {@link #reserveInformationAreas()}.
+     * Only V7 and above carry version information; for V1-V6 this does nothing.
+     * Bit i (counted from the least significant bit) goes to row i / 3, column size - 11 + i % 3 of the top-right block,
+     * and to the transposed position of the bottom-left block.
+     */
+    public void addVersionInformation() {
+        if (version.getNumber() < 7) {
+            return;
+        }
+        int size = field.length;
+        int bits = versionInformationBits(version.getNumber());
+        for (int i = 0; i < 18; i++) {
+            int bit = (bits >>> i) & 1;
+            int far = size - 11 + i % 3;
+            int near = i / 3;
+            field[near][far].setValue(bit).setBusy(true);   // top-right block
+            field[far][near].setValue(bit).setBusy(true);   // bottom-left block
+        }
+    }
+
+    /**
+     * @return 18 bits: the 6-bit version number followed by the 12-bit BCH(18,6) remainder (generator 0x1F25)
+     */
+    static int versionInformationBits(int versionNumber) {
+        int rem = versionNumber;
+        for (int i = 0; i < 12; i++) {
+            rem = (rem << 1) ^ ((rem >>> 11) * 0x1F25);
+        }
+        return (versionNumber << 12) | rem;
+    }
+
     private enum FillDirection {UP, DOWN}
 
 }
