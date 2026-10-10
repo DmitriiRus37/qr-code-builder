@@ -7,6 +7,10 @@ import lombok.NoArgsConstructor;
 import java.util.EnumMap;
 import java.util.Map;
 
+/**
+ * The 15-bit format information strings for each EC level and mask: 5 data bits, 10 BCH bits,
+ * already XORed with 101010000010010.
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CorrectionLevelAndMaskCodeMap {
     private static final EnumMap<CorrectionLevel, Map<Byte, String>> map = new EnumMap<>(CorrectionLevel.class);
@@ -52,6 +56,7 @@ public class CorrectionLevelAndMaskCodeMap {
                 (byte) 7, "000100000111011"));
     }
 
+    /** The format string for level {@code cl} and mask number {@code m} (0-7). */
     public static String getMaskAndCorrectionLevelCode(CorrectionLevel cl, byte m) {
         return map.get(cl).get(m);
     }

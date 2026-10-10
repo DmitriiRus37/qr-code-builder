@@ -14,9 +14,8 @@ import java.util.Locale;
 import java.util.Set;
 
 /**
- * The command line of {@link Main}, parsed without side effects (the file system is only read, to see whether
- * {@code -o} names an existing directory). {@link #parse(String...)} throws {@link UsageException} for anything it
- * cannot accept; {@link Main} turns that into exit code 2.
+ * The parsed command line of {@link Main}. Parsing has no side effects (it only checks whether {@code -o} is an
+ * existing directory) and throws {@link UsageException}, which {@link Main} turns into exit code 2.
  *
  * @param text      what to encode (never empty)
  * @param level     error correction level
@@ -32,6 +31,7 @@ import java.util.Set;
 public record CliOptions(String text, CorrectionLevel level, Version version, Integer mask, int scale, int quietZone,
                          Path output, Format format, boolean debug, boolean help) {
 
+    /** The help text printed for {@code -h} and after usage errors. */
     public static final String USAGE = """
             Usage: java -jar qr-code-builder.jar TEXT [options]
 
@@ -63,13 +63,16 @@ public record CliOptions(String text, CorrectionLevel level, Version version, In
             QrImageDrawer.MAX_SCALE, QrImageDrawer.DEFAULT_SCALE,
             QrImageDrawer.MAX_QUIET_ZONE, QrImageDrawer.DEFAULT_QUIET_ZONE);
 
+    /** Error correction level used when {@code -l} is not given. */
     public static final CorrectionLevel DEFAULT_LEVEL = CorrectionLevel.MEDIUM;
+    /** Output file name without extension when {@code -o} is not given or names a directory. */
     public static final String DEFAULT_OUTPUT_NAME = "qr";
     /** The options that take a value; the argument after them is never read as an option. */
     private static final Set<String> VALUE_OPTIONS = Set.of("-l", "-v", "-m", "-s", "-q", "-o");
 
     /** A command line that cannot be accepted; the message says why. */
     public static class UsageException extends RuntimeException {
+        /** Creates the exception with a user-facing message. */
         public UsageException(String message) {
             super(message);
         }
@@ -199,6 +202,7 @@ public record CliOptions(String text, CorrectionLevel level, Version version, In
         return path;
     }
 
+    /** The value of {@code option} at {@code args[i]}; throws if the command line ends first. */
     private static String value(String[] args, int i, String option) {
         if (i >= args.length) {
             throw new UsageException("option " + option + " needs a value");
@@ -206,6 +210,7 @@ public record CliOptions(String text, CorrectionLevel level, Version version, In
         return args[i];
     }
 
+    /** Parses the {@code -l} value; throws {@link UsageException} for anything but L, M, Q or H. */
     private static CorrectionLevel parseLevel(String value) {
         try {
             return CorrectionLevel.fromLetter(value);
@@ -214,6 +219,7 @@ public record CliOptions(String text, CorrectionLevel level, Version version, In
         }
     }
 
+    /** Parses an integer option value and checks that it lies in {@code min..max}. */
     private static int parseInt(String value, String option, int min, int max) {
         int n;
         try {

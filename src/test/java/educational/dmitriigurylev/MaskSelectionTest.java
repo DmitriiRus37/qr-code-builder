@@ -54,6 +54,7 @@ class MaskSelectionTest {
         return cases.stream();
     }
 
+    /** A random string of 1 to {@code maxLength} characters from {@code alphabet}. */
     private static String randomText(Random random, String alphabet, int maxLength) {
         int length = 1 + random.nextInt(maxLength);
         StringBuilder sb = new StringBuilder(length);

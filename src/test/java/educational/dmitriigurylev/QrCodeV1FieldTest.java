@@ -11,6 +11,7 @@ import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/** Function patterns and format bits on a bare V1-H {@link QrCodeField}. */
 class QrCodeV1FieldTest {
 
     QrCodeField qrCodeField;

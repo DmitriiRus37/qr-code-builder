@@ -25,12 +25,15 @@ import java.util.function.Predicate;
  */
 public class QrImageDrawer {
 
+    /** Default pixels per module side. */
     public static final int DEFAULT_SCALE = 10;
+    /** Default light border in modules (the spec's minimum). */
     public static final int DEFAULT_QUIET_ZONE = 4;
     /** Upper bounds that keep a V10 image below 7 000 × 7 000 pixels. */
     public static final int MAX_SCALE = 50;
     public static final int MAX_QUIET_ZONE = 40;
 
+    /** Output image format. */
     public enum Format {
         /** Lossless raster image, written by {@link ImageIO}. */
         PNG,
@@ -54,8 +57,10 @@ public class QrImageDrawer {
     private final QrCodeField qrCodeField;
     private int scale = DEFAULT_SCALE;
     private int quietZone = DEFAULT_QUIET_ZONE;
+    /** Whether to also write the debug image of reserved modules. */
     private boolean isDebug = false;
 
+    /** Creates a drawer with the default scale and quiet zone. */
     public QrImageDrawer(QrCodeField qrCodeField) {
         this.qrCodeField = Objects.requireNonNull(qrCodeField, "qrCodeField");
     }
@@ -117,6 +122,7 @@ public class QrImageDrawer {
         return toSvg(QrImageDrawer::isDark);
     }
 
+    /** Writes one image file, painting the cells that {@code dark} accepts as dark. */
     private void writeOne(Path path, Format format, Predicate<Cell> dark) {
         try {
             switch (format) {
@@ -134,6 +140,7 @@ public class QrImageDrawer {
         }
     }
 
+    /** Renders a 1-bit raster image with the quiet zone, painting the cells that {@code dark} accepts. */
     private BufferedImage toImage(Predicate<Cell> dark) {
         Cell[][] field = qrCodeField.getField();
         int side = (field.length + 2 * quietZone) * scale;
@@ -156,6 +163,7 @@ public class QrImageDrawer {
         return image;
     }
 
+    /** Builds the SVG document, merging each horizontal run of dark cells into one {@code <rect>}. */
     private String toSvg(Predicate<Cell> dark) {
         Cell[][] field = qrCodeField.getField();
         int side = field.length + 2 * quietZone;
@@ -185,10 +193,12 @@ public class QrImageDrawer {
         return svg.append("</g>\n</svg>\n").toString();
     }
 
+    /** Whether the module is dark (value 1). */
     private static boolean isDark(Cell cell) {
         return cell.getValue() == 1;
     }
 
+    /** The last path element as a string; throws if the path has none (e.g. a root). */
     private static String fileName(Path path) {
         Path name = Objects.requireNonNull(path, "path").getFileName();
         if (name == null) {

@@ -14,10 +14,14 @@ import java.nio.file.Path;
  * See {@link CliOptions#USAGE} for the options.
  */
 public class Main {
+    /** Exit code: the image was written (or help was printed). */
     public static final int EXIT_OK = 0;
+    /** Exit code: the text cannot be encoded or the file cannot be written. */
     public static final int EXIT_FAILURE = 1;
+    /** Exit code: the command line is invalid. */
     public static final int EXIT_USAGE = 2;
 
+    /** Runs the CLI and exits with a non-zero code on failure. */
     public static void main(String[] args) {
         int code = run(args, System.out, System.err);
         if (code != EXIT_OK) {
@@ -82,6 +86,7 @@ public class Main {
         }
     }
 
+    /** Creates the missing parent directories of the output file; I/O errors become {@link UncheckedIOException}. */
     private static void createParentDirectories(Path output) {
         Path parent = output.toAbsolutePath().getParent();
         try {

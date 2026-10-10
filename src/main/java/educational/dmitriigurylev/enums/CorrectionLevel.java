@@ -9,6 +9,7 @@ public enum CorrectionLevel {
 
     private final String letter;
 
+    /** Binds the level to its one-letter name. */
     CorrectionLevel(String letter) {
         this.letter = letter;
     }

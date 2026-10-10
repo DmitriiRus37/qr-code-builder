@@ -14,22 +14,21 @@ import java.util.stream.Stream;
 /**
  * Generates a QR code for every version × correction level × sample (plus a list of regression cases)
  * and decodes it with BoofCV and ZXing.
- *
- * <p>The former {@code knownBroken()} rules (one per plan step) are gone: since Step 9 the encoder has no known
- * defect. The only exceptions left are correct symbols that ZXing's detector cannot locate,
- * {@link QrTestSupport#UNDETECTABLE_BY_ZXING}; they must still fail ZXing (strict expected failure) and must
- * decode with BoofCV.
+ * The only exceptions are correct symbols that ZXing's detector cannot locate,
+ * {@link QrTestSupport#UNDETECTABLE_BY_ZXING}; they get stricter checks instead.
  */
 class DecodeRoundTripTest {
 
     /** Every sample fits V1-H, the smallest capacity (17 digits / 10 alphanumeric / 7 bytes). */
     record Sample(String name, Object input, String expected, Mode mode) {
+        /** The sample's name, used in the parameterized test name. */
         @Override
         public String toString() {
             return name;
         }
     }
 
+    /** The mode a sample is expected to select. */
     enum Mode { NUMERIC, ALPHANUMERIC, BYTE }
 
     static final List<Sample> SAMPLES = List.of(
@@ -44,7 +43,7 @@ class DecodeRoundTripTest {
 
     /**
      * Payloads that only fit larger versions, each tied to one version and level. All of them failed ZXing's
-     * normal detection under the old fixed mask 2 (plan Steps 6 and 8); the lowest-penalty mask fixes all but one.
+     * normal detection under the old fixed mask 2; the lowest-penalty mask fixes all but one.
      */
     static final List<Arguments> REGRESSIONS = List.of(
             Arguments.of(Version.V_2, CorrectionLevel.HIGH,
@@ -65,18 +64,22 @@ class DecodeRoundTripTest {
             Arguments.of(Version.V_9, CorrectionLevel.HIGH,
                     numeric("55258294937699303991991207")));
 
+    /** A numeric sample whose input, expected text and name are {@code text}. */
     private static Sample numeric(String text) {
         return new Sample("\"" + text + "\"", text, text, Mode.NUMERIC);
     }
 
+    /** An alphanumeric sample whose input, expected text and name are {@code text}. */
     private static Sample alphanumeric(String text) {
         return new Sample("\"" + text + "\"", text, text, Mode.ALPHANUMERIC);
     }
 
+    /** A byte mode sample whose input, expected text and name are {@code text}. */
     private static Sample bytes(String text) {
         return new Sample("\"" + text + "\"", text, text, Mode.BYTE);
     }
 
+    /** Every sample on every version x level, plus the regression cases. */
     static Stream<Arguments> cases() {
         Stream<Arguments> allCombinations = Stream.of(Version.values()).flatMap(v ->
                 Stream.of(CorrectionLevel.values()).flatMap(l ->

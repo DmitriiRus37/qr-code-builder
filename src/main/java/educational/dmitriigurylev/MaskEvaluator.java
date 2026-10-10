@@ -5,17 +5,11 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 /**
- * Mask selection by the penalty rules of ISO/IEC 18004 (section 7.8.3). Lower penalty is better.
- *
- * <p>Rules work on a matrix of 0 (light) / 1 (dark) values, {@code matrix[row][col]}:
- * <ul>
- *   <li><b>N1</b>: every row/column run of 5 or more same-colour modules scores 3 + (length - 5);</li>
- *   <li><b>N2</b>: every 2x2 block of one colour scores 3 (overlapping blocks all count);</li>
- *   <li><b>N3</b>: every finder-like {@code 1011101} with 4 light modules on at least one side scores 40;</li>
- *   <li><b>N4</b>: 10 for every full 5 % the dark-module ratio deviates from 50 %.</li>
- * </ul>
- * N3 follows ZXing's reading of the spec: a {@code 1011101} that has light modules on <i>both</i> sides
- * ({@code 000010111010000}) counts once, not twice, and modules outside the symbol are not treated as light.
+ * Mask selection by the penalty rules of ISO/IEC 18004 section 7.8.3 on a 0/1 matrix; lower is better.
+ * N1: 3 + (length - 5) per row/column run of 5+ same-colour modules. N2: 3 per one-colour 2x2 block (overlaps count).
+ * N3: 40 per {@code 1011101} with 4 light modules on at least one side. N4: 10 per full 5 % the dark ratio
+ * deviates from 50 %. N3 follows ZXing: light modules on both sides count once, and modules outside the symbol
+ * are not light.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MaskEvaluator {
@@ -45,7 +39,7 @@ public class MaskEvaluator {
         return lowestPenalty(penalties);
     }
 
-    /** @return the mask with the lowest penalty ({@code penalties[i]} belongs to mask i); a tie goes to the lower number */
+    /** The mask with the lowest penalty ({@code penalties[i]} belongs to mask i); a tie goes to the lower number. */
     static MaskPattern lowestPenalty(int[] penalties) {
         int best = 0;
         for (int i = 1; i < penalties.length; i++) {
@@ -56,6 +50,7 @@ public class MaskEvaluator {
         return MaskPattern.of(best);
     }
 
+    /** Total penalty N1 + N2 + N3 + N4 of a 0/1 matrix. */
     public static int penalty(int[][] matrix) {
         return penaltyRule1(matrix) + penaltyRule2(matrix) + penaltyRule3(matrix) + penaltyRule4(matrix);
     }
@@ -86,6 +81,7 @@ public class MaskEvaluator {
         return penalty;
     }
 
+    /** N1 score of one run: 3 + (length - 5) for runs of 5 or more, otherwise 0. */
     private static int runPenalty(int run) {
         return run >= 5 ? N1 + (run - 5) : 0;
     }
@@ -124,7 +120,7 @@ public class MaskEvaluator {
         return N3 * patterns;
     }
 
-    /** @return true if the 7 modules from (row, col) in direction (dRow, dCol) read 1011101 */
+    /** Whether the 7 modules from (row, col) in direction (dRow, dCol) read 1011101. */
     private static boolean isFinderLike(int[][] matrix, int row, int col, int dRow, int dCol) {
         for (int i = 0; i < FINDER_LIKE.length; i++) {
             if (matrix[row + i * dRow][col + i * dCol] != FINDER_LIKE[i]) {
@@ -134,7 +130,7 @@ public class MaskEvaluator {
         return true;
     }
 
-    /** @return true if the 4 modules from (row, col) in direction (dRow, dCol) are light; leaving the symbol is not light */
+    /** Whether the 4 modules from (row, col) in direction (dRow, dCol) are light; outside the symbol is not light. */
     private static boolean isLight(int[][] matrix, int row, int col, int dRow, int dCol) {
         for (int i = 0; i < 4; i++) {
             int r = row + i * dRow;
@@ -159,6 +155,7 @@ public class MaskEvaluator {
         return N4 * (Math.abs(2 * dark - total) * 10 / total);
     }
 
+    /** Copies the module colours of the field into a plain 0/1 matrix. */
     static int[][] toMatrix(Cell[][] field) {
         int[][] matrix = new int[field.length][field[0].length];
         for (int row = 0; row < field.length; row++) {

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.EnumMap;
 import java.util.Map;
 
+/** Data capacity in bits (data codewords * 8) per version and EC level. */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class InformationBitSizeMap {
     private static final EnumMap<Version, Map<CorrectionLevel, Integer>> map = new EnumMap<>(Version.class);
@@ -25,6 +26,7 @@ public class InformationBitSizeMap {
     }
 
 
+    /** Packs the four per-level values of one version into a map. */
     private static Map<CorrectionLevel, Integer> addInfoByCorrectionLevel(int low, int medium, int quartile, int high) {
         return Map.of(
                 CorrectionLevel.LOW, low,
@@ -33,6 +35,7 @@ public class InformationBitSizeMap {
                 CorrectionLevel.HIGH, high);
     }
 
+    /** The number of data bits the symbol holds, excluding EC codewords. */
     public static int getInformationBitsSizeByVersionAndCorrectionLevel(Version v, CorrectionLevel cl) {
         return map.get(v).get(cl);
     }

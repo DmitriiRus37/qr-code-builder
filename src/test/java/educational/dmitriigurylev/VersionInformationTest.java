@@ -17,6 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/** The 18-bit version information of V7+ and its placement, cross-checked against ZXing's encoder. */
 class VersionInformationTest {
 
     @ParameterizedTest

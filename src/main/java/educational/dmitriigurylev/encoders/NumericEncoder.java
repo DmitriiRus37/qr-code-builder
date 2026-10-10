@@ -9,8 +9,14 @@ import educational.dmitriigurylev.utility_maps.EncodingModeIndicatorMap;
 
 import java.util.Map;
 
+/** Numeric mode: digits are packed in groups of three into 10 bits (a trailing group of 2 or 1 into 7 or 4). */
 public class NumericEncoder implements Encoder {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws InvalidInputFormatException if {@code obj} is not a non-empty String of digits 0-9
+     */
     @Override
     public String[] encode(Object obj, Version version) {
         String[] strAr = separateSymbols(toDigits(obj));
@@ -18,7 +24,7 @@ public class NumericEncoder implements Encoder {
         return strAr;
     }
 
-    /** QrCreator passes the text; numbers were already turned into their decimal text there. */
+    /** Checks that the payload is a non-empty digit string; QrCreator already turned numbers into decimal text. */
     private static String toDigits(Object obj) {
         if (!(obj instanceof String digits)) {
             throw new InvalidInputFormatException("numeric mode takes a String, got "
@@ -31,6 +37,10 @@ public class NumericEncoder implements Encoder {
         return digits;
     }
 
+    /**
+     * Splits the digits into groups of three starting at index 2; slot 0 is left for the mode indicator and
+     * slot 1 temporarily holds the digit count as decimal text.
+     */
     private static String[] separateSymbols(String strInteger) {
         int digitsInValue = strInteger.length();
         String[] arr = digitsInValue % 3 == 0 ? new String[digitsInValue / 3 + 2] : new String[digitsInValue / 3 + 3];
@@ -50,6 +60,7 @@ public class NumericEncoder implements Encoder {
         return arr;
     }
 
+    /** Converts the array in place: mode indicator, character count bits and 10/7/4-bit digit groups. */
     private static void symbolsArrayToBinaryArray(String[] arr, Version version) {
         // the group width depends on the number of digits, never on the value ("012" takes 10 bits)
         Map<Integer, Integer> binaryDigitsCount = Map.of(1, 4, 2, 7, 3, 10);

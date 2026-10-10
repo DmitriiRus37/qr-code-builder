@@ -64,14 +64,19 @@ public enum MaskPattern {
     /** The 3-bit mask reference written into the format information. */
     private final int number;
 
+    /** Binds the pattern to its 3-bit mask reference. */
     MaskPattern(int number) {
         this.number = number;
     }
 
-    /** @return true if the module at (row, col) is inverted by this mask */
+    /** Whether this mask inverts the module at (row, col). */
     public abstract boolean inverts(int row, int col);
 
-    /** @throws IllegalArgumentException if {@code number} is not 0-7 */
+    /**
+     * The mask pattern with the given reference number.
+     *
+     * @throws IllegalArgumentException if {@code number} is not 0-7
+     */
     public static MaskPattern of(int number) {
         if (number < 0 || number >= COUNT) {
             throw new IllegalArgumentException("Mask pattern must be 0-" + (COUNT - 1) + ", got " + number);

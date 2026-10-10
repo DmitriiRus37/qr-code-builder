@@ -31,19 +31,23 @@ class MainTest {
     private final ByteArrayOutputStream out = new ByteArrayOutputStream();
     private final ByteArrayOutputStream err = new ByteArrayOutputStream();
 
+    /** Runs the CLI in process, capturing stdout and stderr. */
     private int run(String... args) {
         return Main.run(args, new PrintStream(out, true, StandardCharsets.UTF_8),
                 new PrintStream(err, true, StandardCharsets.UTF_8));
     }
 
+    /** Everything written to stdout so far. */
     private String out() {
         return out.toString(StandardCharsets.UTF_8);
     }
 
+    /** Everything written to stderr so far. */
     private String err() {
         return err.toString(StandardCharsets.UTF_8);
     }
 
+    /** Asserts that BoofCV and ZXing both decode {@code image} to {@code expected}. */
     private static void assertDecodes(String expected, BufferedImage image) throws Exception {
         assertEquals(expected, QrTestSupport.decodeBoofcv(image), "BoofCV");
         assertEquals(expected, QrTestSupport.decode(image), "ZXing");
@@ -140,6 +144,7 @@ class MainTest {
         assertFalse(err().contains("\tat "), "no stack trace");
     }
 
+    /** Asserts that nothing was written into the temp directory. */
     private void assertNoFiles() throws Exception {
         try (Stream<Path> files = Files.list(tempDir)) {
             assertEquals(0, files.count(), "nothing is written");

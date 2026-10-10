@@ -15,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+/** Alignment patterns, finder patterns with separators, format and version areas, and the reserved-module count. */
 class AlignmentPatternTest {
 
     /** Number of alignment patterns per version V1..V10 (ISO/IEC 18004 table E.1). */
@@ -118,6 +119,7 @@ class AlignmentPatternTest {
         assertEquals(36, reserved);
     }
 
+    /** On a fresh field, only the alignment patterns at {@code centres} are drawn and reserved. */
     private static void assertOnlyAlignmentPatternsAt(Version version, List<int[]> centres) {
         var qrCodeField = new QrCodeField(version, CorrectionLevel.HIGH);
         qrCodeField.addAlignmentPatterns();
@@ -152,6 +154,7 @@ class AlignmentPatternTest {
         return result;
     }
 
+    /** Checks one 5x5 alignment pattern (dark ring, light ring, dark centre) and that it is reserved. */
     private static void assertAlignmentPattern(Cell[][] field, int centreY, int centreX) {
         for (int dy = -2; dy <= 2; dy++) {
             for (int dx = -2; dx <= 2; dx++) {
@@ -184,6 +187,7 @@ class AlignmentPatternTest {
         }
     }
 
+    /** Checks both copies of the 15 format bits and the dark module. */
     private static void assertFormatInformation(Cell[][] field, String bits) {
         int size = field.length;
         int[][] firstCopy = {

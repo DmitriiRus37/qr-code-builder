@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.EnumMap;
 import java.util.Map;
 
+/** Number of error correction codewords in each block, per version and EC level. */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CorrectionBytesPerBlockMap {
     private static final EnumMap<Version, Map<CorrectionLevel, Integer>> map = new EnumMap<>(Version.class);
@@ -24,6 +25,7 @@ public class CorrectionBytesPerBlockMap {
         map.put(Version.V_10, addInfoByCorrectionLevel(18,26,24,28));
     }
 
+    /** Packs the four per-level values of one version into a map. */
     private static Map<CorrectionLevel, Integer> addInfoByCorrectionLevel(int low, int medium, int quartile, int high) {
         return Map.of(
                 CorrectionLevel.LOW, low,
@@ -32,6 +34,7 @@ public class CorrectionBytesPerBlockMap {
                 CorrectionLevel.HIGH, high);
     }
 
+    /** The EC codewords per block; every block of a symbol has the same number. */
     public static int getCorrectionBytesSizeByVersionAndCorrectionLevel(Version v, CorrectionLevel cl) {
         return map.get(v).get(cl);
     }

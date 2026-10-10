@@ -44,11 +44,13 @@ class QrImageDrawerTest {
     @TempDir
     Path tempDir;
 
+    /** Every version x level. */
     static Stream<Arguments> versionsAndLevels() {
         return Arrays.stream(Version.values())
                 .flatMap(v -> Arrays.stream(CorrectionLevel.values()).map(l -> Arguments.of(v, l)));
     }
 
+    /** A creator for {@link #SAMPLE} built at the given version and level. */
     private static QrCreator built(Version version, CorrectionLevel level) {
         return QrCreator.of(SAMPLE, level).version(version).createQr();
     }
@@ -87,6 +89,7 @@ class QrImageDrawerTest {
         }
     }
 
+    /** Scale/quiet-zone pairs, including the minimum and maximum values. */
     static Stream<Arguments> scalesAndQuietZones() {
         return Stream.of(Arguments.of(1, 0), Arguments.of(1, 4), Arguments.of(3, 2), Arguments.of(4, 4),
                 Arguments.of(7, 6), Arguments.of(QrImageDrawer.MAX_SCALE, 1), Arguments.of(2, QrImageDrawer.MAX_QUIET_ZONE));
@@ -263,10 +266,12 @@ class QrImageDrawerTest {
         }
     }
 
+    /** Number of dark modules in the matrix. */
     private static int countDark(Cell[][] field) {
         return (int) Arrays.stream(field).flatMap(Arrays::stream).filter(c -> c.getValue() == 1).count();
     }
 
+    /** Parses an SVG file as namespace-aware XML (doctype declarations are refused). */
     private static Document parse(Path file) throws Exception {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
         factory.setNamespaceAware(true);

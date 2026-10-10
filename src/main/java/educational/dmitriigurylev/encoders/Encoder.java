@@ -7,6 +7,8 @@ import educational.dmitriigurylev.enums.Version;
  */
 public interface Encoder {
     /**
+     * Encodes {@code value} as one segment for the given version.
+     *
      * @return {mode indicator, character count indicator, data bits...}; the count width depends on {@code version}
      */
     String[] encode(Object value, Version version);

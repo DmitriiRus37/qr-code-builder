@@ -47,6 +47,7 @@ public final class QrTestSupport {
     private static final int SCALE = 8;
     private static final int QUIET_ZONE = 4;
 
+    /** ZXing hints for normal decoding: try harder, QR only, byte mode as UTF-8. */
     private static final Map<DecodeHintType, Object> HINTS = Map.of(
             DecodeHintType.TRY_HARDER, Boolean.TRUE,
             DecodeHintType.POSSIBLE_FORMATS, List.of(BarcodeFormat.QR_CODE),
@@ -60,6 +61,7 @@ public final class QrTestSupport {
 
     /** A correct symbol that ZXing's detector cannot locate; {@code text} is the payload and the expected decode. */
     public record UndetectableByZxing(Version version, CorrectionLevel level, String text) {
+        /** Short label such as {@code V1-Q "007"} for parameterized test names. */
         @Override
         public String toString() {
             return "V" + version.getNumber() + "-" + level.letter() + " \"" + text + "\"";
@@ -82,9 +84,11 @@ public final class QrTestSupport {
             new UndetectableByZxing(Version.V_10, CorrectionLevel.QUARTILE, "A1 $%*+-./"),
             new UndetectableByZxing(Version.V_6, CorrectionLevel.QUARTILE, "5074145457"));
 
+    /** Static helpers only. */
     private QrTestSupport() {
     }
 
+    /** Renders the matrix at 8 px per module with a 4-module white quiet zone. */
     public static BufferedImage render(Cell[][] field) {
         int n = field.length;
         int size = (n + 2 * QUIET_ZONE) * SCALE;
@@ -100,7 +104,7 @@ public final class QrTestSupport {
         return img;
     }
 
-    /** @return decoded text, or throws {@link ReaderException} when the matrix is not a readable QR code */
+    /** Decodes the matrix with ZXing; throws {@link ReaderException} when it is not a readable QR code. */
     public static String decode(Cell[][] field) throws ReaderException {
         return decode(render(field));
     }
@@ -235,7 +239,7 @@ public final class QrTestSupport {
         return Encoder.encode(new String(bytes, StandardCharsets.ISO_8859_1), zxingLevel, hints);
     }
 
-    /** @return true if every module of {@code field} equals the module of ZXing's matrix */
+    /** Whether {@code field} has the same size as ZXing's matrix and equals it module by module. */
     public static boolean sameMatrix(ByteMatrix expected, Cell[][] field) {
         if (expected.getHeight() != field.length || expected.getWidth() != field[0].length) {
             return false;

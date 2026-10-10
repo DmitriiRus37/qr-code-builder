@@ -6,6 +6,10 @@ import lombok.NoArgsConstructor;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Reed-Solomon generator polynomials keyed by the number of EC codewords. Coefficients are exponents of α,
+ * highest degree first, with the leading α^0 term omitted.
+ */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GeneratingPolynomialMap {
     private static final Map<Integer, int[]> map = new HashMap<>();
@@ -25,6 +29,7 @@ public class GeneratingPolynomialMap {
         map.put(30, new int[]{41, 173, 145, 152, 216, 31, 179, 182, 50, 48, 110, 86, 239, 96, 222, 125, 42, 173, 226, 193, 224, 130, 156, 37, 251, 216, 238, 40, 192, 180});
     }
 
+    /** The generator polynomial for {@code i} EC codewords, or null if that count is not used by V1-V10. */
     public static int[] getGeneratingPolynomial(int i) {
         return map.get(i);
     }

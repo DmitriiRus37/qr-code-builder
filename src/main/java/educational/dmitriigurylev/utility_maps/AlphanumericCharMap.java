@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Map;
 
+/** The 45-character alphanumeric set and each character's value 0-44. */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AlphanumericCharMap {
     private static final Map<Character, Integer> map = Map.ofEntries(
@@ -54,10 +55,12 @@ public class AlphanumericCharMap {
             Map.entry('/', 43),
             Map.entry(':', 44));
 
+    /** The value 0-44 of an alphanumeric character; the character must be in the set. */
     public static int getIntByChar(char ch) {
         return map.get(ch);
     }
 
+    /** Whether the character belongs to the alphanumeric set. */
     public static boolean contains(char ch) {
         return map.containsKey(ch);
     }

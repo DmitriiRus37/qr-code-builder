@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.EnumMap;
 import java.util.Map;
 
+/** Number of Reed-Solomon blocks the data is split into, per version and EC level. */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class BlocksCountMap {
 
@@ -27,6 +28,7 @@ public class BlocksCountMap {
     }
 
 
+    /** Packs the four per-level values of one version into a map. */
     private static Map<CorrectionLevel, Integer> addInfoByCorrectionLevel(int low, int medium, int quartile, int high) {
         return Map.of(
                 CorrectionLevel.LOW, low,
@@ -35,6 +37,7 @@ public class BlocksCountMap {
                 CorrectionLevel.HIGH, high);
     }
 
+    /** The total block count (both groups together). */
     public static int getBlocksCountByVersionAndCorrectionLevel(Version v, CorrectionLevel cl) {
         return map.get(v).get(cl);
     }

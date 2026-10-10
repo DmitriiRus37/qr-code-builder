@@ -13,13 +13,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+/**
+ * The module matrix of one QR symbol. Methods add the function patterns, place the data bits,
+ * apply a mask and write the format and version information.
+ */
 @Getter
 public class QrCodeField {
 
     private final Version version;
     private final CorrectionLevel level;
+    /** The modules, indexed {@code field[row][col]}. */
     private final Cell[][] field;
 
+    /** Creates an empty (all light, nothing reserved) matrix of the version's size. */
     public QrCodeField(Version version, CorrectionLevel level) {
         this.version = version;
         this.level = level;
@@ -41,10 +47,12 @@ public class QrCodeField {
         }
     }
 
+    /** A deep copy of this field (see the copy constructor). */
     QrCodeField copy() {
         return new QrCodeField(this);
     }
 
+    /** Fills the matrix with fresh light, free cells. */
     private void fillFieldWithZeros() {
         for (Cell[] cells : field) {
             for (int i = 0; i < cells.length; i++) {
@@ -53,12 +61,14 @@ public class QrCodeField {
         }
     }
 
+    /** Draws the three 7x7 finder patterns and reserves their light separators. */
     public void addFinderPatterns() {
         addSquareStartingWithLeftUpperPoint(0,0, FinderPatternLocation.UPPER_LEFT);
         addSquareStartingWithLeftUpperPoint(0, field[0].length - 7, FinderPatternLocation.UPPER_RIGHT);
         addSquareStartingWithLeftUpperPoint(field.length-7,0, FinderPatternLocation.LOWER_LEFT);
     }
 
+    /** Draws one finder pattern with its top-left corner at (firstY, firstX) and reserves its separator. */
     private void addSquareStartingWithLeftUpperPoint(int firstY, int firstX, FinderPatternLocation location) {
         for (int y=0; y<7; y++) {
             for (int x=0; x<7; x++) {
@@ -88,6 +98,7 @@ public class QrCodeField {
         }
     }
 
+    /** Draws the alternating dark/light timing patterns along row 6 and column 6 between the finders. */
     public void addSynchronizationLines() {
         int until = field.length - 9;
         boolean isOneHere = true;
@@ -153,6 +164,10 @@ public class QrCodeField {
         }
     }
 
+    /**
+     * Places the bit stream in the free modules: two-column strips zig-zagging up and down from the
+     * bottom-right corner, skipping the vertical timing column. Consumes {@code sb}.
+     */
     public void fillFieldWithBitsSequence(StringBuilder sb) {
         Cell[][] f = field;
         FillDirection dir = FillDirection.UP;
@@ -196,6 +211,7 @@ public class QrCodeField {
         }
     }
 
+    /** Writes the next bit of {@code sb} into the cell at (x, y) if it is free; otherwise does nothing. */
     private void fillCell(StringBuilder sb, Cell[][] f, int x, int y) {
         if (!f[y][x].isBusy() && !sb.isEmpty()) {
             f[y][x].setValue(sb.charAt(0) == '0' ? 0 : 1);
@@ -215,6 +231,7 @@ public class QrCodeField {
         }
     }
 
+    /** Draws the 5x5 alignment patterns at all centre combinations except the three that overlap the finders. */
     public void addAlignmentPatterns() {
         int[] centers = AlignmentPatternCentersMap.getAlignmentPatternCentersByVersion(version);
         if (centers.length == 0) {
@@ -236,6 +253,7 @@ public class QrCodeField {
         }
     }
 
+    /** Draws one 5x5 alignment pattern (dark ring, light ring, dark centre) around the given centre. */
     private void addAlignmentPattern(int centerY, int centerX) {
         for (int y = centerY - 2; y <= centerY + 2; y++) {
             for (int x = centerX - 2; x <= centerX + 2; x++) {
@@ -292,7 +310,8 @@ public class QrCodeField {
     }
 
     /**
-     * @return 18 bits: the 6-bit version number followed by the 12-bit BCH(18,6) remainder (generator 0x1F25)
+     * The 18-bit version information: the 6-bit version number followed by the 12-bit BCH(18,6) remainder
+     * (generator 0x1F25).
      */
     static int versionInformationBits(int versionNumber) {
         int rem = versionNumber;
@@ -302,6 +321,7 @@ public class QrCodeField {
         return (versionNumber << 12) | rem;
     }
 
+    /** Current vertical direction of the data placement zig-zag. */
     private enum FillDirection {UP, DOWN}
 
 }

@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 
+/** Separate creators never share a matrix, and the field size follows the version. */
 class QrCodeFieldIsolationTest {
 
     @Test

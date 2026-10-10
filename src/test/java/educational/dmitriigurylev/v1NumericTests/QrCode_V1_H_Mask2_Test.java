@@ -8,6 +8,7 @@ import educational.dmitriigurylev.enums.Version;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+/** Snapshot tests: numeric payloads on V1-H with mask 2 must give the stored matrices. */
 class QrCode_V1_H_Mask2_Test {
 
     @Test

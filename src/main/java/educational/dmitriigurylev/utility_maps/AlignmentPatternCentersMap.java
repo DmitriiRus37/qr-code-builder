@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.EnumMap;
 
+/** Row/column coordinates of the alignment pattern centres per version (V1 has none). */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AlignmentPatternCentersMap {
     private static final EnumMap<Version, int[]> map = new EnumMap<>(Version.class);
@@ -22,6 +23,7 @@ public class AlignmentPatternCentersMap {
         map.put(Version.V_10, new int[]{6,28,50});
     }
 
+    /** The centre coordinates; patterns sit at every row/column combination except over the finders. */
     public static int[] getAlignmentPatternCentersByVersion(Version e) {
         return map.get(e);
     }

@@ -1,5 +1,6 @@
 package educational.dmitriigurylev.v1NumericTests;
 
+/** Stored V1-H mask 2 matrices for numeric payloads, in {@code FieldUtil.fieldToString} format; one method per payload. */
 public class QrCodeFields_V1_H_Mask2 {
 
     public static String getFieldOfValue_1() {

@@ -13,8 +13,14 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
+/** Byte mode: every byte of the payload is written as 8 bits. */
 public class ByteEncoder implements Encoder {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws InvalidInputFormatException if {@code obj} is not a {@code byte[]}
+     */
     @Override
     public String[] encode(Object obj, Version version) {
         // QrCreator passes the bytes; text was already turned into UTF-8 there (see toUtf8)
@@ -26,8 +32,11 @@ public class ByteEncoder implements Encoder {
     }
 
     /**
-     * Text is written in byte mode as UTF-8, with no ECI header: practically every reader detects it.
-     * Strict UTF-8: a lone surrogate is an error instead of a silent '?' (String.getBytes would replace it). */
+     * Encodes text as strict UTF-8 for byte mode (no ECI header: practically every reader detects it).
+     * A lone surrogate is an error instead of a silent '?' (String.getBytes would replace it).
+     *
+     * @throws InvalidInputFormatException if {@code str} is not valid UTF-16
+     */
     public static byte[] toUtf8(String str) {
         try {
             var buffer = StandardCharsets.UTF_8.newEncoder()
@@ -40,6 +49,7 @@ public class ByteEncoder implements Encoder {
         }
     }
 
+    /** Builds {mode indicator, byte count, data bits} for the given bytes. */
     private static String[] byteArrayToBinaryArray(byte[] arr, Version version) {
         String[] resArr = new String[3];
         var binaryString = new StringBuilder();

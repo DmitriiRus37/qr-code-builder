@@ -28,6 +28,7 @@ class MaskEvaluatorTest {
         return m;
     }
 
+    /** A {@code rows} x {@code cols} matrix with every module set to {@code value}. */
     private static int[][] filled(int rows, int cols, int value) {
         int[][] m = new int[rows][cols];
         for (int[] row : m) {
@@ -142,7 +143,7 @@ class MaskEvaluatorTest {
         assertEquals(before, FieldUtil.fieldToString(qrCodeField.getField()));
     }
 
-    /** Expected: one character per mask 0-7, '1' if the module is inverted; computed by hand from the table in the plan. */
+    /** Expected: one character per mask 0-7, '1' if the module is inverted; computed by hand from the mask conditions. */
     @ParameterizedTest
     @CsvSource({
             "0, 0, 11111111",   // every condition is 0 == 0

@@ -18,12 +18,12 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-/** Byte mode (Step 5): 8 bits per byte, String input as UTF-8, count = number of bytes. */
+/** Byte mode: 8 bits per byte, String input as UTF-8, count = number of bytes. */
 class ByteModeTest {
 
     private static final String URL = "https://example.com/?q=1"; // 24 bytes
 
-    /** Byte capacity per version, levels in L / M / Q / H order (plan §2 character table). */
+    /** Byte capacity per version, levels in L / M / Q / H order. */
     private static final Map<Version, int[]> BYTE_CAPACITY = Map.of(
             Version.V_1, new int[]{17, 14, 11, 7},
             Version.V_2, new int[]{32, 26, 20, 14},
@@ -32,6 +32,7 @@ class ByteModeTest {
             Version.V_5, new int[]{106, 84, 60, 44},
             Version.V_6, new int[]{134, 106, 74, 58});
 
+    /** The byte capacity of version {@code v} at level {@code l}, from the table above. */
     private static int byteCapacity(Version v, CorrectionLevel l) {
         int index = switch (l) {
             case LOW -> 0;
@@ -100,7 +101,7 @@ class ByteModeTest {
         assertThrowsExactly(InvalidInputFormatException.class, () -> new ByteEncoder().encode("hello", Version.V_1));
     }
 
-    // literal "Done when" check of plan Step 5
+    // Boundary check
     @Test
     void seventeenBytesFitV1LowAndEighteenThrow() throws Exception {
         String fits = "a".repeat(17);
@@ -110,6 +111,7 @@ class ByteModeTest {
                 () -> new QrCreator(Version.V_1, CorrectionLevel.LOW, "a".repeat(18)).createQr());
     }
 
+    /** Every level of V1-V6, the versions in the capacity table. */
     static Stream<Arguments> v1ToV6() {
         return BYTE_CAPACITY.keySet().stream().sorted().flatMap(v ->
                 Stream.of(CorrectionLevel.values()).map(l -> Arguments.of(v, l)));

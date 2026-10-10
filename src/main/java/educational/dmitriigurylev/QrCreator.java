@@ -22,18 +22,15 @@ import java.nio.file.Path;
 import java.util.Objects;
 
 /**
- * Builds one QR code. Usual entry point:
- * <pre>{@code QrCodeField field = QrCreator.of("HELLO WORLD", CorrectionLevel.MEDIUM).build();}</pre>
- * The mode is the most compact one that covers every character (numeric, then alphanumeric, then byte as UTF-8),
- * the version is the smallest one the payload fits, and the mask is the one with the lowest penalty.
- * {@link #version(Version)} and {@link #forceMask(int)} override the automatic choices.
- * Empty input is rejected: a symbol that carries nothing is almost certainly a caller error.
- * <p>{@code of(...).build()} is the recommended API; {@code new QrCreator(version, level, input).createQr()} is the
- * legacy form, kept for existing callers. The class is mutable (a builder that keeps its last result) and not
- * thread-safe: use one instance per thread.
+ * Builds one QR code: {@code QrCreator.of("HELLO WORLD", CorrectionLevel.MEDIUM).build()}.
+ * It picks the most compact mode (numeric, alphanumeric, then byte as UTF-8), the smallest fitting version and the
+ * lowest-penalty mask; {@link #version(Version)} and {@link #forceMask(int)} override them. Empty input is rejected.
+ * {@code new QrCreator(version, level, input).createQr()} is the legacy fixed-version form.
+ * Mutable (a builder that keeps its last result) and not thread-safe.
  */
 @Getter
 public class QrCreator {
+    /** Width of the mode indicator that starts every segment. */
     private static final int MODE_INDICATOR_BITS = 4;
 
     private static final Encoder NUMERIC_ENCODER = new NumericEncoder();
@@ -68,6 +65,7 @@ public class QrCreator {
         this.requestedVersion = Objects.requireNonNull(version, "version");
     }
 
+    /** Validates the input, picks the mode from its characters and prepares the payload for the encoder. */
     private QrCreator(CorrectionLevel correctionLevel, Object objectToEncode) {
         this.correctionLevel = Objects.requireNonNull(correctionLevel, "correctionLevel");
         Object input = normalize(objectToEncode);
@@ -155,6 +153,7 @@ public class QrCreator {
         return payload instanceof byte[] bytes ? bytes.length : ((String) payload).length();
     }
 
+    /** The smallest version whose data capacity holds the payload at the chosen level. */
     private Version chooseVersion() {
         for (Version v : Version.values()) {
             if (requiredBits(encodingWay, payloadLength(), v) <= capacityBits(v)) {
@@ -165,6 +164,7 @@ public class QrCreator {
         throw new InsufficientCapacityException(overflowMessage(largest) + " (the largest supported version)");
     }
 
+    /** Returns {@code v} if the payload fits it, otherwise throws {@link InsufficientCapacityException}. */
     private Version checkFits(Version v) {
         if (requiredBits(encodingWay, payloadLength(), v) > capacityBits(v)) {
             throw new InsufficientCapacityException(overflowMessage(v));
@@ -172,6 +172,7 @@ public class QrCreator {
         return v;
     }
 
+    /** Data capacity in bits of version {@code v} at the chosen level. */
     private int capacityBits(Version v) {
         return InformationBitSizeMap.getInformationBitsSizeByVersionAndCorrectionLevel(v, correctionLevel);
     }
@@ -230,6 +231,10 @@ public class QrCreator {
         return normalized;
     }
 
+    /**
+     * Runs the data pipeline: segment bits, terminator, byte padding, pad codewords, block split,
+     * Reed-Solomon EC codewords and interleaving. Returns the final bit stream to place in the matrix.
+     */
     private StringBuilder encodeBits() {
         Encoder encoder = switch (encodingWay) {
             case NUMERIC -> NUMERIC_ENCODER;

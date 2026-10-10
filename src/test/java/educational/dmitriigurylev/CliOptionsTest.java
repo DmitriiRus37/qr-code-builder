@@ -25,10 +25,12 @@ class CliOptionsTest {
     @TempDir
     Path tempDir;
 
+    /** Shorthand for {@link CliOptions#parse}. */
     private static CliOptions parse(String... args) {
         return CliOptions.parse(args);
     }
 
+    /** Parses {@code args}, expects a {@link CliOptions.UsageException} and returns its message. */
     private static String usageError(String... args) {
         return assertThrows(CliOptions.UsageException.class, () -> CliOptions.parse(args)).getMessage();
     }

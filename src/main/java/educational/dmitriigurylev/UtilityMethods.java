@@ -14,8 +14,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+/** Static helpers for the bit-stream and Reed-Solomon stages of the encoding pipeline. */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UtilityMethods {
+    /**
+     * Parses a big-endian string of 0s and 1s as a non-negative integer.
+     *
+     * @throws InvalidInputFormatException if the string is null, empty or not binary
+     */
     public static int binaryToDecimal(String binaryString) {
         if (binaryString == null || binaryString.isEmpty() || !containsZerosAndOnesOnly(binaryString)) {
             throw new InvalidInputFormatException("not a binary string: " + quote(binaryString));
@@ -57,6 +63,7 @@ public class UtilityMethods {
         return toBits(count, width);
     }
 
+    /** Concatenates the segment parts (mode, count, data bits) into one bit stream. */
     public static StringBuilder binaryArrayToBitString(String[] strAr) {
         if (strAr == null) {
             throw new InvalidInputFormatException("no bit strings to join: null");
@@ -64,12 +71,14 @@ public class UtilityMethods {
         return new StringBuilder(String.join("", strAr));
     }
 
+    /** Pads the bit stream with zeros up to the next multiple of 8 (byte boundary). */
     public static String addLagZeros(StringBuilder binaryString) {
         StringBuilder res = new StringBuilder(binaryString);
         byte remainToWholeByte = (byte) (8 - binaryString.length() % 8);
         return res.append("0".repeat(remainToWholeByte == 8 ? 0 : remainToWholeByte)).toString();
     }
 
+    /** Cuts a bit string into 8-bit codewords and returns their values 0-255. */
     public static int[] binaryStringToDecimalArray(String bitString) {
         if (bitString == null || bitString.isEmpty() || bitString.length() % 8 != 0) {
             throw new InvalidInputFormatException("bit string length must be a positive multiple of 8: "
@@ -84,6 +93,7 @@ public class UtilityMethods {
         return decimalIntArray;
     }
 
+    /** Fills the codewords up to {@code maxByteSequence} with the alternating pad bytes 236 and 17. */
     public static int[] addRotationalBytes(int[] decimalArr, int maxByteSequence) {
         int[] resArray = new int[maxByteSequence];
         System.arraycopy(decimalArr, 0, resArray, 0, decimalArr.length);
@@ -97,6 +107,11 @@ public class UtilityMethods {
         return resArray;
     }
 
+    /**
+     * Whether the string is non-empty and consists of 0s and 1s only.
+     *
+     * @throws InvalidInputFormatException if {@code str} is null
+     */
     public static boolean containsZerosAndOnesOnly(String str) {
         if (str == null) {
             throw new InvalidInputFormatException("not a binary string: null");
@@ -131,6 +146,10 @@ public class UtilityMethods {
         return remainder;
     }
 
+    /**
+     * Splits the data codewords into {@code blocksCount} blocks; when they do not divide evenly,
+     * the last blocks (group 2) get one codeword more.
+     */
     public static int[][] splitIntoBlocks(int[] inputDecimalArr, int blocksCount) {
         int quotient = inputDecimalArr.length / blocksCount;
         int remainder = inputDecimalArr.length % blocksCount;
@@ -148,12 +167,14 @@ public class UtilityMethods {
         return decimalArrays;
     }
 
+    /** Computes the EC codewords for each data block. */
     public static Block[] calculateCorrectionBytes(int[][] decimalArrays, int correctionBytesPerBlock) {
         return Arrays.stream(decimalArrays)
                 .map(arr -> new Block(arr, UtilityMethods.getCorrectionBytes(arr, correctionBytesPerBlock)))
                 .toArray(Block[]::new);
     }
 
+    /** Interleaves the blocks: data codewords column by column, then EC codewords column by column. */
     public static String[] uniteBlocks(Block[] blocks) {
         LinkedList<List<Integer>> dataCodewords = new LinkedList<>();
         LinkedList<List<Integer>> correctionBytesList = new LinkedList<>();
@@ -197,10 +218,16 @@ public class UtilityMethods {
         return sb;
     }
 
+    /** Wraps a string in quotes for error messages, or returns "null". */
     private static String quote(String s) {
         return s == null ? "null" : "'" + s + "'";
     }
 
+    /**
+     * Appends the terminator: up to 4 zero bits, fewer if the symbol is nearly full.
+     *
+     * @throws InsufficientCapacityException if the stream is already longer than {@code maxBitSequence}
+     */
     public static StringBuilder addTerminator(StringBuilder bs, int maxBitSequence) {
         int remainZeros = maxBitSequence - bs.length();
         if (remainZeros < 0) {

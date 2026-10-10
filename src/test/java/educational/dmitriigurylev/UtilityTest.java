@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static educational.dmitriigurylev.UtilityMethods.*;
 
+/** Bit-string conversions and padding helpers of {@link UtilityMethods}. */
 class UtilityTest {
 
     @Test

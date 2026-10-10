@@ -10,8 +10,14 @@ import educational.dmitriigurylev.utility_maps.EncodingModeIndicatorMap;
 
 import java.util.Map;
 
+/** Alphanumeric mode: character pairs are packed into 11 bits (45 * a + b), a trailing single character into 6. */
 public class AlphanumericEncoder implements Encoder {
 
+    /**
+     * {@inheritDoc}
+     *
+     * @throws InvalidInputFormatException if {@code obj} is not a String of alphanumeric characters
+     */
     @Override
     public String[] encode(Object obj, Version version) {
         if (!(obj instanceof String val)) {
@@ -23,6 +29,7 @@ public class AlphanumericEncoder implements Encoder {
         return symbolsArrayToBinaryArray(intAr, version);
     }
 
+    /** Splits the text into pairs of characters; an odd length leaves one character in the last element. */
     private static String[] separateSymbols(String val) {
         int symbolsInValue = val.length();
         String[] arr = symbolsInValue % 2 == 0 ? new String[symbolsInValue / 2] : new String[symbolsInValue / 2 + 1];
@@ -40,6 +47,7 @@ public class AlphanumericEncoder implements Encoder {
         return arr;
     }
 
+    /** Replaces each character by its alphanumeric value 0-44; throws for characters outside the set. */
     private static int[][] mapCharToInt(String[] strAr) {
         int[][] res = new int[strAr.length][];
         for (int j = 0; j < strAr.length; j++) {
@@ -57,6 +65,7 @@ public class AlphanumericEncoder implements Encoder {
         return res;
     }
 
+    /** Builds {mode indicator, character count, 11- or 6-bit groups...} from the character values. */
     private static String[] symbolsArrayToBinaryArray(int[][] arr, Version version) {
         Map<Integer, Integer> binaryDigitsCount = Map.of(1, 6, 2, 11);
         int symbolsCounter = 0;

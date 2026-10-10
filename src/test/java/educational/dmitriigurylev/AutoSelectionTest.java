@@ -25,13 +25,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-/** Step 10: automatic mode and version selection, upfront capacity check, {@code QrCreator.of(...)} API. */
+/** Automatic mode and version selection, upfront capacity check, {@code QrCreator.of(...)} API. */
 class AutoSelectionTest {
 
     private static final String ALPHANUMERIC_SET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
 
     /**
-     * Character capacity per version (plan §2 table), in the order L (N, A, B), M (N, A, B), Q (N, A, B), H (N, A, B).
+     * Character capacity per version (ISO/IEC 18004 capacity table), in the order L (N, A, B), M (N, A, B), Q (N, A, B), H (N, A, B).
      * Written down independently of the code under test.
      */
     private static final Map<Version, int[]> CAPACITY = Map.of(
@@ -48,6 +48,7 @@ class AutoSelectionTest {
 
     private static final List<EncodingWay> MODES = List.of(EncodingWay.NUMERIC, EncodingWay.ALPHANUMERIC, EncodingWay.BYTE);
 
+    /** The character capacity of {@code v} at level {@code l} in {@code mode}, from the table above. */
     private static int capacity(Version v, CorrectionLevel l, EncodingWay mode) {
         int level = switch (l) {
             case LOW -> 0;
@@ -72,6 +73,7 @@ class AutoSelectionTest {
         return sb.toString();
     }
 
+    /** The next larger version; throws for V10. */
     private static Version next(Version v) {
         return Version.values()[v.ordinal() + 1];
     }
@@ -90,7 +92,7 @@ class AutoSelectionTest {
         QrTestSupport.assertRoundTrip(creator, "HELLO WORLD", "HELLO WORLD");
     }
 
-    // literal "Done when" check of plan Step 10
+    // Boundary check
     @Test
     void alphanumeric154AtLowPicksV5And155PicksV6() throws Exception {
         String fits = payload(EncodingWay.ALPHANUMERIC, 154);
@@ -105,6 +107,7 @@ class AutoSelectionTest {
         QrTestSupport.assertRoundTrip(second, oneMore, oneMore);
     }
 
+    /** Every version x level x mode. */
     static Stream<Arguments> boundaries() {
         List<Arguments> cases = new ArrayList<>();
         for (Version v : Version.values()) {
@@ -133,6 +136,7 @@ class AutoSelectionTest {
         }
     }
 
+    /** A sample of version/level/mode boundaries that are also decoded. */
     static Stream<Arguments> roundTripBoundaries() {
         return Stream.of(
                 Arguments.of(Version.V_1, CorrectionLevel.LOW, EncodingWay.NUMERIC),
@@ -170,6 +174,7 @@ class AutoSelectionTest {
         }
     }
 
+    /** Texts and the mode each must select. */
     static Stream<Arguments> modeCases() {
         return Stream.of(
                 Arguments.of("0123456789", EncodingWay.NUMERIC),
@@ -311,6 +316,7 @@ class AutoSelectionTest {
         }
     }
 
+    /** Checks that the encoder output {@code parts} has the data and total bit counts QrCreator predicts. */
     private static void assertBits(String[] parts, EncodingWay mode, int n, Version v) {
         int data = Arrays.stream(parts, 2, parts.length).mapToInt(String::length).sum();
         int total = Arrays.stream(parts).mapToInt(String::length).sum();

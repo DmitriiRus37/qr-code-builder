@@ -19,9 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
-/** Numeric mode (Step 6): the group width follows the digit count, so groups with leading zeros keep their width. */
+/** Numeric mode: the group width follows the digit count, so groups with leading zeros keep their width. */
 class NumericModeTest {
 
+    /** Encodes {@code input} with the numeric encoder for V1. */
     private static String[] encode(String input) {
         return new NumericEncoder().encode(input, Version.V_1);
     }
@@ -91,8 +92,10 @@ class NumericModeTest {
                 () -> new QrCreator(Version.V_1, CorrectionLevel.HIGH, "0".repeat(18)).createQr());
     }
 
-    // Done-when inputs plus a 16-digit Long, on every version/level that decodes today (V7+ wait for Steps 7-8).
-    // 1000000 and "1000012" are left out: DecodeRoundTripTest already runs both on every combination.
+    /**
+     * Inputs with zero groups plus a 16-digit Long on every level of V1-V6. 1000000 and "1000012" are left out:
+     * DecodeRoundTripTest already runs both on every combination.
+     */
     static Stream<Arguments> doneWhenCases() {
         List<Object> inputs = List.of("007", "000", "0", 9007199254740993L);
         return Stream.of(Version.values()).filter(v -> v.getNumber() <= 6).flatMap(v ->

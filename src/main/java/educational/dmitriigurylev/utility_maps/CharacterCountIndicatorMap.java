@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.EnumMap;
 import java.util.Map;
 
+/** Width in bits of the character count indicator, per version and mode (it grows from V10 on). */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class CharacterCountIndicatorMap {
 
@@ -49,6 +50,7 @@ public class CharacterCountIndicatorMap {
         }
     }
 
+    /** The count indicator width, e.g. 9 bits for alphanumeric in V1-V9. */
     public static int getCharacterCountIndicatorByVersionAndEncodingWay(Version v, EncodingWay ew) {
         return map.get(v).get(ew);
     }
