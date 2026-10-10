@@ -67,8 +67,7 @@ class NumericModeTest {
     @Test
     void negativeNumberIsRoutedToAlphanumeric() throws Exception {
         for (Object input : List.of(-5, -5L)) {
-            Cell[][] field = new QrCreator(Version.V_1, CorrectionLevel.HIGH, input).createQr().getQrCodeField().getField();
-            assertEquals("-5", QrTestSupport.decode(field));
+            QrTestSupport.assertRoundTrip(Version.V_1, CorrectionLevel.HIGH, input, "-5");
         }
         // same matrix as the alphanumeric string "-5"
         assertEquals(
@@ -79,8 +78,7 @@ class NumericModeTest {
     @Test
     void seventeenDigitsFitV1HighAndEighteenThrow() throws Exception {
         String fits = "0".repeat(17);
-        Cell[][] field = new QrCreator(Version.V_1, CorrectionLevel.HIGH, fits).createQr().getQrCodeField().getField();
-        assertEquals(fits, QrTestSupport.decode(field));
+        QrTestSupport.assertRoundTrip(Version.V_1, CorrectionLevel.HIGH, fits, fits);
 
         assertThrowsExactly(InsuffiecientQrLengthToEncode.class,
                 () -> new QrCreator(Version.V_1, CorrectionLevel.HIGH, "0".repeat(18)).createQr());
@@ -98,7 +96,6 @@ class NumericModeTest {
     @ParameterizedTest(name = "{0} {1} {2}")
     @MethodSource("doneWhenCases")
     void numbersWithZeroGroupsRoundTrip(Version v, CorrectionLevel l, Object input) throws Exception {
-        Cell[][] field = new QrCreator(v, l, input).createQr().getQrCodeField().getField();
-        assertEquals(String.valueOf(input), QrTestSupport.decode(field));
+        QrTestSupport.assertRoundTrip(v, l, input, String.valueOf(input));
     }
 }

@@ -8,18 +8,17 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 /**
- * Generates a QR code for every version × correction level × sample and decodes it with ZXing.
+ * Generates a QR code for every version × correction level × sample (plus a list of regression cases)
+ * and decodes it with BoofCV and ZXing.
  *
- * <p>Combinations that are broken today are listed in {@link #knownBroken}. They are asserted to
- * <b>still fail</b> (strict "expected failure"): when a fix makes one pass, this test turns red and
- * the matching rule must be deleted. Goal of the implementation plan: no rules left.
+ * <p>The former {@code knownBroken()} rules (one per plan step) are gone: since Step 9 the encoder has no known
+ * defect. The only exceptions left are correct symbols that ZXing's detector cannot locate,
+ * {@link QrTestSupport#UNDETECTABLE_BY_ZXING}; they must still fail ZXing (strict expected failure) and must
+ * decode with BoofCV.
  */
 class DecodeRoundTripTest {
 
@@ -43,51 +42,65 @@ class DecodeRoundTripTest {
             new Sample("\"Хаб\" (UTF-8)", "Хаб", "Хаб", Mode.BYTE),
             new Sample("byte[] \"Ab\"", "Ab".getBytes(StandardCharsets.UTF_8), "Ab", Mode.BYTE));
 
+    /**
+     * Payloads that only fit larger versions, each tied to one version and level. All of them failed ZXing's
+     * normal detection under the old fixed mask 2 (plan Steps 6 and 8); the lowest-penalty mask fixes all but one.
+     */
+    static final List<Arguments> REGRESSIONS = List.of(
+            Arguments.of(Version.V_2, CorrectionLevel.HIGH,
+                    numeric("0".repeat(33) + "7")),
+            Arguments.of(Version.V_3, CorrectionLevel.MIDDLE,
+                    numeric("078161009481839")),
+            Arguments.of(Version.V_6, CorrectionLevel.QUARTER,
+                    numeric("5074145457")),
+            // the rest come from a seeded sweep of random payloads (java.util.Random(42)) on all versions x levels
+            Arguments.of(Version.V_7, CorrectionLevel.QUARTER,
+                    alphanumeric("0%$R.2CV++4$S3I/O XJJ8E-P4Y- %GLMFVOYQFESVY7JXXH8/IZVT3$F2")),
+            Arguments.of(Version.V_8, CorrectionLevel.HIGH,
+                    alphanumeric("N%9ZXB .*GI3/AJ7:DJT:LI1XAKY.HT5HCCKFAP/FB*- WDV0 JPGK78QVKL8A78*Q5$2D+%S")),
+            Arguments.of(Version.V_8, CorrectionLevel.HIGH,
+                    bytes("a0tncr#g4pgiyt82oban&_1!4oju2wp06")),
+            Arguments.of(Version.V_8, CorrectionLevel.QUARTER,
+                    bytes("apny5q=yugc9urgf627rr#ox!me&lg2y#~xq73quqwppi")),
+            Arguments.of(Version.V_9, CorrectionLevel.HIGH,
+                    numeric("55258294937699303991991207")));
+
+    private static Sample numeric(String text) {
+        return new Sample("\"" + text + "\"", text, text, Mode.NUMERIC);
+    }
+
+    private static Sample alphanumeric(String text) {
+        return new Sample("\"" + text + "\"", text, text, Mode.ALPHANUMERIC);
+    }
+
+    private static Sample bytes(String text) {
+        return new Sample("\"" + text + "\"", text, text, Mode.BYTE);
+    }
+
     static Stream<Arguments> cases() {
-        return Stream.of(Version.values()).flatMap(v ->
+        Stream<Arguments> allCombinations = Stream.of(Version.values()).flatMap(v ->
                 Stream.of(CorrectionLevel.values()).flatMap(l ->
                         SAMPLES.stream().map(s -> Arguments.of(v, l, s))));
+        return Stream.concat(allCombinations, REGRESSIONS.stream());
     }
 
     /**
-     * Known defects, one rule per plan step. Delete a rule in the step that fixes it.
-     *
-     * @return the plan step expected to fix this combination, or empty if it must decode correctly
+     * Every case must decode to the input with BoofCV and with ZXing. Correct symbols that ZXing's detector cannot
+     * locate are listed in {@link QrTestSupport#UNDETECTABLE_BY_ZXING} and get stricter checks instead.
      */
-    static Optional<String> knownBroken(Version v, CorrectionLevel l, Sample s) {
-        // Step 9: fixed mask 2 leaves finder-like patterns in the data area; the bits are valid
-        // (ZXing decodes them with PURE_BARCODE) but the detector cannot locate the symbol
-        if (s.input().equals("A1 $%*+-./") && List.of("V6-H", "V6-Q", "V6-M", "V10-Q").contains(key(v, l))) {
-            return Optional.of("Step 9");
-        }
-        return Optional.empty();
-    }
-
-    private static String key(Version v, CorrectionLevel l) {
-        return "V" + (v.getNumber()) + "-" + l.name().charAt(0);
-    }
-
     @ParameterizedTest(name = "{0} {1} {2}")
     @MethodSource("cases")
-    void generatedCodeDecodesToInput(Version v, CorrectionLevel l, Sample s) {
-        String outcome;
-        try {
-            Cell[][] field = new QrCreator(v, l, s.input()).createQr().getQrCodeField().getField();
-            outcome = QrTestSupport.decode(field);
-        } catch (Exception e) {
-            outcome = null;
-            if (knownBroken(v, l, s).isEmpty()) {
-                fail("expected a readable code, got " + e, e);
-            }
-        }
+    void generatedCodeDecodesToInput(Version v, CorrectionLevel l, Sample s) throws Exception {
+        QrTestSupport.assertRoundTrip(v, l, s.input(), s.expected());
+    }
 
-        Optional<String> broken = knownBroken(v, l, s);
-        if (broken.isPresent()) {
-            if (s.expected().equals(outcome)) {
-                fail("Now decodes correctly - remove the '" + broken.get() + "' rule from knownBroken()");
-            }
-        } else {
-            assertEquals(s.expected(), outcome);
-        }
+    /**
+     * Every list entry is checked on its own, even if no other test produces it: a stale entry (ZXing reads it now)
+     * or a typo (an entry for a symbol ZXing does read) fails here.
+     */
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("educational.dmitriigurylev.QrTestSupport#undetectableByZxing")
+    void undetectableByZxingEntriesStayStrict(QrTestSupport.UndetectableByZxing entry) throws Exception {
+        QrTestSupport.assertOnlyZxingDetectorFails(entry.version(), entry.level(), entry.text(), entry.text());
     }
 }

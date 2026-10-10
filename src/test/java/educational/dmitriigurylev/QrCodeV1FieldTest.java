@@ -3,6 +3,7 @@ package educational.dmitriigurylev;
 import educational.dmitriigurylev.Cell;
 import educational.dmitriigurylev.QrCodeField;
 import educational.dmitriigurylev.enums.CorrectionLevel;
+import educational.dmitriigurylev.enums.MaskPattern;
 import educational.dmitriigurylev.enums.Version;
 import educational.dmitriigurylev.utility_maps.CorrectionLevelAndMaskCodeMap;
 import org.junit.jupiter.api.BeforeEach;
@@ -98,7 +99,7 @@ class QrCodeV1FieldTest {
 
         field[8][6].setBusy(true);
         field[6][8].setBusy(true);
-        qrCodeField.addInformationTypeBits();
+        qrCodeField.addInformationTypeBits(MaskPattern.M_2);
         for (int y = 0; y < field.length; y++) {
             for (int x = 0; x < field[0].length; x++) {
                 Cell cell = field[y][x];

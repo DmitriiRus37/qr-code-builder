@@ -18,6 +18,7 @@
         <commonsLang3.version>3.21.0</commonsLang3.version>
         <twelvemonkeysImageio.version>3.15.3</twelvemonkeysImageio.version>
         <zxing.version>3.5.4</zxing.version>
+        <boofcv.version>1.1.7</boofcv.version>
 
         <mavenCompilerPlugin.version>3.16.0</mavenCompilerPlugin.version>
         <mavenSurefirePlugin.version>3.6.0</mavenSurefirePlugin.version>
@@ -73,6 +74,13 @@
             <groupId>com.google.zxing</groupId>
             <artifactId>javase</artifactId>
             <version>${zxing.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!-- second independent QR decoder: its detector does not share ZXing's blind spots -->
+        <dependency>
+            <groupId>org.boofcv</groupId>
+            <artifactId>boofcv-recognition</artifactId>
+            <version>${boofcv.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

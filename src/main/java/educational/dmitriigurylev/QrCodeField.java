@@ -2,6 +2,7 @@ package educational.dmitriigurylev;
 
 import educational.dmitriigurylev.enums.CorrectionLevel;
 import educational.dmitriigurylev.enums.FinderPatterLocation;
+import educational.dmitriigurylev.enums.MaskPattern;
 import educational.dmitriigurylev.enums.Version;
 import educational.dmitriigurylev.utility_maps.AlignmentPatternCentersMap;
 import educational.dmitriigurylev.utility_maps.CorrectionLevelAndMaskCodeMap;
@@ -24,6 +25,24 @@ public class QrCodeField {
         this.level = level;
         this.field = new Cell[version.size()][version.size()];
         fillFieldWithZeros();
+    }
+
+    /** Deep copy: the new field has its own cells, so masking it leaves this one untouched. */
+    private QrCodeField(QrCodeField source) {
+        this.version = source.version;
+        this.level = source.level;
+        this.field = new Cell[source.field.length][];
+        for (int y = 0; y < field.length; y++) {
+            field[y] = new Cell[source.field[y].length];
+            for (int x = 0; x < field[y].length; x++) {
+                Cell cell = source.field[y][x];
+                field[y][x] = new Cell(cell.isBusy(), cell.getValue());
+            }
+        }
+    }
+
+    QrCodeField copy() {
+        return new QrCodeField(this);
     }
 
     private void fillFieldWithZeros() {
@@ -83,8 +102,12 @@ public class QrCodeField {
         }
     }
 
-    public void addInformationTypeBits() {
-        List<Character> collected = CorrectionLevelAndMaskCodeMap.getMaskAndCorrectionLevelCode(level, (byte) 2)
+    /**
+     * Writes both copies of the 15 format information bits (level + mask) and the dark module.
+     * Safe to call again: it overwrites the previous format bits, e.g. when trying another mask.
+     */
+    public void addInformationTypeBits(MaskPattern mask) {
+        List<Character> collected = CorrectionLevelAndMaskCodeMap.getMaskAndCorrectionLevelCode(level, (byte) mask.getNumber())
                 .chars()
                 .mapToObj(c -> (char) c).collect(Collectors.toList());
         List<Character> typeInformationBits = new LinkedList<>(collected);
@@ -113,7 +136,7 @@ public class QrCodeField {
 
         i = -1;
         j = -2;
-        typeInformationBits = collected;
+        typeInformationBits = new LinkedList<>(collected);
         while (!typeInformationBits.isEmpty()) {
             i++;
             Cell currentCell;
@@ -180,14 +203,13 @@ public class QrCodeField {
         }
     }
 
-    public void applyMaskPattern() {
-        for (int x=0; x<field[0].length; x++) {
-            if (x % 3 == 0) {
-                for (Cell[] cells : field) {
-                    if (cells[x].isBusy()) {
-                        continue;
-                    }
-                    cells[x].setValue(cells[x].getValue() == 1 ? 0 : 1);
+    /** Inverts every data/EC module (every cell not marked busy) for which {@code mask} holds. */
+    public void applyMaskPattern(MaskPattern mask) {
+        for (int y = 0; y < field.length; y++) {
+            for (int x = 0; x < field[y].length; x++) {
+                Cell cell = field[y][x];
+                if (!cell.isBusy() && mask.inverts(y, x)) {
+                    cell.setValue(cell.getValue() == 1 ? 0 : 1);
                 }
             }
         }
@@ -225,7 +247,7 @@ public class QrCodeField {
 
     /**
      * Marks the format information cells (and, from V7 on, the version information blocks) as busy,
-     * so data bits and the mask skip them. The format bits are written later by {@link #addInformationTypeBits()}.
+     * so data bits and the mask skip them. The format bits are written later by {@link #addInformationTypeBits(MaskPattern)}.
      */
     public void reserveInformationAreas() {
         int size = field.length;

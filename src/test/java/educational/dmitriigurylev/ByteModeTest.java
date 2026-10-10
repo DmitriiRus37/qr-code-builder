@@ -103,8 +103,7 @@ class ByteModeTest {
     @Test
     void seventeenBytesFitV1LowAndEighteenThrow() throws Exception {
         String fits = "a".repeat(17);
-        Cell[][] field = new QrCreator(Version.V_1, CorrectionLevel.LOW, fits).createQr().getQrCodeField().getField();
-        assertEquals(fits, QrTestSupport.decode(field));
+        QrTestSupport.assertRoundTrip(Version.V_1, CorrectionLevel.LOW, fits, fits);
 
         assertThrowsExactly(InsuffiecientQrLengthToEncode.class,
                 () -> new QrCreator(Version.V_1, CorrectionLevel.LOW, "a".repeat(18)).createQr());
@@ -121,8 +120,7 @@ class ByteModeTest {
     void urlRoundTripsWhereItFits(Version v, CorrectionLevel l) throws Exception {
         int length = URL.getBytes(StandardCharsets.UTF_8).length;
         if (length <= byteCapacity(v, l)) {
-            Cell[][] field = new QrCreator(v, l, URL).createQr().getQrCodeField().getField();
-            assertEquals(URL, QrTestSupport.decode(field));
+            QrTestSupport.assertRoundTrip(v, l, URL, URL);
         } else {
             assertThrowsExactly(InsuffiecientQrLengthToEncode.class, () -> new QrCreator(v, l, URL).createQr());
         }
@@ -133,8 +131,7 @@ class ByteModeTest {
     @MethodSource("v1ToV6")
     void maximumPayloadFitsAndOneMoreThrows(Version v, CorrectionLevel l) throws Exception {
         String max = "x".repeat(byteCapacity(v, l));
-        Cell[][] field = new QrCreator(v, l, max).createQr().getQrCodeField().getField();
-        assertEquals(max, QrTestSupport.decode(field));
+        QrTestSupport.assertRoundTrip(v, l, max, max);
 
         assertThrowsExactly(InsuffiecientQrLengthToEncode.class, () -> new QrCreator(v, l, max + "x").createQr());
     }

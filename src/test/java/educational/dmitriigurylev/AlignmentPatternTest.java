@@ -56,7 +56,8 @@ class AlignmentPatternTest {
     @EnumSource(Version.class)
     void functionPatternsAreIntactAfterCreateQr(Version version) {
         for (CorrectionLevel level : CorrectionLevel.values()) {
-            Cell[][] field = new QrCreator(version, level, "HELLO").createQr().getQrCodeField().getField();
+            QrCreator creator = new QrCreator(version, level, "HELLO").createQr();
+            Cell[][] field = creator.getQrCodeField().getField();
             int size = field.length;
 
             assertFinderWithSeparator(field, 0, 0, 7, 7);
@@ -75,8 +76,9 @@ class AlignmentPatternTest {
                 assertAlignmentPattern(field, centre[0], centre[1]);
             }
 
-            // mask 2 is hard-coded until Step 9 (mask selection) changes it
-            assertFormatInformation(field, CorrectionLevelAndMaskCodeMap.getMaskAndCorrectionLevelCode(level, (byte) 2));
+            // the format information names the mask that was chosen
+            assertFormatInformation(field, CorrectionLevelAndMaskCodeMap.getMaskAndCorrectionLevelCode(
+                    level, (byte) creator.getMaskPattern().getNumber()));
         }
     }
 

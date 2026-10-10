@@ -7,11 +7,13 @@ import educational.dmitriigurylev.encoders.Encoder;
 import educational.dmitriigurylev.encoders.IntLetterEncoder;
 import educational.dmitriigurylev.encoders.IntegerEncoder;
 import educational.dmitriigurylev.enums.CorrectionLevel;
+import educational.dmitriigurylev.enums.MaskPattern;
 import educational.dmitriigurylev.enums.Version;
 import educational.dmitriigurylev.utility_maps.BlocksCountMap;
 import educational.dmitriigurylev.utility_maps.CorrectionBytesPerBlockMap;
 import educational.dmitriigurylev.utility_maps.InformationBitSizeMap;
 import educational.dmitriigurylev.utility_maps.IntLetterEncoderCharMap;
+import lombok.AccessLevel;
 import lombok.Getter;
 
 @Getter
@@ -20,6 +22,11 @@ public class QrCreator {
     private final Version version;
     private final CorrectionLevel correctionLevel;
     private final Object objectToEncode;
+    /** Set by {@link #forceMask(int)}; null means "choose the mask with the lowest penalty". */
+    @Getter(AccessLevel.NONE)
+    private MaskPattern forcedMask;
+    /** The mask applied by the last {@link #createQr()}. */
+    private MaskPattern maskPattern;
 
     public QrCreator(Version version, CorrectionLevel correctionLevel, Object objectToEncode) {
         this.version = version;
@@ -28,14 +35,24 @@ public class QrCreator {
         this.qrCodeField = new QrCodeField(version, correctionLevel);
     }
 
+    /**
+     * Uses mask pattern {@code mask} (0-7) instead of the one with the lowest penalty.
+     * Meant for tests and for reproducing a given symbol; the spec requires the lowest-penalty mask.
+     */
+    public QrCreator forceMask(int mask) {
+        this.forcedMask = MaskPattern.of(mask);
+        return this;
+    }
+
     public QrCreator createQr() {
         qrCodeField.addFinderPatterns();
         qrCodeField.addSynchronizationLines();
         qrCodeField.addAlignmentPatterns();
         qrCodeField.reserveInformationAreas();
         qrCodeField.fillFieldWithBitsSequence(encodeBits(objectToEncode));
-        qrCodeField.applyMaskPattern();
-        qrCodeField.addInformationTypeBits();
+        maskPattern = forcedMask != null ? forcedMask : MaskEvaluator.chooseBest(qrCodeField);
+        qrCodeField.applyMaskPattern(maskPattern);
+        qrCodeField.addInformationTypeBits(maskPattern);
         qrCodeField.addVersionInformation();
         return this;
     }
