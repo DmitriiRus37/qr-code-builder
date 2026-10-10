@@ -58,6 +58,8 @@ public enum MaskPattern {
     };
 
     private static final MaskPattern[] BY_NUMBER = values();
+    /** Number of mask patterns; valid numbers are 0 to {@code COUNT - 1}. */
+    public static final int COUNT = BY_NUMBER.length;
 
     /** The 3-bit mask reference written into the format information. */
     private final int number;
@@ -71,8 +73,8 @@ public enum MaskPattern {
 
     /** @throws IllegalArgumentException if {@code number} is not 0-7 */
     public static MaskPattern of(int number) {
-        if (number < 0 || number >= BY_NUMBER.length) {
-            throw new IllegalArgumentException("Mask pattern must be 0-7, got " + number);
+        if (number < 0 || number >= COUNT) {
+            throw new IllegalArgumentException("Mask pattern must be 0-" + (COUNT - 1) + ", got " + number);
         }
         return BY_NUMBER[number];
     }

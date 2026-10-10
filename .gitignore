@@ -35,5 +35,6 @@ build/
 .DS_Store
 
 ### Generated QR images ###
-/qr_image.*
+/qr.png
+/qr.svg
 /debug_*

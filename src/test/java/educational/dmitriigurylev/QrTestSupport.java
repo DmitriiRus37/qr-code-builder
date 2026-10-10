@@ -21,8 +21,14 @@ import com.google.zxing.qrcode.encoder.QRCode;
 import educational.dmitriigurylev.enums.CorrectionLevel;
 import educational.dmitriigurylev.enums.Version;
 
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.awt.image.BufferedImage;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -131,6 +137,43 @@ public final class QrTestSupport {
         detector.process(image);
         List<QrCode> found = detector.getDetections();
         return found.size() == 1 ? found.get(0).message : null;
+    }
+
+    /**
+     * Rasterises an SVG written by {@link QrImageDrawer} at {@code pixelsPerModule} pixels per viewBox unit: the
+     * square viewBox in white, then every {@code <rect>} inside a {@code <g>} in black. Only the subset of SVG the
+     * drawer writes is understood; {@code QrImageDrawerTest} checks that subset in detail.
+     */
+    public static BufferedImage rasterizeSvg(Path file, int pixelsPerModule) throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        Document doc = factory.newDocumentBuilder().parse(file.toFile());
+        String[] viewBox = doc.getDocumentElement().getAttribute("viewBox").split(" ");
+        int side = Integer.parseInt(viewBox[2]) * pixelsPerModule;
+        BufferedImage img = new BufferedImage(side, side, BufferedImage.TYPE_INT_RGB);
+        for (int y = 0; y < side; y++) {
+            for (int x = 0; x < side; x++) {
+                img.setRGB(x, y, 0xFFFFFF);
+            }
+        }
+        NodeList groups = doc.getElementsByTagNameNS("*", "g");
+        for (int g = 0; g < groups.getLength(); g++) {
+            NodeList rects = ((Element) groups.item(g)).getElementsByTagNameNS("*", "rect");
+            for (int i = 0; i < rects.getLength(); i++) {
+                Element rect = (Element) rects.item(i);
+                int x0 = Integer.parseInt(rect.getAttribute("x")) * pixelsPerModule;
+                int y0 = Integer.parseInt(rect.getAttribute("y")) * pixelsPerModule;
+                int w = Integer.parseInt(rect.getAttribute("width")) * pixelsPerModule;
+                int h = Integer.parseInt(rect.getAttribute("height")) * pixelsPerModule;
+                for (int y = y0; y < y0 + h; y++) {
+                    for (int x = x0; x < x0 + w; x++) {
+                        img.setRGB(x, y, 0x000000);
+                    }
+                }
+            }
+        }
+        return img;
     }
 
     /**
